@@ -4,6 +4,8 @@ require('dotenv').config();
 require('./db');
 
 const authRoutes = require('./routes/auth') 
+const wizardRoutes = require('./routes/wizard')
+const aiRoutes     = require('./routes/ai')
 const app = express();
 
 app.use(cors());
@@ -34,6 +36,8 @@ app.get('/api/reviews', (req, res) => {
 })
 
 app.use('/api/auth', authRoutes)
+app.use('/api/wizard', wizardRoutes)
+app.use('/api/ai',     aiRoutes)
 
 app.listen(5000, () => {
   console.log('Server running on port 5000 ✅')
