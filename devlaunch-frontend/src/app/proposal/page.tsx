@@ -3,7 +3,7 @@ import { useState } from 'react'
 
 export default function ProposalPage() {
   const [projectId, setProjectId]   = useState('')
-  const [proposal,  setProposal]    = useState(null)
+  const [proposal,  setProposal]    = useState<any>(null)
   const [loading,   setLoading]     = useState(false)
   const [error,     setError]       = useState('')
 
@@ -91,7 +91,7 @@ export default function ProposalPage() {
               Recommended tech stack
             </div>
             <div className="grid grid-cols-2 gap-3">
-              {Object.entries(proposal.stack || {}).map(([key, value]) => (
+              {Object.entries(proposal.stack || {}).map(([key, value]: [string, any]) => (
                 <div key={key} className="bg-gray-50 rounded-xl p-3">
                   <div className="text-xs text-gray-400 capitalize mb-1">{key}</div>
                   <div className="text-sm font-semibold text-gray-800">{value}</div>

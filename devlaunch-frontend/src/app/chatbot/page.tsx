@@ -25,7 +25,7 @@ export default function ChatbotPage() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  async function sendMessage(text) {
+  async function sendMessage(text?: string) {
     const userMsg = text || input.trim()
     if (!userMsg) return
 
