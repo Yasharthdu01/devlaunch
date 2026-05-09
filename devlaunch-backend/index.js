@@ -8,6 +8,9 @@ const wizardRoutes = require('./routes/wizard')
 const aiRoutes     = require('./routes/ai')
 const chatRoutes     = require('./routes/chat')
 const proposalRoutes = require('./routes/proposals')
+const projectRoutes    = require('./routes/projects')
+const milestoneRoutes  = require('./routes/milestones')
+const taskRoutes      = require('./routes/tasks')
 
 const app = express();
 
@@ -43,6 +46,9 @@ app.use('/api/wizard', wizardRoutes)
 app.use('/api/ai',     aiRoutes)
 app.use('/api/chat',      chatRoutes)
 app.use('/api/proposals', proposalRoutes)
+app.use('/api/projects',   projectRoutes)
+app.use('/api/milestones', milestoneRoutes)
+app.use('/api/tasks',      taskRoutes)
 
 app.listen(5000, () => {
   console.log('Server running on port 5000 ✅')
