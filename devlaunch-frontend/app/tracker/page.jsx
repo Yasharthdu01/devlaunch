@@ -63,7 +63,6 @@ export default function TrackerPage() {
         `http://localhost:5000/api/milestones/${projectId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       )
-      debugger
       const data = await res.json()
       setMilestones(data)
     } catch {}
