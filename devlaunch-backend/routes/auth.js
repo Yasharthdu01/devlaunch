@@ -105,4 +105,23 @@ router.get('/me', authMiddleware, async (req, res) => {
   }
 })
 
+// PATCH /api/auth/update
+router.patch('/update', authMiddleware, async (req, res) => {
+  const { name, company_name, industry } = req.body
+  try {
+    const result = await pool.query(
+      `UPDATE users SET
+        name = COALESCE($1, name),
+        company_name = COALESCE($2, company_name),
+        industry = COALESCE($3, industry)
+       WHERE id = $4
+       RETURNING id, name, email, role, company_name, industry`,
+      [name, company_name, industry, req.user.id]
+    )
+    res.json(result.rows[0])
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' })
+  }
+})
+
 module.exports = router

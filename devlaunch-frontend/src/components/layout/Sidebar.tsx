@@ -3,7 +3,7 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import {
   Home, Folder, Star, Rocket, BarChart2, FileText,
-  Users, Cloud, Bot, Zap, Megaphone, LayoutGrid, Settings
+  Users, Cloud, Bot, Zap, Megaphone, LayoutGrid, Settings, User
 } from 'lucide-react'
 
 const navItems = [
@@ -33,6 +33,7 @@ const navItems = [
       { label: 'Marketing AI',  href: '/marketing', icon: Megaphone },
       { label: 'Support',       href: '/support',   icon: LayoutGrid },
       { label: 'Admin panel',   href: '/admin',     icon: Settings },
+      { label: 'My profile', href: '/profile', icon: User },
     ]
   },
 ]
