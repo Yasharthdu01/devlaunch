@@ -12,6 +12,8 @@ const projectRoutes    = require('./routes/projects')
 const milestoneRoutes  = require('./routes/milestones')
 const taskRoutes      = require('./routes/tasks')
 const adminRoutes     = require('./routes/admin')
+const marketingRoutes = require('./routes/marketing')
+const supportRoutes   = require('./routes/support')
 
 const app = express();
 
@@ -51,6 +53,8 @@ app.use('/api/projects',   projectRoutes)
 app.use('/api/milestones', milestoneRoutes)
 app.use('/api/tasks',      taskRoutes)
 app.use('/api/admin',      adminRoutes)
+app.use('/api/marketing',  marketingRoutes)
+app.use('/api/support',    supportRoutes)
 
 app.listen(5000, () => {
   console.log('Server running on port 5000 ✅')
