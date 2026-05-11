@@ -52,7 +52,7 @@ export default function SupportPage() {
   async function fetchTickets() {
     setLoading(true)
     try {
-      const res = await fetch('http://localhost:5000/api/support', {
+      const res = await fetch('${API_URL}/api/support', {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -71,7 +71,7 @@ export default function SupportPage() {
     if (!form.title.trim()) return
     setSubmitting(true)
     try {
-      const res = await fetch('http://localhost:5000/api/support', {
+      const res = await fetch('${API_URL}/api/support', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -89,7 +89,7 @@ export default function SupportPage() {
 
   async function updateStatus(id: number, status: string) {
     try {
-      const res = await fetch(`http://localhost:5000/api/support/${id}`, {
+      const res = await fetch(`${API_URL}/api/support/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -104,7 +104,7 @@ export default function SupportPage() {
 
   async function deleteTicket(id: number) {
     try {
-      await fetch(`http://localhost:5000/api/support/${id}`, {
+      await fetch(`${API_URL}/api/support/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       })

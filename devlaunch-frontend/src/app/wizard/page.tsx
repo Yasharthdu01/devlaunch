@@ -71,7 +71,7 @@ export default function WizardPage() {
       6: form.industry || 'web app',
     }
     try {
-      const res = await fetch('http://localhost:5000/api/ai/suggest', {
+      const res = await fetch('${API_URL}/api/ai/suggest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ step: currentStep, data: contextMap[currentStep] }),
@@ -97,7 +97,7 @@ export default function WizardPage() {
           setLoading(false)
           return
         }
-        const res = await fetch('http://localhost:5000/api/wizard/start', {
+        const res = await fetch('${API_URL}/api/wizard/start', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -117,7 +117,7 @@ export default function WizardPage() {
         }
         setProjectId(data.id)
       } else if (projectId) {
-        await fetch(`http://localhost:5000/api/wizard/${projectId}`, {
+        await fetch(`${API_URL}/api/wizard/${projectId}`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',

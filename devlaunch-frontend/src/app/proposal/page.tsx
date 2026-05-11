@@ -18,7 +18,7 @@ export default function ProposalPage() {
 
     try {
       const token = localStorage.getItem('token')
-      const res = await fetch('http://localhost:5000/api/proposals/generate', {
+      const res = await fetch('${API_URL}/api/proposals/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

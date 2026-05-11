@@ -118,7 +118,7 @@ npm run dev
 Backend runs on:
 
 ```
-http://localhost:5000
+${API_URL}
 ```
 
 ---
@@ -138,7 +138,7 @@ CLAUDE_API_KEY=your_claude_key
 ### Frontend (`.env.local`)
 
 ```
-NEXT_PUBLIC_API_URL=http://localhost:5000
+NEXT_PUBLIC_API_URL=${API_URL}
 ```
 
 ---

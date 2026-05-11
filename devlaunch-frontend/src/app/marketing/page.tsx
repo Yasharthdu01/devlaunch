@@ -49,7 +49,7 @@ export default function MarketingPage() {
     setData(null)
 
     try {
-      const res = await fetch('http://localhost:5000/api/marketing/generate', {
+      const res = await fetch('${API_URL}/api/marketing/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

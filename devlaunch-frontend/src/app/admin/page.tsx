@@ -75,10 +75,10 @@ export default function AdminPage() {
     setLoading(true)
     try {
       const [s, c, p, r] = await Promise.all([
-        fetch('http://localhost:5000/api/admin/stats',    { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
-        fetch('http://localhost:5000/api/admin/clients',  { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
-        fetch('http://localhost:5000/api/admin/projects', { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
-        fetch('http://localhost:5000/api/admin/revenue',  { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+        fetch('${API_URL}/api/admin/stats',    { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+        fetch('${API_URL}/api/admin/clients',  { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+        fetch('${API_URL}/api/admin/projects', { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+        fetch('${API_URL}/api/admin/revenue',  { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
       ])
       setStats(s)
       setClients(Array.isArray(c) ? c : [])
@@ -91,7 +91,7 @@ export default function AdminPage() {
   async function updateProject(id, field, value) {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/admin/projects/${id}`,
+        `${API_URL}/api/admin/projects/${id}`,
         {
           method: 'PATCH',
           headers: {

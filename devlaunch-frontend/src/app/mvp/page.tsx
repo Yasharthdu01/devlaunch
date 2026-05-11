@@ -52,7 +52,7 @@ export default function MVPPage() {
     setData(null)
 
     try {
-      const res = await fetch('http://localhost:5000/api/mvp/generate', {
+      const res = await fetch('${API_URL}/api/mvp/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
