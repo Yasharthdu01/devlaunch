@@ -22,10 +22,13 @@ const app = express();
 app.use(cors({
   origin: [
     'http://localhost:3000',
-    'https://devlaunch-frontend.vercel.app',
+    'https://devlaunch-iota.vercel.app',
+    'https://devlaunch-git-main-yasharthdu01s-projects.vercel.app',
     process.env.FRONTEND_URL || '',
   ].filter(Boolean),
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }))
 
 app.use(express.json());
