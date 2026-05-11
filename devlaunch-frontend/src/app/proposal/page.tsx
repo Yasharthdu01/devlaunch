@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import API_URL from '@/lib/config'
 
 export default function ProposalPage() {
   const [projectId, setProjectId]   = useState('')
@@ -18,7 +19,7 @@ export default function ProposalPage() {
 
     try {
       const token = localStorage.getItem('token')
-      const res = await fetch('${API_URL}/api/proposals/generate', {
+      const res = await fetch(API_URL + '/api/proposals/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

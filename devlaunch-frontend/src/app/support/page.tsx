@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { API_URL } from '../../lib/config'
+import API_URL from '@/lib/config'
 
 interface Ticket {
   id:          number
@@ -53,7 +53,7 @@ export default function SupportPage() {
   async function fetchTickets() {
     setLoading(true)
     try {
-      const res = await fetch('${API_URL}/api/support', {
+      const res = await fetch(API_URL + '/api/support', {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -72,7 +72,7 @@ export default function SupportPage() {
     if (!form.title.trim()) return
     setSubmitting(true)
     try {
-      const res = await fetch('${API_URL}/api/support', {
+      const res = await fetch(API_URL + '/api/support', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -90,7 +90,7 @@ export default function SupportPage() {
 
   async function updateStatus(id: number, status: string) {
     try {
-      const res = await fetch(`${API_URL}/api/support/${id}`, {
+      const res = await fetch(API_URL + `/api/support/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -105,7 +105,7 @@ export default function SupportPage() {
 
   async function deleteTicket(id: number) {
     try {
-      await fetch(`${API_URL}/api/support/${id}`, {
+      await fetch(API_URL + `/api/support/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       })

@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { API_URL } from '../../lib/config'
+import API_URL from '@/lib/config'
 
 const COLUMNS = [
   { id: 'todo',        label: 'To do',       color: 'bg-gray-100' },
@@ -36,7 +36,7 @@ export default function CollabPage() {
 
   async function fetchProjects() {
     try {
-      const res = await fetch('${API_URL}/api/projects', {
+      const res = await fetch(API_URL + '/api/projects', {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -48,7 +48,7 @@ export default function CollabPage() {
   async function fetchTasks() {
     try {
       const res = await fetch(
-        `${API_URL}/api/tasks/${selectedId}`,
+        API_URL + `/api/tasks/${selectedId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       )
       const data = await res.json()
@@ -59,7 +59,7 @@ export default function CollabPage() {
   async function fetchComments(taskId) {
     try {
       const res = await fetch(
-        `${API_URL}/api/tasks/${taskId}/comments`,
+        API_URL + `/api/tasks/${taskId}/comments`,
         { headers: { Authorization: `Bearer ${token}` } }
       )
       const data = await res.json()
@@ -71,7 +71,7 @@ export default function CollabPage() {
     if (!newTask.title.trim()) return
     setLoading(true)
     try {
-      const res = await fetch('${API_URL}/api/tasks', {
+      const res = await fetch(API_URL + '/api/tasks', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -96,7 +96,7 @@ export default function CollabPage() {
 
   async function moveTask(taskId, newStatus) {
     try {
-      const res = await fetch(`${API_URL}/api/tasks/${taskId}`, {
+      const res = await fetch(API_URL + `/api/tasks/${taskId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -112,7 +112,7 @@ export default function CollabPage() {
 
   async function deleteTask(taskId) {
     try {
-      await fetch(`${API_URL}/api/tasks/${taskId}`, {
+      await fetch(API_URL + `/api/tasks/${taskId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -125,7 +125,7 @@ export default function CollabPage() {
     if (!newComment.trim() || !selectedTask) return
     try {
       const res = await fetch(
-        `${API_URL}/api/tasks/${selectedTask.id}/comments`,
+        API_URL + `/api/tasks/${selectedTask.id}/comments`,
         {
           method: 'POST',
           headers: {

@@ -1,5 +1,6 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
+import API_URL from '@/lib/config'
 
 const quickChips = [
   'What tech stack for a travel booking app?',
@@ -40,7 +41,7 @@ export default function ChatbotPage() {
         content: m.content,
       }))
 
-      const res = await fetch('${API_URL}/api/chat', {
+      const res = await fetch(API_URL + '/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

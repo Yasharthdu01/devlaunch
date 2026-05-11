@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { API_URL } from '../../lib/config'
+import API_URL from '@/lib/config'
 
 const STATUS_COLORS = {
   discovery:   'bg-gray-100 text-gray-600',
@@ -76,10 +76,10 @@ export default function AdminPage() {
     setLoading(true)
     try {
       const [s, c, p, r] = await Promise.all([
-        fetch('${API_URL}/api/admin/stats',    { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
-        fetch('${API_URL}/api/admin/clients',  { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
-        fetch('${API_URL}/api/admin/projects', { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
-        fetch('${API_URL}/api/admin/revenue',  { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+        fetch(API_URL +'/api/admin/stats',    { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+        fetch(API_URL +'/api/admin/clients',  { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+        fetch(API_URL +'/api/admin/projects', { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+        fetch(API_URL +'/api/admin/revenue',  { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
       ])
       setStats(s)
       setClients(Array.isArray(c) ? c : [])
@@ -92,7 +92,7 @@ export default function AdminPage() {
   async function updateProject(id, field, value) {
     try {
       const res = await fetch(
-        `${API_URL}/api/admin/projects/${id}`,
+        API_URL + `/api/admin/projects/${id}`,
         {
           method: 'PATCH',
           headers: {

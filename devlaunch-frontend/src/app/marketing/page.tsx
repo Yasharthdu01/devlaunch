@@ -1,4 +1,5 @@
 'use client'
+import API_URL from '@/lib/config'
 import { useState } from 'react'
 
 interface InstagramPost {
@@ -49,7 +50,7 @@ export default function MarketingPage() {
     setData(null)
 
     try {
-      const res = await fetch('${API_URL}/api/marketing/generate', {
+      const res = await fetch(API_URL + '/api/marketing/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

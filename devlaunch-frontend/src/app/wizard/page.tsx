@@ -1,8 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { API_URL } from '../../lib/config'
-
+import API_URL from '@/lib/config'
 const steps = [
   { number: 1, title: 'Project basics',     desc: 'Tell us about your business and idea' },
   { number: 2, title: 'Platform type',      desc: 'What kind of app do you need?' },
@@ -72,7 +71,7 @@ export default function WizardPage() {
       6: form.industry || 'web app',
     }
     try {
-      const res = await fetch('${API_URL}/api/ai/suggest', {
+      const res = await fetch(API_URL + '/api/ai/suggest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ step: currentStep, data: contextMap[currentStep] }),
@@ -98,7 +97,7 @@ export default function WizardPage() {
           setLoading(false)
           return
         }
-        const res = await fetch('${API_URL}/api/wizard/start', {
+        const res = await fetch(API_URL + '/api/wizard/start', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -118,7 +117,7 @@ export default function WizardPage() {
         }
         setProjectId(data.id)
       } else if (projectId) {
-        await fetch(`${API_URL}/api/wizard/${projectId}`, {
+        await fetch(API_URL + `/api/wizard/${projectId}`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',

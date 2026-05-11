@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { API_URL } from '../../lib/config'
+import API_URL from '@/lib/config'
 
 const STAGES = ['discovery', 'design', 'development', 'testing', 'deploy', 'live']
 
@@ -48,7 +48,7 @@ export default function TrackerPage() {
   async function fetchProjects() {
     setLoading(true)
     try {
-      const res = await fetch('${API_URL}/api/projects', {
+      const res = await fetch(API_URL + '/api/projects', {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -61,7 +61,7 @@ export default function TrackerPage() {
   async function fetchMilestones(projectId) {
     try {
       const res = await fetch(
-        `${API_URL}/api/milestones/${projectId}`,
+        API_URL + `/api/milestones/${projectId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       )
       const data = await res.json()
@@ -72,7 +72,7 @@ export default function TrackerPage() {
   async function updateStatus(status) {
     try {
       const res = await fetch(
-        `${API_URL}/api/projects/${selected.id}/status`,
+        API_URL + `/api/projects/${selected.id}/status`,
         {
           method: 'PATCH',
           headers: {
@@ -92,7 +92,7 @@ export default function TrackerPage() {
 
   async function updateMilestone(id, status) {
     try {
-      await fetch(`${API_URL}/api/milestones/${id}`, {
+      await fetch(API_URL + `/api/milestones/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -110,7 +110,7 @@ export default function TrackerPage() {
     if (!newTitle.trim()) return
     setAdding(true)
     try {
-      const res = await fetch('${API_URL}/api/milestones', {
+      const res = await fetch(API_URL + '/api/milestones', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -132,7 +132,7 @@ export default function TrackerPage() {
 
   async function deleteMilestone(id) {
     try {
-      await fetch(`${API_URL}/api/milestones/${id}`, {
+      await fetch(API_URL + `/api/milestones/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       })

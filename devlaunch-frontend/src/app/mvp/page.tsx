@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
+import API_URL from '@/lib/config'
 
 interface TimelineItem {
   phase: string
@@ -52,7 +53,7 @@ export default function MVPPage() {
     setData(null)
 
     try {
-      const res = await fetch('${API_URL}/api/mvp/generate', {
+      const res = await fetch(API_URL + '/api/mvp/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
