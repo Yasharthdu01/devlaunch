@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { API_URL } from '../../lib/config'
 
 const steps = [
   { number: 1, title: 'Project basics',     desc: 'Tell us about your business and idea' },

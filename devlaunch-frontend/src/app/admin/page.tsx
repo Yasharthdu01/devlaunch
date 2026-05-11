@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { API_URL } from '../../lib/config'
 
 const STATUS_COLORS = {
   discovery:   'bg-gray-100 text-gray-600',

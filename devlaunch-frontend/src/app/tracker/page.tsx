@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { API_URL } from '../../lib/config'
 
 const STAGES = ['discovery', 'design', 'development', 'testing', 'deploy', 'live']
 

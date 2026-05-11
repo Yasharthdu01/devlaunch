@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { API_URL } from '../../lib/config'
 
 const COLUMNS = [
   { id: 'todo',        label: 'To do',       color: 'bg-gray-100' },
