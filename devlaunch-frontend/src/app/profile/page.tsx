@@ -325,9 +325,9 @@ export default function ProfilePage() {
                     {p.title}
                   </div>
                   <div className="text-xs text-gray-400 mt-0.5">
-                    Started {new Date(p.created_at).toLocaleDateString('en-IN', {
+                    {p.created_at ? `Started ${new Date(p.created_at).toLocaleDateString('en-IN', {
                       day: 'numeric', month: 'short', year: 'numeric'
-                    })}
+                    })}` : 'Recently started'}
                   </div>
                 </div>
                 <span className={`text-xs px-2 py-0.5 rounded-full font-semibold capitalize
