@@ -1,27 +1,29 @@
-import { createTheme } from '@mui/material/styles';
+import { createTheme } from "@mui/material/styles";
 
 const theme = createTheme({
   typography: {
-    fontFamily: 'var(--font-geist-sans), sans-serif',
+    fontFamily: "var(--font-geist-sans), sans-serif",
   },
   palette: {
     primary: {
-      main: '#2563EB', // blue-600 to match existing design
+      main: "#2563EB",
     },
     background: {
-      default: '#F8F9FA', // from globals.css
+      default: "var(--bg-secondary)",
+      paper: "var(--bg-primary)",
     },
     text: {
-      primary: '#1A1A1A',
+      primary: "var(--text-primary)",
+      secondary: "var(--text-secondary)",
     },
   },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
-          textTransform: 'none',
-          borderRadius: '16px',
-          fontWeight: 'bold',
+          textTransform: "none",
+          borderRadius: "16px",
+          fontWeight: "bold",
         },
       },
     },

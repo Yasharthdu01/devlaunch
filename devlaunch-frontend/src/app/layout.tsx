@@ -1,11 +1,7 @@
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter'
-import Providers from '@/components/Providers'
 import './globals.css'
+import { ThemeProvider } from 'next-themes'
 import AppShell from '@/components/layout/AppShell'
-import { Inter } from 'next/font/google'
-import React from 'react'
-
-const inter = Inter({ subsets: ['latin'] })
+import Providers from '@/components/Providers'
 
 export const metadata = {
   title: 'DevLaunch — AI Delivery Platform',
@@ -18,13 +14,18 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={inter.className}>
-      <body className="antialiased">
-        <AppRouterCacheProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body suppressHydrationWarning>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem={false}
+          storageKey="devlaunch-theme"
+        >
           <Providers>
             <AppShell>{children}</AppShell>
           </Providers>
-        </AppRouterCacheProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

@@ -20,7 +20,7 @@ export default function ChatbotPage() {
   const [input,     setInput]     = useState('')
   const [loading,   setLoading]   = useState(false)
   const [escalated, setEscalated] = useState(false)
-  const bottomRef = useRef(null)
+  const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -75,21 +75,21 @@ export default function ChatbotPage() {
     <div className="max-w-2xl mx-auto">
 
       {/* Header card */}
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+      <div className="bg-[var(--bg-primary)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
 
         {/* Chat header */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
-          <div className="w-9 h-9 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-sm font-bold flex-shrink-0">
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-[var(--border)]">
+          <div className="w-9 h-9 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 flex items-center justify-center text-sm font-bold flex-shrink-0">
             AI
           </div>
           <div className="flex-1">
-            <div className="text-sm font-bold text-gray-900">DevLaunch AI assistant</div>
+            <div className="text-sm font-bold text-[var(--text-primary)]">DevLaunch AI assistant</div>
             <div className="text-xs text-green-600">● Online · Powered by Claude</div>
           </div>
           {!escalated && (
             <button
               onClick={handleEscalate}
-              className="text-xs px-3 py-1.5 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50"
+              className="text-xs px-3 py-1.5 border border-[var(--border)] rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] cursor-pointer"
             >
               Talk to human
             </button>
@@ -102,7 +102,7 @@ export default function ChatbotPage() {
             <button
               key={chip}
               onClick={() => sendMessage(chip)}
-              className="text-xs px-3 py-1.5 border border-gray-200 rounded-full text-gray-500 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors"
+              className="text-xs px-3 py-1.5 border border-[var(--border)] rounded-full text-[var(--text-muted)] hover:bg-[var(--blue-light)] hover:text-[var(--blue)] hover:border-[var(--blue)] transition-all cursor-pointer"
             >
               {chip}
             </button>
@@ -110,18 +110,18 @@ export default function ChatbotPage() {
         </div>
 
         {/* Messages */}
-        <div className="px-5 py-4 flex flex-col gap-4 min-h-64 max-h-96 overflow-y-auto">
+        <div className="px-5 py-4 flex flex-col gap-4 min-h-[350px] max-h-[500px] overflow-y-auto">
           {messages.map((m, i) => (
             <div key={i} className={`flex gap-3 ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
               {m.role === 'assistant' && (
-                <div className="w-7 h-7 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-1">
+                <div className="w-7 h-7 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-1">
                   AI
                 </div>
               )}
               <div className={`max-w-xs lg:max-w-md px-4 py-2.5 rounded-2xl text-sm leading-relaxed
                 ${m.role === 'user'
-                  ? 'bg-blue-600 text-white rounded-br-sm'
-                  : 'bg-gray-100 text-gray-800 rounded-bl-sm'
+                  ? 'bg-[var(--blue)] text-white rounded-br-sm'
+                  : 'bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-bl-sm border border-[var(--border)]'
                 }`}>
                 {m.content}
               </div>
@@ -130,10 +130,10 @@ export default function ChatbotPage() {
 
           {loading && (
             <div className="flex gap-3">
-              <div className="w-7 h-7 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-xs font-bold flex-shrink-0">
+              <div className="w-7 h-7 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 flex items-center justify-center text-xs font-bold flex-shrink-0">
                 AI
               </div>
-              <div className="bg-gray-100 px-4 py-3 rounded-2xl rounded-bl-sm">
+              <div className="bg-[var(--bg-tertiary)] px-4 py-3 rounded-2xl rounded-bl-sm border border-[var(--border)]">
                 <div className="flex gap-1">
                   <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                   <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -146,18 +146,18 @@ export default function ChatbotPage() {
         </div>
 
         {/* Input */}
-        <div className="px-5 py-4 border-t border-gray-100 flex gap-3">
+        <div className="px-5 py-4 border-t border-[var(--border)] flex gap-3">
           <input
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && sendMessage()}
             placeholder="Ask anything about your project..."
-            className="flex-1 px-4 py-2.5 text-sm border border-gray-300 rounded-xl outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className="flex-1 px-4 py-2.5 text-sm border border-[var(--border)] bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-xl outline-none focus:border-[var(--blue)] focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/20"
           />
           <button
             onClick={() => sendMessage()}
             disabled={loading || !input.trim()}
-            className="px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            className="px-4 py-2.5 bg-[var(--blue)] text-white text-sm font-semibold rounded-xl hover:opacity-90 disabled:opacity-50 transition-colors cursor-pointer"
           >
             Send
           </button>
