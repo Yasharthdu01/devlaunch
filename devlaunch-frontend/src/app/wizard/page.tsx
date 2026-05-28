@@ -163,7 +163,7 @@ export default function WizardPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto w-full">
 
       {/* Step progress bar */}
       <div className="flex items-center mb-8">
@@ -191,22 +191,22 @@ export default function WizardPage() {
       </div>
 
       {/* Step card */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-6">
+      <div className="bg-[var(--bg-primary)] dark:bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-6">
         <div className="mb-5">
           <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
             Step {currentStep} of {steps.length}
           </div>
-          <h2 className="text-lg font-bold text-gray-900">
+          <h2 className="text-lg font-bold text-[var(--text-primary)]">
             {steps[currentStep - 1].title}
           </h2>
-          <p className="text-sm text-gray-400 mt-0.5">
+          <p className="text-sm text-[var(--text-muted)] mt-0.5">
             {steps[currentStep - 1].desc}
           </p>
         </div>
 
         {/* Error */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-4 py-2 mb-4">
+          <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm rounded-lg px-4 py-2 mb-4">
             {error}
           </div>
         )}

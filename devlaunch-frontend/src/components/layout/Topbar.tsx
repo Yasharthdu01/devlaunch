@@ -4,6 +4,7 @@ import Link from 'next/link'
 import ThemeToggle from '@/components/ui/ThemeToggle'
 
 const PAGE_META: Record<string, { title: string; sub: string }> = {
+  '/dashboard':  { title: 'Dashboard',           sub: 'Your AI-powered delivery platform'    },
   '/':           { title: 'Welcome back',       sub: 'Your AI-powered delivery platform'    },
   '/portfolio':  { title: 'Portfolio',           sub: 'End-to-end projects delivered'        },
   '/reviews':    { title: 'Client reviews',      sub: 'Real feedback from our clients'       },

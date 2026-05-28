@@ -163,7 +163,7 @@ export default function TrackerPage() {
   const progress = selected ? getProgress(selected.status) : 0
 
   return (
-    <div>
+    <div className="w-full">
 
       {/* Project selector */}
       {projects.length > 1 && (

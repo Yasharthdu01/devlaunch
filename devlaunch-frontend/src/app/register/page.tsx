@@ -42,7 +42,7 @@ export default function RegisterPage() {
 
       localStorage.setItem('token', data.token)
       localStorage.setItem('user', JSON.stringify(data.user))
-      router.push('/')
+      router.push('/dashboard')
 
     } catch (err) {
       setError('Server error. Make sure backend is running.')

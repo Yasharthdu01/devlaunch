@@ -118,7 +118,7 @@ export default function SupportPage() {
   const resolved = tickets.filter(t => t.status === 'resolved').length
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto w-full">
 
       {/* Header */}
       <div className="flex items-center justify-between mb-6">

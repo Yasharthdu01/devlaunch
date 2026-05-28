@@ -43,7 +43,7 @@ export default function ProposalPage() {
   const totalCost = proposal?.cost?.reduce((sum: number, item: any) => sum + item.amount, 0) || 0
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto w-full">
 
       {/* Generate section */}
       <div className="bg-[var(--bg-primary)] border border-[var(--border)] rounded-2xl p-6 mb-6 shadow-sm">

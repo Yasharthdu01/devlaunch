@@ -116,10 +116,10 @@ export default function AdminPage() {
   }
 
   return (
-    <div>
+    <div className="w-full">
 
       {/* Metric cards */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[
           {
             label: 'Total clients',
@@ -181,7 +181,7 @@ export default function AdminPage() {
 
       {/* OVERVIEW TAB */}
       {tab === 'overview' && (
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
           {/* Revenue chart */}
           <div className="bg-white border border-gray-200 rounded-2xl p-5">

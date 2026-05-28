@@ -145,7 +145,7 @@ export default function CollabPage() {
     tasks.filter(t => t.status === status)
 
   return (
-    <div className="flex gap-5 h-full min-h-0">
+    <div className="flex gap-5 h-full min-h-0 w-full">
 
       {/* Kanban board */}
       <div className="flex-1 min-w-0">

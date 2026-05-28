@@ -67,18 +67,18 @@ export default function MarketingPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto w-full">
 
       {/* Input card */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-6">
-        <h1 className="text-lg font-bold text-gray-900 mb-1">Marketing AI</h1>
-        <p className="text-sm text-gray-400 mb-5">
+      <div className="bg-[var(--bg-primary)] dark:bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-6 mb-6">
+        <h1 className="text-lg font-bold text-[var(--text-primary)] mb-1">Marketing AI</h1>
+        <p className="text-sm text-[var(--text-muted)] mb-5">
           Generate SEO keywords, social posts and ad copy for your business
         </p>
 
         <div className="grid grid-cols-3 gap-3 mb-4">
           <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
               Business name
             </label>
             <input
@@ -86,7 +86,7 @@ export default function MarketingPage() {
               value={form.business_type}
               onChange={handleChange}
               placeholder="TravelNest Agency"
-              className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500"
+              className="mt-1 w-full px-3 py-2 text-sm border border-[var(--border)] bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-lg outline-none focus:border-[var(--blue)]"
             />
           </div>
           <div>
@@ -109,7 +109,7 @@ export default function MarketingPage() {
               name="industry"
               value={form.industry}
               onChange={handleChange}
-              className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500 bg-white"
+              className="mt-1 w-full px-3 py-2 text-sm border border-[var(--border)] bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-lg outline-none focus:border-[var(--blue)]"
             >
               <option value="">Select...</option>
               <option>Travel & Hospitality</option>
@@ -124,7 +124,7 @@ export default function MarketingPage() {
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-4 py-2 mb-3">
+          <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm rounded-lg px-4 py-2 mb-3">
             {error}
           </div>
         )}
@@ -132,7 +132,7 @@ export default function MarketingPage() {
         <button
           onClick={generate}
           disabled={loading}
-          className="w-full py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          className="w-full py-2.5 bg-[var(--blue)] text-white text-sm font-semibold rounded-lg hover:opacity-90 disabled:opacity-50 transition-colors cursor-pointer"
         >
           {loading ? '✦ Generating with AI...' : '✦ Generate marketing content'}
         </button>

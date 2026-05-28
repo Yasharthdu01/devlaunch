@@ -125,7 +125,7 @@ export default function ProfilePage() {
     .slice(0, 2)
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto w-full">
 
       {/* Profile hero */}
       <div className="bg-blue-600 rounded-2xl p-6 mb-5 text-white">
