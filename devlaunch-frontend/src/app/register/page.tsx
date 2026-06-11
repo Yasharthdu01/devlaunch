@@ -3,6 +3,15 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import API_URL from '@/lib/config'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Paper from '@mui/material/Paper'
+import Button from '@mui/material/Button'
+import TextField from '@mui/material/TextField'
+import MenuItem from '@mui/material/MenuItem'
+import Alert from '@mui/material/Alert'
+
+const INDUSTRIES = ['Travel & Hospitality', 'E-commerce', 'Healthcare', 'EdTech', 'SaaS', 'Marketing', 'Other']
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -16,11 +25,11 @@ export default function RegisterPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  function handleChange(e) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
     setLoading(true)
@@ -50,128 +59,130 @@ export default function RegisterPage() {
     }
   }
 
+  const labelSx = { fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', mb: 0.5 } as const
+
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="bg-white border border-gray-200 rounded-2xl p-8 w-full max-w-md">
+    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'var(--bg-secondary)', p: 2 }}>
+      <Paper
+        elevation={0}
+        sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 4, width: '100%', maxWidth: 420 }}
+      >
 
         {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="text-2xl font-bold text-blue-600">DevLaunch</div>
-          <div className="text-sm text-gray-400 mt-1">AI delivery platform</div>
-        </div>
+        <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Typography sx={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--blue)' }}>DevLaunch</Typography>
+          <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-muted)', mt: 0.5 }}>AI delivery platform</Typography>
+        </Box>
 
-        <h1 className="text-xl font-bold text-gray-900 mb-1">Create account</h1>
-        <p className="text-sm text-gray-400 mb-6">Start your project today</p>
+        <Typography sx={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)', mb: 0.5 }}>Create account</Typography>
+        <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-muted)', mb: 3 }}>Start your project today</Typography>
 
         {/* Error */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-4 py-3 mb-4">
+          <Alert severity="error" sx={{ borderRadius: '12px', mb: 2.5 }}>
             {error}
-          </div>
+          </Alert>
         )}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
 
-          <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Full name
-            </label>
-            <input
+          <Box>
+            <Typography sx={labelSx}>Full name</Typography>
+            <TextField
               type="text"
               name="name"
               value={form.name}
               onChange={handleChange}
               placeholder="Yasharth Dubey"
               required
-              className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              size="small"
+              fullWidth
             />
-          </div>
+          </Box>
 
-          <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Email
-            </label>
-            <input
+          <Box>
+            <Typography sx={labelSx}>Email</Typography>
+            <TextField
               type="email"
               name="email"
               value={form.email}
               onChange={handleChange}
               placeholder="you@example.com"
               required
-              className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              size="small"
+              fullWidth
             />
-          </div>
+          </Box>
 
-          <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Password
-            </label>
-            <input
+          <Box>
+            <Typography sx={labelSx}>Password</Typography>
+            <TextField
               type="password"
               name="password"
               value={form.password}
               onChange={handleChange}
               placeholder="••••••••"
               required
-              minLength={6}
-              className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              size="small"
+              fullWidth
+              slotProps={{ htmlInput: { minLength: 6 } }}
             />
-          </div>
+          </Box>
 
-          <div className="flex gap-3">
-            <div className="flex-1">
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                Company name
-              </label>
-              <input
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2.5 }}>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography sx={labelSx}>Company name</Typography>
+              <TextField
                 type="text"
                 name="company_name"
                 value={form.company_name}
                 onChange={handleChange}
                 placeholder="Traveler Co."
-                className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                size="small"
+                fullWidth
               />
-            </div>
-            <div className="flex-1">
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                Industry
-              </label>
-              <select
+            </Box>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography sx={labelSx}>Industry</Typography>
+              <TextField
+                select
                 name="industry"
                 value={form.industry}
                 onChange={handleChange}
-                className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500 bg-white"
+                size="small"
+                fullWidth
               >
-                <option value="">Select...</option>
-                <option>Travel & Hospitality</option>
-                <option>E-commerce</option>
-                <option>Healthcare</option>
-                <option>EdTech</option>
-                <option>SaaS</option>
-                <option>Marketing</option>
-                <option>Other</option>
-              </select>
-            </div>
-          </div>
+                <MenuItem value="">Select...</MenuItem>
+                {INDUSTRIES.map(i => <MenuItem key={i} value={i}>{i}</MenuItem>)}
+              </TextField>
+            </Box>
+          </Box>
 
-          <button
+          <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white text-sm font-semibold py-2.5 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 mt-2"
+            variant="contained"
+            disableElevation
+            fullWidth
+            sx={{ bgcolor: 'var(--blue)', color: '#fff', borderRadius: '8px', textTransform: 'none', fontWeight: 600, py: 1, mt: 0.5, '&:hover': { bgcolor: 'var(--blue-dark)' } }}
           >
             {loading ? 'Creating account...' : 'Create account'}
-          </button>
+          </Button>
 
-        </form>
+        </Box>
 
-        <p className="text-center text-sm text-gray-400 mt-6">
+        <Typography sx={{ textAlign: 'center', fontSize: '0.875rem', color: 'var(--text-muted)', mt: 3 }}>
           Already have an account?{' '}
-          <Link href="/login" className="text-blue-600 font-semibold hover:underline">
+          <Typography
+            component={Link}
+            href="/login"
+            sx={{ color: 'var(--blue)', fontWeight: 600, fontSize: '0.875rem', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+          >
             Sign in
-          </Link>
-        </p>
+          </Typography>
+        </Typography>
 
-      </div>
-    </div>
+      </Paper>
+    </Box>
   )
 }

@@ -2,6 +2,13 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import API_URL from '@/lib/config'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Paper from '@mui/material/Paper'
+import Button from '@mui/material/Button'
+import Chip from '@mui/material/Chip'
+import TextField from '@mui/material/TextField'
+import Alert from '@mui/material/Alert'
 
 interface TimelineItem {
   phase: string
@@ -19,10 +26,10 @@ interface MVPData {
   complexity: string
 }
 
-const COMPLEXITY_COLORS: Record<string, string> = {
-  simple: 'bg-green-100 text-green-700',
-  medium: 'bg-amber-100 text-amber-700',
-  complex: 'bg-red-100 text-red-700',
+const COMPLEXITY_COLORS: Record<string, { bg: string; fg: string }> = {
+  simple:  { bg: '#dcfce7', fg: '#15803d' },
+  medium:  { bg: '#fef3c7', fg: '#b45309' },
+  complex: { bg: '#fee2e2', fg: '#b91c1c' },
 }
 
 const EXAMPLE_IDEAS = [
@@ -33,6 +40,8 @@ const EXAMPLE_IDEAS = [
   'Restaurant food ordering platform',
   'Freelancer project management tool',
 ]
+
+const labelSx = { fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', mb: 2 } as const
 
 export default function MVPPage() {
   const [idea,    setIdea]    = useState('')
@@ -70,211 +79,271 @@ export default function MVPPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto w-full">
+    <Box sx={{ maxWidth: 768, mx: 'auto', width: '100%' }}>
 
       {/* Hero input */}
-      <div className="bg-white dark:bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-6 mb-6">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-xl">⚡</span>
-          <h1 className="text-lg font-bold text-[var(--text-primary)]">Build my MVP</h1>
-        </div>
-        <p className="text-sm text-[var(--text-muted)] mb-5">
+      <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 3, mb: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+          <Typography sx={{ fontSize: '1.25rem' }}>⚡</Typography>
+          <Typography component="h1" sx={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+            Build my MVP
+          </Typography>
+        </Box>
+        <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-muted)', mb: 2.5 }}>
           Enter your app idea — AI instantly generates features, pages,
           tech stack, timeline and cost estimate
-        </p>
+        </Typography>
 
-        <div className="flex gap-3 mb-4">
-          <input
+        <Box sx={{ display: 'flex', gap: 1.5, mb: 2, flexWrap: 'wrap' }}>
+          <TextField
             value={idea}
-            onChange={e => setIdea(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && generate()}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setIdea(e.target.value)}
+            onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Enter') generate() }}
             placeholder="e.g. Travel booking app for Varanasi tours..."
-            className="flex-1 px-4 py-2.5 text-sm border border-[var(--border)] bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-xl outline-none focus:border-[var(--blue)] focus:ring-2 focus:ring-blue-100"
+            size="small"
+            sx={{
+              flex: 1,
+              minWidth: 200,
+              '& .MuiOutlinedInput-root': {
+                bgcolor: 'var(--bg-primary)',
+                color: 'var(--text-primary)',
+                borderRadius: '12px',
+                fontSize: '0.875rem',
+              },
+            }}
           />
-          <button
+          <Button
             onClick={generate}
             disabled={loading}
-            className="px-5 py-2.5 bg-[var(--blue)] text-white text-sm font-semibold rounded-xl hover:opacity-90 disabled:opacity-50 transition-colors whitespace-nowrap cursor-pointer"
+            variant="contained"
+            disableElevation
+            sx={{
+              px: 2.5,
+              bgcolor: 'var(--blue)',
+              color: '#fff',
+              fontWeight: 600,
+              fontSize: '0.875rem',
+              borderRadius: '12px',
+              textTransform: 'none',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+              '&:hover': { bgcolor: 'var(--blue-dark)' },
+            }}
           >
             {loading ? '⟳ Generating...' : '⚡ Generate MVP'}
-          </button>
-        </div>
+          </Button>
+        </Box>
 
         {/* Example ideas */}
-        <div>
-          <div className="text-xs text-[var(--text-muted)] mb-2">Try an example:</div>
-          <div className="flex flex-wrap gap-2">
+        <Box>
+          <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', mb: 1 }}>Try an example:</Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {EXAMPLE_IDEAS.map(ex => (
-              <button
+              <Chip
                 key={ex}
+                label={ex}
                 onClick={() => setIdea(ex)}
-                className="text-xs px-3 py-1.5 border border-[var(--border)] rounded-full text-[var(--text-muted)] hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors dark:hover:bg-blue-950"
-              >
-                {ex}
-              </button>
+                variant="outlined"
+                sx={{
+                  fontSize: '0.75rem',
+                  borderColor: 'var(--border)',
+                  color: 'var(--text-muted)',
+                  bgcolor: 'transparent',
+                  '&:hover': { bgcolor: 'var(--blue-light)', color: 'var(--blue)', borderColor: 'var(--blue)' },
+                }}
+              />
             ))}
-          </div>
-        </div>
+          </Box>
+        </Box>
 
         {error && (
-          <div className="mt-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm rounded-lg px-4 py-2">
+          <Alert severity="error" sx={{ mt: 1.5, borderRadius: '8px' }}>
             {error}
-          </div>
+          </Alert>
         )}
 
         {loading && (
-          <div className="mt-4 text-center">
-            <div className="text-sm text-[var(--text-muted)] mb-2">
+          <Box sx={{ mt: 2, textAlign: 'center' }}>
+            <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-muted)', mb: 1 }}>
               AI is analyzing your idea...
-            </div>
-            <div className="flex justify-center gap-1">
+            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5, flexWrap: 'wrap' }}>
               {['Features', 'Pages', 'Stack', 'Timeline', 'Cost'].map((s, i) => (
-                <span
+                <Chip
                   key={s}
-                  className="text-xs px-2 py-1 bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400 rounded-full animate-pulse"
-                  style={{ animationDelay: `${i * 150}ms` }}
-                >
-                  {s}
-                </span>
+                  label={s}
+                  size="small"
+                  sx={{
+                    fontSize: '0.75rem',
+                    bgcolor: 'var(--blue-light)',
+                    color: 'var(--blue)',
+                    animation: 'pulse 1.5s ease-in-out infinite',
+                    animationDelay: `${i * 150}ms`,
+                    '@keyframes pulse': {
+                      '0%, 100%': { opacity: 1 },
+                      '50%': { opacity: 0.4 },
+                    },
+                  }}
+                />
               ))}
-            </div>
-          </div>
+            </Box>
+          </Box>
         )}
-      </div>
+      </Paper>
 
       {/* Results */}
       {data && (
-        <div className="flex flex-col gap-5">
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
 
           {/* App header */}
-          <div className="bg-[var(--blue)] rounded-2xl p-5 text-white">
-            <div className="flex items-start justify-between">
-              <div>
-                <h2 className="text-xl font-bold mb-1">{data.app_name}</h2>
-                <p className="text-blue-200 text-sm">{data.tagline}</p>
-              </div>
-              <span className={`text-xs px-3 py-1 rounded-full font-semibold capitalize
-                ${COMPLEXITY_COLORS[data.complexity] || COMPLEXITY_COLORS.medium}`}>
-                {data.complexity} complexity
-              </span>
-            </div>
-            <div className="mt-4 flex gap-4">
-              <div className="text-center">
-                <div className="text-xl font-bold">
+          <Paper elevation={0} sx={{ bgcolor: 'var(--blue)', borderRadius: '16px', p: 2.5, color: '#fff' }}>
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography component="h2" sx={{ fontSize: '1.25rem', fontWeight: 700, mb: 0.5 }}>{data.app_name}</Typography>
+                <Typography sx={{ color: '#bfdbfe', fontSize: '0.875rem' }}>{data.tagline}</Typography>
+              </Box>
+              {(() => {
+                const cc = COMPLEXITY_COLORS[data.complexity] || COMPLEXITY_COLORS.medium
+                return (
+                  <Chip
+                    label={`${data.complexity} complexity`}
+                    size="small"
+                    sx={{
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      textTransform: 'capitalize',
+                      flexShrink: 0,
+                      bgcolor: cc.bg,
+                      color: cc.fg,
+                    }}
+                  />
+                )
+              })()}
+            </Box>
+            <Box sx={{ mt: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+              <Box sx={{ textAlign: 'center' }}>
+                <Typography sx={{ fontSize: '1.25rem', fontWeight: 700 }}>
                   ₹{Math.round(data.cost.min / 100000 * 10) / 10}L
-                </div>
-                <div className="text-xs text-blue-200">Min cost</div>
-              </div>
-              <div className="w-px bg-blue-500" />
-              <div className="text-center">
-                <div className="text-xl font-bold">
+                </Typography>
+                <Typography sx={{ fontSize: '0.75rem', color: '#bfdbfe' }}>Min cost</Typography>
+              </Box>
+              <Box sx={{ width: '1px', bgcolor: '#3b82f6' }} />
+              <Box sx={{ textAlign: 'center' }}>
+                <Typography sx={{ fontSize: '1.25rem', fontWeight: 700 }}>
                   ₹{Math.round(data.cost.max / 100000 * 10) / 10}L
-                </div>
-                <div className="text-xs text-blue-200">Max cost</div>
-              </div>
-              <div className="w-px bg-blue-500" />
-              <div className="text-center">
-                <div className="text-xl font-bold">10</div>
-                <div className="text-xs text-blue-200">Weeks</div>
-              </div>
-              <div className="w-px bg-blue-500" />
-              <div className="text-center">
-                <div className="text-xl font-bold">{data.features.length}</div>
-                <div className="text-xs text-blue-200">Features</div>
-              </div>
-            </div>
-          </div>
+                </Typography>
+                <Typography sx={{ fontSize: '0.75rem', color: '#bfdbfe' }}>Max cost</Typography>
+              </Box>
+              <Box sx={{ width: '1px', bgcolor: '#3b82f6' }} />
+              <Box sx={{ textAlign: 'center' }}>
+                <Typography sx={{ fontSize: '1.25rem', fontWeight: 700 }}>10</Typography>
+                <Typography sx={{ fontSize: '0.75rem', color: '#bfdbfe' }}>Weeks</Typography>
+              </Box>
+              <Box sx={{ width: '1px', bgcolor: '#3b82f6' }} />
+              <Box sx={{ textAlign: 'center' }}>
+                <Typography sx={{ fontSize: '1.25rem', fontWeight: 700 }}>{data.features.length}</Typography>
+                <Typography sx={{ fontSize: '0.75rem', color: '#bfdbfe' }}>Features</Typography>
+              </Box>
+            </Box>
+          </Paper>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 2.5 }}>
 
             {/* Features */}
-            <div className="bg-[var(--bg-primary)] dark:bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-5">
-              <div className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-4">
-                Core features
-              </div>
-              <div className="flex flex-col gap-2">
+            <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5 }}>
+              <Typography sx={labelSx}>Core features</Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 {data.features.map((f, i) => (
-                  <div key={i} className="flex items-start gap-3">
-                    <div className="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                  <Box key={i} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                    <Box sx={{ width: 20, height: 20, borderRadius: '50%', bgcolor: '#dbeafe', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 700, flexShrink: 0, mt: 0.25 }}>
                       {i + 1}
-                    </div>
-                    <div className="text-sm text-[var(--text-secondary)] leading-relaxed">{f}</div>
-                  </div>
+                    </Box>
+                    <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{f}</Typography>
+                  </Box>
                 ))}
-              </div>
-            </div>
+              </Box>
+            </Paper>
 
             {/* Pages */}
-            <div className="bg-[var(--bg-primary)] dark:bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-5">
-              <div className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-4">
-                Pages needed
-              </div>
-              <div className="flex flex-col gap-2">
+            <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5 }}>
+              <Typography sx={labelSx}>Pages needed</Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                 {data.pages.map((p, i) => (
-                  <div key={i} className="flex items-center gap-3 py-1.5 border-b border-[var(--border-light)] last:border-none">
-                    <div className="w-5 h-5 rounded bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                  <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 0.75, borderBottom: i === data.pages.length - 1 ? 'none' : '1px solid var(--border-light)' }}>
+                    <Box sx={{ width: 20, height: 20, borderRadius: '4px', bgcolor: '#f3e8ff', color: '#9333ea', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 700, flexShrink: 0 }}>
                       {i + 1}
-                    </div>
-                    <div className="text-sm text-[var(--text-secondary)]">{p}</div>
-                  </div>
+                    </Box>
+                    <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{p}</Typography>
+                  </Box>
                 ))}
-              </div>
-            </div>
+              </Box>
+            </Paper>
 
-          </div>
+          </Box>
 
           {/* Tech stack */}
-          <div className="bg-[var(--bg-primary)] dark:bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-5">
-            <div className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-4">
-              Recommended tech stack
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5 }}>
+            <Typography sx={labelSx}>Recommended tech stack</Typography>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 1.5 }}>
               {Object.entries(data.stack).map(([key, value]) => (
-                <div key={key} className="bg-[var(--bg-tertiary)] rounded-xl p-3">
-                  <div className="text-xs text-[var(--text-muted)] capitalize mb-1">{key}</div>
-                  <div className="text-sm font-semibold text-[var(--text-primary)]">{value}</div>
-                </div>
+                <Box key={key} sx={{ bgcolor: 'var(--bg-tertiary)', borderRadius: '12px', p: 1.5, minWidth: 0 }}>
+                  <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'capitalize', mb: 0.5 }}>{key}</Typography>
+                  <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</Typography>
+                </Box>
               ))}
-            </div>
-          </div>
+            </Box>
+          </Paper>
 
           {/* Timeline */}
-          <div className="bg-[var(--bg-primary)] dark:bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-5">
-            <div className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-4">
-              Development timeline
-            </div>
-            <div className="flex flex-col gap-3">
+          <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5 }}>
+            <Typography sx={labelSx}>Development timeline</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
               {data.timeline.map((item, i) => (
-                <div key={i} className="flex items-center gap-4">
-                  <div className="w-20 text-xs font-bold text-[var(--blue)] flex-shrink-0">
+                <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Typography sx={{ width: 80, fontSize: '0.75rem', fontWeight: 700, color: 'var(--blue)', flexShrink: 0 }}>
                     {item.phase}
-                  </div>
-                  <div className="flex-1 h-px bg-[var(--border)]" />
-                  <div className="text-sm text-[var(--text-secondary)]">{item.task}</div>
-                </div>
+                  </Typography>
+                  <Box sx={{ flex: 1, height: '1px', bgcolor: 'var(--border)' }} />
+                  <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{item.task}</Typography>
+                </Box>
               ))}
-            </div>
-          </div>
+            </Box>
+          </Paper>
 
           {/* CTA */}
-          <div className="bg-[var(--bg-tertiary)] border border-[var(--border)] rounded-2xl p-5 flex items-center justify-between">
-            <div>
-              <div className="text-sm font-bold text-[var(--text-primary)] mb-1">
+          <Paper elevation={0} sx={{ bgcolor: 'var(--bg-tertiary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)', mb: 0.5 }}>
                 Ready to build this?
-              </div>
-              <div className="text-xs text-[var(--text-muted)]">
+              </Typography>
+              <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                 Go through our 6-step wizard to get a detailed proposal
-              </div>
-            </div>
-            <Link href="/wizard">
-              <button className="px-5 py-2.5 bg-[var(--blue)] text-white text-sm font-semibold rounded-xl hover:opacity-90 transition-colors cursor-pointer">
-                Start project →
-              </button>
-            </Link>
-          </div>
+              </Typography>
+            </Box>
+            <Button
+              component={Link}
+              href="/wizard"
+              variant="contained"
+              disableElevation
+              sx={{
+                px: 2.5,
+                py: 1.25,
+                bgcolor: 'var(--blue)',
+                color: '#fff',
+                fontWeight: 600,
+                fontSize: '0.875rem',
+                borderRadius: '12px',
+                textTransform: 'none',
+                flexShrink: 0,
+                '&:hover': { bgcolor: 'var(--blue-dark)' },
+              }}
+            >
+              Start project →
+            </Button>
+          </Paper>
 
-        </div>
+        </Box>
       )}
-    </div>
+    </Box>
   )
 }

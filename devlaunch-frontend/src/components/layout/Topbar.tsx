@@ -1,6 +1,9 @@
 'use client'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Chip from '@mui/material/Chip'
 import ThemeToggle from '@/components/ui/ThemeToggle'
 
 const PAGE_META: Record<string, { title: string; sub: string }> = {
@@ -29,63 +32,103 @@ export default function Topbar() {
   }
 
   return (
-    <div className="
-      bg-[var(--bg-primary)]
-      border-b border-[var(--border)]
-      px-5 py-3 flex items-center justify-between flex-shrink-0
-    ">
-      <div>
-        <div className="text-sm font-bold text-[var(--text-primary)]">
+    <Box
+      sx={{
+        bgcolor: 'var(--bg-primary)',
+        borderBottom: '1px solid var(--border)',
+        px: 2.5,
+        py: 1.5,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexShrink: 0,
+      }}
+    >
+      <Box>
+        <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' }}>
           {meta.title}
-        </div>
-        <div className="text-xs text-[var(--text-muted)] mt-0.5">
+        </Typography>
+        <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', mt: 0.25 }}>
           {meta.sub}
-        </div>
-      </div>
+        </Typography>
+      </Box>
 
-      <div className="flex items-center gap-2">
-        <span className="text-xs font-semibold bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400 px-2 py-1 rounded-full">
-          ● Live
-        </span>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Chip
+          label="● Live"
+          size="small"
+          sx={{
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            bgcolor: 'var(--blue-light)',
+            color: 'var(--blue)',
+            borderRadius: '9999px',
+          }}
+        />
 
         <ThemeToggle />
 
-        <Link href="/chatbot">
-          <button className="
-            text-xs px-3 py-1.5 rounded-lg border cursor-pointer
-            border-[var(--border)]
-            bg-[var(--bg-primary)]
-            text-[var(--text-secondary)]
-            hover:bg-[var(--bg-tertiary)]
-          ">
-            Ask AI
-          </button>
-        </Link>
+        <Box
+          component={Link}
+          href="/chatbot"
+          sx={{
+            fontSize: '0.75rem',
+            px: 1.5,
+            py: 0.75,
+            borderRadius: '8px',
+            border: '1px solid var(--border)',
+            bgcolor: 'var(--bg-primary)',
+            color: 'var(--text-secondary)',
+            textDecoration: 'none',
+            cursor: 'pointer',
+            '&:hover': { bgcolor: 'var(--bg-tertiary)' },
+          }}
+        >
+          Ask AI
+        </Box>
 
-        <Link href="/wizard">
-          <button className="
-            text-xs px-3 py-1.5 rounded-lg cursor-pointer
-            bg-[var(--blue)] hover:opacity-90
-            text-white font-semibold
-          ">
-            Start project
-          </button>
-        </Link>
+        <Box
+          component={Link}
+          href="/wizard"
+          sx={{
+            fontSize: '0.75rem',
+            px: 1.5,
+            py: 0.75,
+            borderRadius: '8px',
+            bgcolor: 'var(--blue)',
+            color: '#fff',
+            fontWeight: 600,
+            textDecoration: 'none',
+            cursor: 'pointer',
+            '&:hover': { opacity: 0.9 },
+          }}
+        >
+          Start project
+        </Box>
 
-        <Link href="/profile">
-          <div className="
-            w-8 h-8 rounded-full cursor-pointer
-            bg-[var(--blue-light)]
-            text-[var(--blue)]
-            flex items-center justify-center
-            text-xs font-bold
-            hover:opacity-80
-            transition-all
-          ">
-            TJ
-          </div>
-        </Link>
-      </div>
-    </div>
+        <Box
+          component={Link}
+          href="/profile"
+          sx={{
+            width: 32,
+            height: 32,
+            borderRadius: '50%',
+            cursor: 'pointer',
+            bgcolor: 'var(--blue-light)',
+            color: 'var(--blue)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            textDecoration: 'none',
+            transition: 'all 0.2s',
+            '&:hover': { opacity: 0.8 },
+          }}
+        >
+          TJ
+        </Box>
+      </Box>
+    </Box>
   )
 }

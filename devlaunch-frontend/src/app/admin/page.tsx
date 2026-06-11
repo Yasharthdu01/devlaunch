@@ -1,16 +1,59 @@
 'use client'
 import { useState, useEffect } from 'react'
 import API_URL from '@/lib/config'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Paper from '@mui/material/Paper'
+import Avatar from '@mui/material/Avatar'
+import Chip from '@mui/material/Chip'
+import Tabs from '@mui/material/Tabs'
+import Tab from '@mui/material/Tab'
+import TextField from '@mui/material/TextField'
+import MenuItem from '@mui/material/MenuItem'
+import Table from '@mui/material/Table'
+import TableHead from '@mui/material/TableHead'
+import TableBody from '@mui/material/TableBody'
+import TableRow from '@mui/material/TableRow'
+import TableCell from '@mui/material/TableCell'
 
-const STATUS_COLORS = {
-  discovery:   'bg-gray-100 text-gray-600',
-  design:      'bg-purple-100 text-purple-700',
-  development: 'bg-blue-100 text-blue-700',
-  testing:     'bg-amber-100 text-amber-700',
-  deploy:      'bg-orange-100 text-orange-700',
-  live:        'bg-green-100 text-green-700',
-  delivered:   'bg-teal-100 text-teal-700',
+interface RevenuePoint { month: string; revenue: string | number }
+interface Client {
+  id: number
+  name: string
+  email: string
+  company_name?: string
+  industry?: string
+  project_count: number
+  total_value?: string | number
+  created_at?: string
 }
+interface Project {
+  id: number
+  title: string
+  status: string
+  client_name?: string
+  company_name?: string
+  platform?: string
+  budget_min?: string | number
+}
+interface Stats {
+  total_clients?: number
+  total_projects?: number
+  active_projects?: number
+  total_revenue?: number
+}
+
+const STATUS_COLORS: Record<string, { bg: string; fg: string }> = {
+  discovery:   { bg: '#f3f4f6', fg: '#4b5563' },
+  design:      { bg: '#faf5ff', fg: '#7e22ce' },
+  development: { bg: '#eff6ff', fg: '#1d4ed8' },
+  testing:     { bg: '#fffbeb', fg: '#b45309' },
+  deploy:      { bg: '#fff7ed', fg: '#c2410c' },
+  live:        { bg: '#f0fdf4', fg: '#15803d' },
+  delivered:   { bg: '#f0fdfa', fg: '#0f766e' },
+}
+
+const STATUSES = ['discovery', 'design', 'development', 'testing', 'deploy', 'live', 'delivered']
 
 const DEVELOPERS = [
   'Ravi Kumar',
@@ -20,48 +63,48 @@ const DEVELOPERS = [
   'Unassigned',
 ]
 
-function RevenueBar({ data }) {
+const labelSx = { fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', mb: 2 } as const
+const thSx = { fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid var(--border)', bgcolor: 'var(--bg-tertiary)', whiteSpace: 'nowrap' } as const
+const tdSx = { borderBottom: '1px solid var(--border-light)', color: 'var(--text-secondary)', fontSize: '0.875rem' } as const
+
+function RevenueBar({ data }: { data: RevenuePoint[] }) {
   if (!data || data.length === 0) return (
-    <div className="text-sm text-gray-400 text-center py-8">
+    <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-muted)', textAlign: 'center', py: 4 }}>
       No revenue data yet
-    </div>
+    </Typography>
   )
 
-  const max = Math.max(...data.map(d => parseInt(d.revenue) || 0))
+  const max = Math.max(...data.map(d => parseInt(String(d.revenue)) || 0))
 
   return (
-    <div className="flex items-end gap-3 h-36 px-2">
+    <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 1.5, height: 144, px: 1 }}>
       {data.map((d, i) => {
-        const height = max > 0
-          ? Math.max(4, Math.round((parseInt(d.revenue) / max) * 100))
-          : 4
+        const value = parseInt(String(d.revenue)) || 0
+        const height = max > 0 ? Math.max(4, Math.round((value / max) * 100)) : 4
         return (
-          <div key={i} className="flex flex-col items-center gap-1 flex-1">
-            <div className="text-xs text-gray-500 font-semibold">
-              {parseInt(d.revenue) > 0
-                ? `₹${Math.round(parseInt(d.revenue) / 1000)}k`
-                : ''}
-            </div>
-            <div
-              className="w-full bg-blue-500 rounded-t-md transition-all hover:bg-blue-600"
-              style={{ height: `${height}%` }}
-              title={`${d.month}: ₹${parseInt(d.revenue).toLocaleString('en-IN')}`}
+          <Box key={i} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5, flex: 1, minWidth: 0, height: '100%', justifyContent: 'flex-end' }}>
+            <Typography sx={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+              {value > 0 ? `₹${Math.round(value / 1000)}k` : ''}
+            </Typography>
+            <Box
+              sx={{ width: '100%', bgcolor: 'var(--blue)', borderTopLeftRadius: '6px', borderTopRightRadius: '6px', transition: 'all 0.2s', height: `${height}%`, '&:hover': { bgcolor: 'var(--blue-dark)' } }}
+              title={`${d.month}: ₹${value.toLocaleString('en-IN')}`}
             />
-            <div className="text-xs text-gray-400 text-center leading-tight">
+            <Typography sx={{ fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.2 }}>
               {d.month}
-            </div>
-          </div>
+            </Typography>
+          </Box>
         )
       })}
-    </div>
+    </Box>
   )
 }
 
 export default function AdminPage() {
-  const [stats,    setStats]    = useState(null)
-  const [clients,  setClients]  = useState([])
-  const [projects, setProjects] = useState([])
-  const [revenue,  setRevenue]  = useState([])
+  const [stats,    setStats]    = useState<Stats | null>(null)
+  const [clients,  setClients]  = useState<Client[]>([])
+  const [projects, setProjects] = useState<Project[]>([])
+  const [revenue,  setRevenue]  = useState<RevenuePoint[]>([])
   const [tab,      setTab]      = useState('overview')
   const [loading,  setLoading]  = useState(true)
 
@@ -89,7 +132,7 @@ export default function AdminPage() {
     setLoading(false)
   }
 
-  async function updateProject(id, field, value) {
+  async function updateProject(id: number, field: string, value: string) {
     try {
       const res = await fetch(
         API_URL + `/api/admin/projects/${id}`,
@@ -109,286 +152,264 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-400 text-sm">Loading admin panel...</div>
-      </div>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 256 }}>
+        <Typography sx={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Loading admin panel...</Typography>
+      </Box>
     )
   }
 
   return (
-    <div className="w-full">
+    <Box sx={{ width: '100%' }}>
 
       {/* Metric cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 2, mb: 3 }}>
         {[
-          {
-            label: 'Total clients',
-            value: stats?.total_clients ?? 0,
-            change: 'registered users',
-            color: 'text-blue-600',
-            bg: 'bg-blue-50',
-          },
-          {
-            label: 'Total projects',
-            value: stats?.total_projects ?? 0,
-            change: 'all time',
-            color: 'text-purple-600',
-            bg: 'bg-purple-50',
-          },
-          {
-            label: 'Active projects',
-            value: stats?.active_projects ?? 0,
-            change: 'in progress',
-            color: 'text-amber-600',
-            bg: 'bg-amber-50',
-          },
-          {
-            label: 'Total revenue',
-            value: `₹${((stats?.total_revenue ?? 0) / 100000).toFixed(1)}L`,
-            change: 'from all projects',
-            color: 'text-green-600',
-            bg: 'bg-green-50',
-          },
+          { label: 'Total clients',   value: stats?.total_clients ?? 0,                                         change: 'registered users',   fg: '#2563eb', bg: '#eff6ff' },
+          { label: 'Total projects',  value: stats?.total_projects ?? 0,                                        change: 'all time',           fg: '#9333ea', bg: '#faf5ff' },
+          { label: 'Active projects', value: stats?.active_projects ?? 0,                                       change: 'in progress',        fg: '#d97706', bg: '#fffbeb' },
+          { label: 'Total revenue',   value: `₹${((stats?.total_revenue ?? 0) / 100000).toFixed(1)}L`,         change: 'from all projects',  fg: '#16a34a', bg: '#f0fdf4' },
         ].map(m => (
-          <div key={m.label} className={`${m.bg} rounded-xl p-4`}>
-            <div className="text-xs text-gray-500 mb-1">{m.label}</div>
-            <div className={`text-2xl font-bold ${m.color}`}>{m.value}</div>
-            <div className="text-xs text-gray-400 mt-1">{m.change}</div>
-          </div>
+          <Paper key={m.label} elevation={0} sx={{ bgcolor: m.bg, borderRadius: '12px', p: 2, minWidth: 0 }}>
+            <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)', mb: 0.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.label}</Typography>
+            <Typography sx={{ fontSize: '1.5rem', fontWeight: 700, color: m.fg, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.value}</Typography>
+            <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', mt: 0.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.change}</Typography>
+          </Paper>
         ))}
-      </div>
+      </Box>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-5 bg-gray-100 p-1 rounded-xl w-fit">
-        {[
-          { id: 'overview',  label: 'Overview'  },
-          { id: 'projects',  label: 'Projects'  },
-          { id: 'clients',   label: 'Clients'   },
-        ].map(t => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all
-              ${tab === t.id
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
-              }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+      <Box sx={{ mb: 2.5 }}>
+        <Tabs
+          value={tab}
+          onChange={(_e, v: string) => setTab(v)}
+          sx={{
+            minHeight: 0,
+            bgcolor: 'var(--bg-tertiary)',
+            borderRadius: '12px',
+            p: 0.5,
+            display: 'inline-flex',
+            '& .MuiTabs-indicator': { display: 'none' },
+            '& .MuiTab-root': {
+              minHeight: 0,
+              py: 0.75,
+              px: 2,
+              textTransform: 'none',
+              fontWeight: 600,
+              fontSize: '0.875rem',
+              borderRadius: '8px',
+              color: 'var(--text-muted)',
+            },
+            '& .Mui-selected': {
+              bgcolor: 'var(--bg-primary)',
+              color: 'var(--text-primary) !important',
+            },
+          }}
+        >
+          <Tab value="overview" label="Overview" />
+          <Tab value="projects" label="Projects" />
+          <Tab value="clients"  label="Clients" />
+        </Tabs>
+      </Box>
 
       {/* OVERVIEW TAB */}
       {tab === 'overview' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 2.5 }}>
 
           {/* Revenue chart */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-5">
-            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
-              Revenue by month
-            </div>
+          <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5, minWidth: 0 }}>
+            <Typography sx={labelSx}>Revenue by month</Typography>
             <RevenueBar data={revenue} />
-          </div>
+          </Paper>
 
           {/* Project status breakdown */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-5">
-            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
-              Project pipeline
-            </div>
-            {['discovery', 'design', 'development', 'testing', 'deploy', 'live', 'delivered'].map(status => {
+          <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5, minWidth: 0 }}>
+            <Typography sx={labelSx}>Project pipeline</Typography>
+            {STATUSES.map(status => {
               const count = projects.filter(p => p.status === status).length
-              const pct = projects.length > 0
-                ? Math.round((count / projects.length) * 100) : 0
+              const pct = projects.length > 0 ? Math.round((count / projects.length) * 100) : 0
               return (
-                <div key={status} className="flex items-center gap-3 mb-3">
-                  <div className="w-20 text-xs text-gray-500 capitalize">{status}</div>
-                  <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-blue-500 rounded-full transition-all"
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                  <div className="text-xs font-semibold text-gray-600 w-6 text-right">
-                    {count}
-                  </div>
-                </div>
+                <Box key={status} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+                  <Typography sx={{ width: 80, fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'capitalize', flexShrink: 0 }}>{status}</Typography>
+                  <Box sx={{ flex: 1, height: 8, bgcolor: 'var(--bg-tertiary)', borderRadius: '999px', overflow: 'hidden' }}>
+                    <Box sx={{ height: '100%', bgcolor: 'var(--blue)', borderRadius: '999px', transition: 'all 0.3s', width: `${pct}%` }} />
+                  </Box>
+                  <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', width: 24, textAlign: 'right', flexShrink: 0 }}>{count}</Typography>
+                </Box>
               )
             })}
-          </div>
+          </Paper>
 
           {/* Recent clients */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-5">
-            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
-              Recent clients
-            </div>
+          <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5, minWidth: 0 }}>
+            <Typography sx={labelSx}>Recent clients</Typography>
             {clients.slice(0, 5).map(c => (
-              <div key={c.id} className="flex items-center gap-3 py-2.5 border-b border-gray-50 last:border-none">
-                <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold flex-shrink-0">
+              <Box key={c.id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1.25, borderBottom: '1px solid var(--border-light)', '&:last-child': { borderBottom: 'none' } }}>
+                <Avatar sx={{ width: 32, height: 32, bgcolor: '#dbeafe', color: '#1d4ed8', fontSize: '0.75rem', fontWeight: 700, flexShrink: 0 }}>
                   {(c.name || 'U')[0].toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-gray-800 truncate">{c.name}</div>
-                  <div className="text-xs text-gray-400 truncate">{c.company_name || c.email}</div>
-                </div>
-                <div className="text-xs font-semibold text-gray-500">
+                </Avatar>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</Typography>
+                  <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.company_name || c.email}</Typography>
+                </Box>
+                <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', flexShrink: 0 }}>
                   {c.project_count} project{c.project_count !== 1 ? 's' : ''}
-                </div>
-              </div>
+                </Typography>
+              </Box>
             ))}
-          </div>
+          </Paper>
 
           {/* Recent projects */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-5">
-            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
-              Recent projects
-            </div>
-            {projects.slice(0, 5).map(p => (
-              <div key={p.id} className="flex items-center gap-3 py-2.5 border-b border-gray-50 last:border-none">
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-gray-800 truncate">{p.title}</div>
-                  <div className="text-xs text-gray-400">{p.client_name}</div>
-                </div>
-                <span className={`text-xs px-2 py-0.5 rounded-full font-semibold capitalize
-                  ${STATUS_COLORS[p.status] || STATUS_COLORS.discovery}`}>
-                  {p.status}
-                </span>
-              </div>
-            ))}
-          </div>
+          <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5, minWidth: 0 }}>
+            <Typography sx={labelSx}>Recent projects</Typography>
+            {projects.slice(0, 5).map(p => {
+              const c = STATUS_COLORS[p.status] || STATUS_COLORS.discovery
+              return (
+                <Box key={p.id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1.25, borderBottom: '1px solid var(--border-light)', '&:last-child': { borderBottom: 'none' } }}>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</Typography>
+                    <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.client_name}</Typography>
+                  </Box>
+                  <Chip label={p.status} size="small" sx={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'capitalize', flexShrink: 0, bgcolor: c.bg, color: c.fg }} />
+                </Box>
+              )
+            })}
+          </Paper>
 
-        </div>
+        </Box>
       )}
 
       {/* PROJECTS TAB */}
       {tab === 'projects' && (
-        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="text-left px-4 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Project</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Client</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Status</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Developer</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Budget</th>
-              </tr>
-            </thead>
-            <tbody>
-              {projects.map(p => (
-                <tr key={p.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3">
-                    <div className="font-semibold text-gray-900">{p.title}</div>
-                    <div className="text-xs text-gray-400">#{p.id}</div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="text-gray-700">{p.client_name}</div>
-                    <div className="text-xs text-gray-400">{p.company_name}</div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <select
-                      value={p.status}
-                      onChange={e => updateProject(p.id, 'status', e.target.value)}
-                      className={`text-xs px-2 py-1 rounded-full font-semibold border-none outline-none cursor-pointer
-                        ${STATUS_COLORS[p.status] || STATUS_COLORS.discovery}`}
-                    >
-                      {['discovery','design','development','testing','deploy','live','delivered'].map(s => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="px-4 py-3">
-                    <select
-                      value={p.platform || 'Unassigned'}
-                      onChange={e => updateProject(p.id, 'developer', e.target.value)}
-                      className="text-xs px-2 py-1 border border-gray-200 rounded-lg outline-none bg-white text-gray-600"
-                    >
-                      {DEVELOPERS.map(d => (
-                        <option key={d} value={d}>{d}</option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="px-4 py-3 font-semibold text-gray-700">
-                    {p.budget_min
-                      ? `₹${parseInt(p.budget_min).toLocaleString('en-IN')}`
-                      : '—'}
-                  </td>
-                </tr>
-              ))}
-              {projects.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-gray-400 text-sm">
-                    No projects yet
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden' }}>
+          <Box sx={{ overflowX: 'auto', width: '100%' }}>
+            <Table sx={{ minWidth: 640 }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={thSx}>Project</TableCell>
+                  <TableCell sx={thSx}>Client</TableCell>
+                  <TableCell sx={thSx}>Status</TableCell>
+                  <TableCell sx={thSx}>Developer</TableCell>
+                  <TableCell sx={thSx}>Budget</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {projects.map(p => {
+                  const c = STATUS_COLORS[p.status] || STATUS_COLORS.discovery
+                  return (
+                    <TableRow key={p.id} sx={{ '&:hover': { bgcolor: 'var(--bg-tertiary)' } }}>
+                      <TableCell sx={tdSx}>
+                        <Typography sx={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.875rem' }}>{p.title}</Typography>
+                        <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>#{p.id}</Typography>
+                      </TableCell>
+                      <TableCell sx={tdSx}>
+                        <Typography sx={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>{p.client_name}</Typography>
+                        <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{p.company_name}</Typography>
+                      </TableCell>
+                      <TableCell sx={tdSx}>
+                        <TextField
+                          select
+                          value={p.status}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateProject(p.id, 'status', e.target.value)}
+                          size="small"
+                          sx={{
+                            '& .MuiOutlinedInput-root': { borderRadius: '999px', bgcolor: c.bg, color: c.fg, fontSize: '0.7rem', fontWeight: 600 },
+                            '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+                            '& .MuiSelect-select': { py: 0.5, pl: 1.5, textTransform: 'capitalize' },
+                          }}
+                        >
+                          {STATUSES.map(s => <MenuItem key={s} value={s} sx={{ textTransform: 'capitalize' }}>{s}</MenuItem>)}
+                        </TextField>
+                      </TableCell>
+                      <TableCell sx={tdSx}>
+                        <TextField
+                          select
+                          value={p.platform || 'Unassigned'}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateProject(p.id, 'developer', e.target.value)}
+                          size="small"
+                          sx={{
+                            '& .MuiOutlinedInput-root': { borderRadius: '8px', bgcolor: 'var(--bg-primary)', color: 'var(--text-secondary)', fontSize: '0.75rem' },
+                            '& .MuiSelect-select': { py: 0.5, pl: 1.5 },
+                          }}
+                        >
+                          {DEVELOPERS.map(d => <MenuItem key={d} value={d}>{d}</MenuItem>)}
+                        </TextField>
+                      </TableCell>
+                      <TableCell sx={{ ...tdSx, fontWeight: 600, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+                        {p.budget_min ? `₹${parseInt(String(p.budget_min)).toLocaleString('en-IN')}` : '—'}
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+                {projects.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={5} sx={{ ...tdSx, textAlign: 'center', py: 4, color: 'var(--text-muted)' }}>
+                      No projects yet
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </Box>
+        </Paper>
       )}
 
       {/* CLIENTS TAB */}
       {tab === 'clients' && (
-        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="text-left px-4 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Client</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Email</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Industry</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Projects</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Total value</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Joined</th>
-              </tr>
-            </thead>
-            <tbody>
-              {clients.map(c => (
-                <tr key={c.id} className="border-b border-gray-50 hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold flex-shrink-0">
-                        {(c.name || 'U')[0].toUpperCase()}
-                      </div>
-                      <div>
-                        <div className="font-semibold text-gray-900">{c.name}</div>
-                        <div className="text-xs text-gray-400">{c.company_name}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{c.email}</td>
-                  <td className="px-4 py-3">
-                    <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">
-                      {c.industry || 'Not set'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 font-semibold text-gray-700 text-center">
-                    {c.project_count}
-                  </td>
-                  <td className="px-4 py-3 font-semibold text-green-700">
-                    {parseInt(c.total_value) > 0
-                      ? `₹${parseInt(c.total_value).toLocaleString('en-IN')}`
-                      : '—'}
-                  </td>
-                  <td className="px-4 py-3 text-xs text-gray-400">
-                    {c.created_at
-                      ? new Date(c.created_at).toLocaleDateString('en-IN', {
-                          day: 'numeric', month: 'short', year: 'numeric'
-                        })
-                      : '—'}
-                  </td>
-                </tr>
-              ))}
-              {clients.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-gray-400 text-sm">
-                    No clients yet
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden' }}>
+          <Box sx={{ overflowX: 'auto', width: '100%' }}>
+            <Table sx={{ minWidth: 720 }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={thSx}>Client</TableCell>
+                  <TableCell sx={thSx}>Email</TableCell>
+                  <TableCell sx={thSx}>Industry</TableCell>
+                  <TableCell sx={thSx}>Projects</TableCell>
+                  <TableCell sx={thSx}>Total value</TableCell>
+                  <TableCell sx={thSx}>Joined</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {clients.map(c => (
+                  <TableRow key={c.id} sx={{ '&:hover': { bgcolor: 'var(--bg-tertiary)' } }}>
+                    <TableCell sx={tdSx}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Avatar sx={{ width: 28, height: 28, bgcolor: '#dbeafe', color: '#1d4ed8', fontSize: '0.7rem', fontWeight: 700, flexShrink: 0 }}>
+                          {(c.name || 'U')[0].toUpperCase()}
+                        </Avatar>
+                        <Box sx={{ minWidth: 0 }}>
+                          <Typography sx={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.875rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</Typography>
+                          <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.company_name}</Typography>
+                        </Box>
+                      </Box>
+                    </TableCell>
+                    <TableCell sx={{ ...tdSx, color: 'var(--text-muted)', fontSize: '0.75rem' }}>{c.email}</TableCell>
+                    <TableCell sx={tdSx}>
+                      <Chip label={c.industry || 'Not set'} size="small" sx={{ fontSize: '0.7rem', bgcolor: '#f3f4f6', color: '#4b5563' }} />
+                    </TableCell>
+                    <TableCell sx={{ ...tdSx, fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'center' }}>
+                      {c.project_count}
+                    </TableCell>
+                    <TableCell sx={{ ...tdSx, fontWeight: 600, color: '#15803d', whiteSpace: 'nowrap' }}>
+                      {parseInt(String(c.total_value)) > 0 ? `₹${parseInt(String(c.total_value)).toLocaleString('en-IN')}` : '—'}
+                    </TableCell>
+                    <TableCell sx={{ ...tdSx, fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                      {c.created_at ? new Date(c.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {clients.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} sx={{ ...tdSx, textAlign: 'center', py: 4, color: 'var(--text-muted)' }}>
+                      No clients yet
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </Box>
+        </Paper>
       )}
 
-    </div>
+    </Box>
   )
 }

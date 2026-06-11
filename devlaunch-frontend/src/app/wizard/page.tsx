@@ -2,6 +2,16 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import API_URL from '@/lib/config'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Paper from '@mui/material/Paper'
+import Button from '@mui/material/Button'
+import TextField from '@mui/material/TextField'
+import MenuItem from '@mui/material/MenuItem'
+import Checkbox from '@mui/material/Checkbox'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import CircularProgress from '@mui/material/CircularProgress'
+
 const steps = [
   { number: 1, title: 'Project basics',     desc: 'Tell us about your business and idea' },
   { number: 2, title: 'Platform type',      desc: 'What kind of app do you need?' },
@@ -10,6 +20,20 @@ const steps = [
   { number: 5, title: 'Marketing & SEO',    desc: 'Growth and visibility strategy' },
   { number: 6, title: 'Deploy & timeline',  desc: 'Hosting and go-live plan' },
 ]
+
+const fieldSx = {
+  '& .MuiOutlinedInput-root': {
+    borderRadius: '8px',
+    bgcolor: 'var(--bg-primary)',
+    color: 'var(--text-primary)',
+    fontSize: '0.875rem',
+    '& fieldset': { borderColor: 'var(--border)' },
+    '&:hover fieldset': { borderColor: 'var(--blue)' },
+    '&.Mui-focused fieldset': { borderColor: 'var(--blue)' },
+  },
+  '& .MuiInputLabel-root': { color: 'var(--text-muted)', fontSize: '0.875rem' },
+  '& .MuiInputLabel-root.Mui-focused': { color: 'var(--blue)' },
+} as const
 
 export default function WizardPage() {
   const router = useRouter()
@@ -162,334 +186,524 @@ export default function WizardPage() {
     router.push('/tracker')
   }
 
+  const labelSx = { fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' } as const
+
   return (
-    <div className="max-w-2xl mx-auto w-full">
+    <Box sx={{ maxWidth: 672, mx: 'auto', width: '100%' }}>
 
       {/* Step progress bar */}
-      <div className="flex items-center mb-8">
-        {steps.map((s, i) => (
-          <div key={s.number} className="flex items-center flex-1">
-            <div className="flex flex-col items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all
-                ${currentStep > s.number  ? 'bg-blue-600 border-blue-600 text-white' : ''}
-                ${currentStep === s.number ? 'border-blue-600 text-blue-600 bg-blue-50' : ''}
-                ${currentStep < s.number  ? 'border-gray-300 text-gray-400 bg-white' : ''}
-              `}>
-                {currentStep > s.number ? '✓' : s.number}
-              </div>
-              <div className="text-xs text-gray-400 mt-1 text-center w-16 hidden sm:block">
-                {s.title.split(' ')[0]}
-              </div>
-            </div>
-            {i < steps.length - 1 && (
-              <div className={`flex-1 h-0.5 mx-1 mb-4 transition-all
-                ${currentStep > s.number ? 'bg-blue-600' : 'bg-gray-200'}`}
-              />
-            )}
-          </div>
-        ))}
-      </div>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+        {steps.map((s, i) => {
+          const done    = currentStep > s.number
+          const active  = currentStep === s.number
+          return (
+            <Box key={s.number} sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <Box
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    border: '2px solid',
+                    transition: 'all 0.2s',
+                    flexShrink: 0,
+                    ...(done
+                      ? { bgcolor: 'var(--blue)', borderColor: 'var(--blue)', color: '#fff' }
+                      : active
+                      ? { borderColor: 'var(--blue)', color: 'var(--blue)', bgcolor: 'var(--blue-light)' }
+                      : { borderColor: 'var(--border)', color: 'var(--text-muted)', bgcolor: 'var(--bg-primary)' }),
+                  }}
+                >
+                  {done ? '✓' : s.number}
+                </Box>
+                <Typography
+                  sx={{
+                    fontSize: '0.75rem',
+                    color: 'var(--text-muted)',
+                    mt: 0.5,
+                    textAlign: 'center',
+                    width: 64,
+                    display: { xs: 'none', sm: 'block' },
+                  }}
+                >
+                  {s.title.split(' ')[0]}
+                </Typography>
+              </Box>
+              {i < steps.length - 1 && (
+                <Box
+                  sx={{
+                    flex: 1,
+                    height: '2px',
+                    mx: 0.5,
+                    mb: 2,
+                    transition: 'all 0.2s',
+                    bgcolor: currentStep > s.number ? 'var(--blue)' : 'var(--border)',
+                  }}
+                />
+              )}
+            </Box>
+          )
+        })}
+      </Box>
 
       {/* Step card */}
-      <div className="bg-[var(--bg-primary)] dark:bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-6">
-        <div className="mb-5">
-          <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+      <Paper
+        elevation={0}
+        sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 3 }}
+      >
+        <Box sx={{ mb: 2.5 }}>
+          <Typography sx={labelSx}>
             Step {currentStep} of {steps.length}
-          </div>
-          <h2 className="text-lg font-bold text-[var(--text-primary)]">
+          </Typography>
+          <Typography sx={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--text-primary)', mt: 0.5 }}>
             {steps[currentStep - 1].title}
-          </h2>
-          <p className="text-sm text-[var(--text-muted)] mt-0.5">
+          </Typography>
+          <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-muted)', mt: 0.25 }}>
             {steps[currentStep - 1].desc}
-          </p>
-        </div>
+          </Typography>
+        </Box>
 
         {/* Error */}
         {error && (
-          <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm rounded-lg px-4 py-2 mb-4">
+          <Box
+            sx={{
+              bgcolor: '#fef2f2',
+              border: '1px solid #fecaca',
+              color: '#dc2626',
+              fontSize: '0.875rem',
+              borderRadius: '8px',
+              px: 2,
+              py: 1,
+              mb: 2,
+            }}
+          >
             {error}
-          </div>
+          </Box>
         )}
 
         {/* STEP 1 */}
         {currentStep === 1 && (
-          <div className="flex flex-col gap-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Project name *</label>
-                <input name="title" value={form.title} onChange={handleChange}
-                  placeholder="TravelNest booking app"
-                  className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500" />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Industry</label>
-                <select name="industry" value={form.industry} onChange={handleChange}
-                  className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500 bg-white">
-                  <option value="">Select...</option>
-                  <option>Travel & Hospitality</option>
-                  <option>E-commerce</option>
-                  <option>Healthcare</option>
-                  <option>EdTech</option>
-                  <option>SaaS</option>
-                  <option>Marketing</option>
-                </select>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Company name</label>
-                <input name="company" value={form.company} onChange={handleChange}
-                  placeholder="Traveler Journey Co."
-                  className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500" />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Budget range (₹)</label>
-                <select name="budget" value={form.budget} onChange={handleChange}
-                  className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500 bg-white">
-                  <option value="">Select...</option>
-                  <option value="100000">₹1L – ₹3L</option>
-                  <option value="300000">₹3L – ₹6L</option>
-                  <option value="600000">₹6L – ₹12L</option>
-                  <option value="1200000">₹12L+</option>
-                </select>
-              </div>
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Project description *</label>
-              <textarea name="description" value={form.description} onChange={handleChange}
-                placeholder="Describe what you want to build and your business goals..."
-                rows={3}
-                className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500 resize-none" />
-            </div>
-          </div>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 1.5 }}>
+              <TextField
+                label="Project name *"
+                name="title"
+                value={form.title}
+                onChange={handleChange}
+                placeholder="TravelNest booking app"
+                size="small"
+                fullWidth
+                sx={fieldSx}
+              />
+              <TextField
+                select
+                label="Industry"
+                name="industry"
+                value={form.industry}
+                onChange={handleChange}
+                size="small"
+                fullWidth
+                sx={fieldSx}
+              >
+                <MenuItem value="">Select...</MenuItem>
+                <MenuItem value="Travel & Hospitality">Travel & Hospitality</MenuItem>
+                <MenuItem value="E-commerce">E-commerce</MenuItem>
+                <MenuItem value="Healthcare">Healthcare</MenuItem>
+                <MenuItem value="EdTech">EdTech</MenuItem>
+                <MenuItem value="SaaS">SaaS</MenuItem>
+                <MenuItem value="Marketing">Marketing</MenuItem>
+              </TextField>
+            </Box>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 1.5 }}>
+              <TextField
+                label="Company name"
+                name="company"
+                value={form.company}
+                onChange={handleChange}
+                placeholder="Traveler Journey Co."
+                size="small"
+                fullWidth
+                sx={fieldSx}
+              />
+              <TextField
+                select
+                label="Budget range (₹)"
+                name="budget"
+                value={form.budget}
+                onChange={handleChange}
+                size="small"
+                fullWidth
+                sx={fieldSx}
+              >
+                <MenuItem value="">Select...</MenuItem>
+                <MenuItem value="100000">₹1L – ₹3L</MenuItem>
+                <MenuItem value="300000">₹3L – ₹6L</MenuItem>
+                <MenuItem value="600000">₹6L – ₹12L</MenuItem>
+                <MenuItem value="1200000">₹12L+</MenuItem>
+              </TextField>
+            </Box>
+            <TextField
+              label="Project description *"
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+              placeholder="Describe what you want to build and your business goals..."
+              multiline
+              rows={3}
+              fullWidth
+              sx={fieldSx}
+            />
+          </Box>
         )}
 
         {/* STEP 2 */}
         {currentStep === 2 && (
-          <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3 block">
+          <Box>
+            <Typography sx={{ ...labelSx, mb: 1.5, display: 'block' }}>
               Select all that apply
-            </label>
-            <div className="grid grid-cols-2 gap-2">
+            </Typography>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 1 }}>
               {['Web application', 'iOS mobile app', 'Android mobile app',
                 'Admin / CMS panel', 'REST API only', 'Marketing landing page',
                 'Email marketing setup', 'SEO optimization'].map(opt => (
-                <label key={opt} className="flex items-center gap-2 p-3 border border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={form.platforms.includes(opt)}
-                    onChange={() => handleCheckbox('platforms', opt)}
-                    className="accent-blue-600"
-                  />
-                  <span className="text-sm text-gray-700">{opt}</span>
-                </label>
+                <FormControlLabel
+                  key={opt}
+                  sx={{
+                    m: 0,
+                    p: 1.5,
+                    border: '1px solid var(--border)',
+                    borderRadius: '8px',
+                    transition: 'border-color 0.15s',
+                    '&:hover': { borderColor: 'var(--blue)' },
+                    '& .MuiFormControlLabel-label': { fontSize: '0.875rem', color: 'var(--text-secondary)' },
+                  }}
+                  control={
+                    <Checkbox
+                      checked={form.platforms.includes(opt)}
+                      onChange={() => handleCheckbox('platforms', opt)}
+                      size="small"
+                      sx={{ color: 'var(--border)', '&.Mui-checked': { color: 'var(--blue)' }, p: 0.5, mr: 0.5 }}
+                    />
+                  }
+                  label={opt}
+                />
               ))}
-            </div>
-          </div>
+            </Box>
+          </Box>
         )}
 
         {/* STEP 3 */}
         {currentStep === 3 && (
-          <div className="flex flex-col gap-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Framework</label>
-                <select name="framework" value={form.framework} onChange={handleChange}
-                  className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500 bg-white">
-                  <option>Next.js 14</option>
-                  <option>React.js</option>
-                  <option>Vue.js</option>
-                  <option>Angular</option>
-                  <option>Flutter Web</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Design style</label>
-                <select name="design_style" value={form.design_style} onChange={handleChange}
-                  className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500 bg-white">
-                  <option>Modern & minimal</option>
-                  <option>Bold & colorful</option>
-                  <option>Corporate / professional</option>
-                  <option>Custom brand kit</option>
-                </select>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Number of screens</label>
-                <input name="screens" value={form.screens} onChange={handleChange}
-                  placeholder="e.g. 15-20 screens"
-                  className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500" />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Responsive?</label>
-                <select name="responsive" value={form.responsive} onChange={handleChange}
-                  className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500 bg-white">
-                  <option>Yes — mobile-first</option>
-                  <option>Desktop only</option>
-                  <option>Mobile only</option>
-                </select>
-              </div>
-            </div>
-          </div>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 1.5 }}>
+              <TextField
+                select
+                label="Framework"
+                name="framework"
+                value={form.framework}
+                onChange={handleChange}
+                size="small"
+                fullWidth
+                sx={fieldSx}
+              >
+                <MenuItem value="Next.js 14">Next.js 14</MenuItem>
+                <MenuItem value="React.js">React.js</MenuItem>
+                <MenuItem value="Vue.js">Vue.js</MenuItem>
+                <MenuItem value="Angular">Angular</MenuItem>
+                <MenuItem value="Flutter Web">Flutter Web</MenuItem>
+              </TextField>
+              <TextField
+                select
+                label="Design style"
+                name="design_style"
+                value={form.design_style}
+                onChange={handleChange}
+                size="small"
+                fullWidth
+                sx={fieldSx}
+              >
+                <MenuItem value="Modern & minimal">Modern & minimal</MenuItem>
+                <MenuItem value="Bold & colorful">Bold & colorful</MenuItem>
+                <MenuItem value="Corporate / professional">Corporate / professional</MenuItem>
+                <MenuItem value="Custom brand kit">Custom brand kit</MenuItem>
+              </TextField>
+            </Box>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 1.5 }}>
+              <TextField
+                label="Number of screens"
+                name="screens"
+                value={form.screens}
+                onChange={handleChange}
+                placeholder="e.g. 15-20 screens"
+                size="small"
+                fullWidth
+                sx={fieldSx}
+              />
+              <TextField
+                select
+                label="Responsive?"
+                name="responsive"
+                value={form.responsive}
+                onChange={handleChange}
+                size="small"
+                fullWidth
+                sx={fieldSx}
+              >
+                <MenuItem value="Yes">Yes — mobile-first</MenuItem>
+                <MenuItem value="Desktop only">Desktop only</MenuItem>
+                <MenuItem value="Mobile only">Mobile only</MenuItem>
+              </TextField>
+            </Box>
+          </Box>
         )}
 
         {/* STEP 4 */}
         {currentStep === 4 && (
-          <div className="flex flex-col gap-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Backend</label>
-                <select name="backend" value={form.backend} onChange={handleChange}
-                  className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500 bg-white">
-                  <option>Node.js + Express</option>
-                  <option>Python FastAPI</option>
-                  <option>Django REST</option>
-                  <option>Spring Boot</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Database</label>
-                <select name="database" value={form.database} onChange={handleChange}
-                  className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500 bg-white">
-                  <option>PostgreSQL</option>
-                  <option>MySQL</option>
-                  <option>MongoDB</option>
-                  <option>Firebase</option>
-                </select>
-              </div>
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Integrations needed</label>
-              <textarea name="integrations" value={form.integrations} onChange={handleChange}
-                placeholder="e.g. Razorpay, Google Maps, SendGrid, Twilio, Google OAuth..."
-                rows={3}
-                className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500 resize-none" />
-            </div>
-          </div>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 1.5 }}>
+              <TextField
+                select
+                label="Backend"
+                name="backend"
+                value={form.backend}
+                onChange={handleChange}
+                size="small"
+                fullWidth
+                sx={fieldSx}
+              >
+                <MenuItem value="Node.js + Express">Node.js + Express</MenuItem>
+                <MenuItem value="Python FastAPI">Python FastAPI</MenuItem>
+                <MenuItem value="Django REST">Django REST</MenuItem>
+                <MenuItem value="Spring Boot">Spring Boot</MenuItem>
+              </TextField>
+              <TextField
+                select
+                label="Database"
+                name="database"
+                value={form.database}
+                onChange={handleChange}
+                size="small"
+                fullWidth
+                sx={fieldSx}
+              >
+                <MenuItem value="PostgreSQL">PostgreSQL</MenuItem>
+                <MenuItem value="MySQL">MySQL</MenuItem>
+                <MenuItem value="MongoDB">MongoDB</MenuItem>
+                <MenuItem value="Firebase">Firebase</MenuItem>
+              </TextField>
+            </Box>
+            <TextField
+              label="Integrations needed"
+              name="integrations"
+              value={form.integrations}
+              onChange={handleChange}
+              placeholder="e.g. Razorpay, Google Maps, SendGrid, Twilio, Google OAuth..."
+              multiline
+              rows={3}
+              fullWidth
+              sx={fieldSx}
+            />
+          </Box>
         )}
 
         {/* STEP 5 */}
         {currentStep === 5 && (
-          <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3 block">
+          <Box>
+            <Typography sx={{ ...labelSx, mb: 1.5, display: 'block' }}>
               Marketing services to include
-            </label>
-            <div className="grid grid-cols-2 gap-2">
+            </Typography>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 1 }}>
               {['On-page SEO setup', 'Google Analytics + Search Console',
                 'Google My Business', 'Social media pages setup',
                 'Email marketing (Mailchimp)', 'Blog / content marketing',
                 'Google Ads campaign', 'Meta Ads (Facebook/Instagram)'].map(opt => (
-                <label key={opt} className="flex items-center gap-2 p-3 border border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={form.marketing.includes(opt)}
-                    onChange={() => handleCheckbox('marketing', opt)}
-                    className="accent-blue-600"
-                  />
-                  <span className="text-sm text-gray-700">{opt}</span>
-                </label>
+                <FormControlLabel
+                  key={opt}
+                  sx={{
+                    m: 0,
+                    p: 1.5,
+                    border: '1px solid var(--border)',
+                    borderRadius: '8px',
+                    transition: 'border-color 0.15s',
+                    '&:hover': { borderColor: 'var(--blue)' },
+                    '& .MuiFormControlLabel-label': { fontSize: '0.875rem', color: 'var(--text-secondary)' },
+                  }}
+                  control={
+                    <Checkbox
+                      checked={form.marketing.includes(opt)}
+                      onChange={() => handleCheckbox('marketing', opt)}
+                      size="small"
+                      sx={{ color: 'var(--border)', '&.Mui-checked': { color: 'var(--blue)' }, p: 0.5, mr: 0.5 }}
+                    />
+                  }
+                  label={opt}
+                />
               ))}
-            </div>
-          </div>
+            </Box>
+          </Box>
         )}
 
         {/* STEP 6 */}
         {currentStep === 6 && (
-          <div className="flex flex-col gap-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Cloud provider</label>
-                <select name="cloud" value={form.cloud} onChange={handleChange}
-                  className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500 bg-white">
-                  <option>Vercel + Railway</option>
-                  <option>AWS</option>
-                  <option>Google Cloud</option>
-                  <option>Azure</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Timeline</label>
-                <select name="timeline" value={form.timeline} onChange={handleChange}
-                  className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500 bg-white">
-                  <option>6-8 weeks</option>
-                  <option>8-10 weeks</option>
-                  <option>10-14 weeks</option>
-                  <option>Flexible</option>
-                </select>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Post-launch support</label>
-                <select name="support" value={form.support} onChange={handleChange}
-                  className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500 bg-white">
-                  <option>Yes - 3 months</option>
-                  <option>Yes - 6 months</option>
-                  <option>No, one-time</option>
-                </select>
-              </div>
-            </div>
-          </div>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 1.5 }}>
+              <TextField
+                select
+                label="Cloud provider"
+                name="cloud"
+                value={form.cloud}
+                onChange={handleChange}
+                size="small"
+                fullWidth
+                sx={fieldSx}
+              >
+                <MenuItem value="Vercel + Railway">Vercel + Railway</MenuItem>
+                <MenuItem value="AWS">AWS</MenuItem>
+                <MenuItem value="Google Cloud">Google Cloud</MenuItem>
+                <MenuItem value="Azure">Azure</MenuItem>
+              </TextField>
+              <TextField
+                select
+                label="Timeline"
+                name="timeline"
+                value={form.timeline}
+                onChange={handleChange}
+                size="small"
+                fullWidth
+                sx={fieldSx}
+              >
+                <MenuItem value="6-8 weeks">6-8 weeks</MenuItem>
+                <MenuItem value="8-10 weeks">8-10 weeks</MenuItem>
+                <MenuItem value="10-14 weeks">10-14 weeks</MenuItem>
+                <MenuItem value="Flexible">Flexible</MenuItem>
+              </TextField>
+            </Box>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 1.5 }}>
+              <TextField
+                select
+                label="Post-launch support"
+                name="support"
+                value={form.support}
+                onChange={handleChange}
+                size="small"
+                fullWidth
+                sx={fieldSx}
+              >
+                <MenuItem value="Yes - 3 months">Yes - 3 months</MenuItem>
+                <MenuItem value="Yes - 6 months">Yes - 6 months</MenuItem>
+                <MenuItem value="No, one-time">No, one-time</MenuItem>
+              </TextField>
+            </Box>
+          </Box>
         )}
 
         {/* AI Suggestion Box */}
-        <div className="mt-5 border-t border-gray-100 pt-4">
-          <button
+        <Box sx={{ mt: 2.5, borderTop: '1px solid var(--border-light)', pt: 2 }}>
+          <Button
             onClick={getAISuggestion}
             disabled={aiLoading}
-            className="flex items-center gap-2 text-xs font-semibold text-blue-600 hover:text-blue-700 disabled:opacity-50"
+            disableElevation
+            startIcon={
+              aiLoading
+                ? <CircularProgress size={14} sx={{ color: 'var(--blue)' }} />
+                : <Box component="span">✦</Box>
+            }
+            sx={{
+              textTransform: 'none',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              color: 'var(--blue)',
+              p: 0,
+              minWidth: 0,
+              '&:hover': { bgcolor: 'transparent', color: 'var(--blue-dark)' },
+              '&.Mui-disabled': { color: 'var(--blue)', opacity: 0.5 },
+            }}
           >
-            {aiLoading ? (
-              <span className="animate-spin">⟳</span>
-            ) : (
-              <span>✦</span>
-            )}
             {aiLoading ? 'Getting AI suggestion...' : 'Get AI suggestion for this step'}
-          </button>
+          </Button>
 
           {suggestion && (
-            <div className="mt-3 bg-blue-50 border border-blue-100 rounded-xl p-4">
-              <div className="text-xs font-bold text-blue-600 mb-2">✦ AI recommendation</div>
-              <div className="text-sm text-blue-800 leading-relaxed whitespace-pre-line">
+            <Paper
+              elevation={0}
+              sx={{ mt: 1.5, bgcolor: 'var(--blue-light)', border: '1px solid var(--blue)', borderRadius: '12px', p: 2 }}
+            >
+              <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--blue)', mb: 1 }}>
+                ✦ AI recommendation
+              </Typography>
+              <Typography sx={{ fontSize: '0.875rem', color: 'var(--blue-dark)', lineHeight: 1.6, whiteSpace: 'pre-line' }}>
                 {suggestion}
-              </div>
-            </div>
+              </Typography>
+            </Paper>
           )}
-        </div>
+        </Box>
 
         {/* Navigation */}
-        <div className="flex items-center justify-between mt-6">
-          <button
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 3, gap: 1.5, flexWrap: 'wrap' }}>
+          <Button
             onClick={handleBack}
             disabled={currentStep === 1}
-            className="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
+            variant="outlined"
+            disableElevation
+            sx={{
+              borderColor: 'var(--border)',
+              color: 'var(--text-secondary)',
+              borderRadius: '8px',
+              textTransform: 'none',
+              fontSize: '0.875rem',
+              '&:hover': { bgcolor: 'var(--bg-tertiary)', borderColor: 'var(--border)' },
+              '&.Mui-disabled': { opacity: 0.3 },
+            }}
           >
             ← Back
-          </button>
-          <span className="text-xs text-gray-400">
+          </Button>
+          <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
             Step {currentStep} of {steps.length}
-          </span>
+          </Typography>
           {currentStep < steps.length ? (
-            <button
+            <Button
               onClick={handleNext}
               disabled={loading}
-              className="px-5 py-2 text-sm bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50"
+              variant="contained"
+              disableElevation
+              sx={{
+                bgcolor: 'var(--blue)',
+                color: '#fff',
+                borderRadius: '8px',
+                textTransform: 'none',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                '&:hover': { bgcolor: 'var(--blue-dark)' },
+              }}
             >
               {loading ? 'Saving...' : 'Next →'}
-            </button>
+            </Button>
           ) : (
-            <button
+            <Button
               onClick={handleSubmit}
               disabled={loading}
-              className="px-5 py-2 text-sm bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 disabled:opacity-50"
+              variant="contained"
+              disableElevation
+              sx={{
+                bgcolor: '#16a34a',
+                color: '#fff',
+                borderRadius: '8px',
+                textTransform: 'none',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                '&:hover': { bgcolor: '#15803d' },
+              }}
             >
               {loading ? 'Submitting...' : 'Submit project ✓'}
-            </button>
+            </Button>
           )}
-        </div>
+        </Box>
 
-      </div>
-    </div>
+      </Paper>
+    </Box>
   )
 }

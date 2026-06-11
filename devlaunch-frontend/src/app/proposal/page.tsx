@@ -1,6 +1,12 @@
 'use client'
 import { useState } from 'react'
 import API_URL from '@/lib/config'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Paper from '@mui/material/Paper'
+import Button from '@mui/material/Button'
+import TextField from '@mui/material/TextField'
+import Alert from '@mui/material/Alert'
 
 export default function ProposalPage() {
   const [projectId, setProjectId]   = useState('')
@@ -42,135 +48,156 @@ export default function ProposalPage() {
 
   const totalCost = proposal?.cost?.reduce((sum: number, item: any) => sum + item.amount, 0) || 0
 
+  const labelSx = { fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', mb: 2 } as const
+
   return (
-    <div className="max-w-3xl mx-auto w-full">
+    <Box sx={{ maxWidth: 768, mx: 'auto', width: '100%' }}>
 
       {/* Generate section */}
-      <div className="bg-[var(--bg-primary)] border border-[var(--border)] rounded-2xl p-6 mb-6 shadow-sm">
-        <h1 className="text-lg font-bold text-[var(--text-primary)] mb-1">Project proposal</h1>
-        <p className="text-sm text-[var(--text-muted)] mb-5">
+      <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 3, mb: 3 }}>
+        <Typography sx={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--text-primary)', mb: 0.5 }}>
+          Project proposal
+        </Typography>
+        <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-muted)', mb: 2.5 }}>
           AI-generated scope, timeline and cost breakdown
-        </p>
+        </Typography>
 
-        <div className="flex gap-3">
-          <input
+        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+          <TextField
             type="number"
             value={projectId}
-            onChange={e => setProjectId(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProjectId(e.target.value)}
             placeholder="Enter your project ID (e.g. 1)"
-            className="flex-1 px-3 py-2 text-sm border border-[var(--border)] bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-lg outline-none focus:border-[var(--blue)]"
+            size="small"
+            sx={{ flex: 1, minWidth: 200 }}
           />
-          <button
+          <Button
             onClick={generateProposal}
             disabled={loading}
-            className="px-5 py-2 bg-[var(--blue)] text-white text-sm font-semibold rounded-lg hover:opacity-90 disabled:opacity-50 cursor-pointer"
+            variant="contained"
+            disableElevation
+            sx={{ bgcolor: 'var(--blue)', color: '#fff', borderRadius: '8px', textTransform: 'none', fontWeight: 600, px: 2.5, whiteSpace: 'nowrap', '&:hover': { bgcolor: 'var(--blue-dark)' } }}
           >
             {loading ? 'Generating...' : '✦ Generate with AI'}
-          </button>
-        </div>
+          </Button>
+        </Box>
 
         {error && (
-          <div className="mt-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm rounded-lg px-4 py-2">
+          <Alert severity="error" sx={{ borderRadius: '8px', mt: 1.5 }}>
             {error}
-          </div>
+          </Alert>
         )}
 
         {loading && (
-          <div className="mt-4 text-center text-sm text-[var(--text-muted)]">
+          <Typography sx={{ mt: 2, textAlign: 'center', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
             Claude is generating your proposal... ✦
-          </div>
+          </Typography>
         )}
-      </div>
+      </Paper>
 
       {/* Proposal output */}
       {proposal && (
-        <div className="flex flex-col gap-5 pb-10">
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pb: 5 }}>
 
           {/* Tech stack */}
-          <div className="bg-[var(--bg-primary)] border border-[var(--border)] rounded-2xl p-5 shadow-sm">
-            <div className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-4">
-              Recommended tech stack
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5 }}>
+            <Typography sx={labelSx}>Recommended tech stack</Typography>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 1.5 }}>
               {Object.entries(proposal.stack || {}).map(([key, value]: [string, any]) => (
-                <div key={key} className="bg-[var(--bg-tertiary)] border border-[var(--border)] rounded-xl p-3">
-                  <div className="text-xs text-[var(--text-muted)] capitalize mb-1">{key}</div>
-                  <div className="text-sm font-semibold text-[var(--text-primary)]">{value}</div>
-                </div>
+                <Box key={key} sx={{ bgcolor: 'var(--bg-tertiary)', border: '1px solid var(--border)', borderRadius: '12px', p: 1.5 }}>
+                  <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'capitalize', mb: 0.5 }}>
+                    {key}
+                  </Typography>
+                  <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    {value}
+                  </Typography>
+                </Box>
               ))}
-            </div>
-          </div>
+            </Box>
+          </Paper>
 
           {/* Scope of work */}
-          <div className="bg-[var(--bg-primary)] border border-[var(--border)] rounded-2xl p-5 shadow-sm">
-            <div className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-4">
-              Scope of work
-            </div>
-            <div className="flex flex-col gap-2">
+          <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5 }}>
+            <Typography sx={labelSx}>Scope of work</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               {(proposal.scope || []).map((item: string, i: number) => (
-                <div key={i} className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-[var(--blue-light)] text-[var(--blue)] flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                <Box key={i} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                  <Box sx={{ width: 20, height: 20, borderRadius: '50%', bgcolor: 'var(--blue-light)', color: 'var(--blue)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700, flexShrink: 0, mt: 0.25 }}>
                     {i + 1}
-                  </div>
-                  <div className="text-sm text-[var(--text-secondary)]">{item}</div>
-                </div>
+                  </Box>
+                  <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{item}</Typography>
+                </Box>
               ))}
-            </div>
-          </div>
+            </Box>
+          </Paper>
 
           {/* Timeline */}
-          <div className="bg-[var(--bg-primary)] border border-[var(--border)] rounded-2xl p-5 shadow-sm">
-            <div className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-4">
-              Project timeline
-            </div>
-            <div className="flex flex-col gap-3">
+          <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5 }}>
+            <Typography sx={labelSx}>Project timeline</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
               {(proposal.timeline || []).map((item: any, i: number) => (
-                <div key={i} className="flex items-center gap-4">
-                  <div className="w-24 text-xs font-semibold text-[var(--blue)] flex-shrink-0">
+                <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Typography sx={{ width: 96, fontSize: '0.75rem', fontWeight: 600, color: 'var(--blue)', flexShrink: 0 }}>
                     {item.week}
-                  </div>
-                  <div className="flex-1 h-px bg-[var(--border)]" />
-                  <div className="text-sm text-[var(--text-secondary)]">{item.task}</div>
-                </div>
+                  </Typography>
+                  <Box sx={{ flex: 1, height: '1px', bgcolor: 'var(--border)' }} />
+                  <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{item.task}</Typography>
+                </Box>
               ))}
-            </div>
-          </div>
+            </Box>
+          </Paper>
 
           {/* Cost breakdown */}
-          <div className="bg-[var(--bg-primary)] border border-[var(--border)] rounded-2xl p-5 shadow-sm">
-            <div className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-4">
-              Cost breakdown
-            </div>
-            <div className="bg-green-50 dark:bg-green-950/20 border border-green-100 dark:border-green-900/30 rounded-xl p-4">
+          <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5 }}>
+            <Typography sx={labelSx}>Cost breakdown</Typography>
+            <Box sx={{ bgcolor: '#f0fdf4', border: '1px solid #dcfce7', borderRadius: '12px', p: 2 }}>
               {(proposal.cost || []).map((item: any, i: number) => (
-                <div key={i} className="flex justify-between py-2 border-b border-green-100 dark:border-green-900/30 last:border-none text-sm">
-                  <span className="text-[var(--text-secondary)]">{item.item}</span>
-                  <span className="font-semibold text-[var(--text-primary)]">
+                <Box
+                  key={i}
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    gap: 2,
+                    py: 1,
+                    fontSize: '0.875rem',
+                    borderBottom: i === (proposal.cost.length - 1) ? 'none' : '1px solid #dcfce7',
+                  }}
+                >
+                  <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{item.item}</Typography>
+                  <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
                     ₹{item.amount.toLocaleString('en-IN')}
-                  </span>
-                </div>
+                  </Typography>
+                </Box>
               ))}
-              <div className="flex justify-between pt-3 text-sm font-bold">
-                <span className="text-[var(--text-primary)]">Total estimate</span>
-                <span className="text-green-600 dark:text-green-400 text-base">
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, pt: 1.5 }}>
+                <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' }}>Total estimate</Typography>
+                <Typography sx={{ fontSize: '1rem', fontWeight: 700, color: '#16a34a', whiteSpace: 'nowrap' }}>
                   ₹{totalCost.toLocaleString('en-IN')}
-                </span>
-              </div>
-            </div>
-          </div>
+                </Typography>
+              </Box>
+            </Box>
+          </Paper>
 
           {/* Actions */}
-          <div className="flex gap-3">
-            <button className="flex-1 py-2.5 border border-[var(--border)] rounded-xl text-sm font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] cursor-pointer">
+          <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+            <Button
+              variant="outlined"
+              disableElevation
+              sx={{ flex: 1, minWidth: 140, py: 1.25, borderColor: 'var(--border)', color: 'var(--text-secondary)', borderRadius: '12px', textTransform: 'none', fontWeight: 600, '&:hover': { bgcolor: 'var(--bg-tertiary)', borderColor: 'var(--border)' } }}
+            >
               Preview PDF
-            </button>
-            <button className="flex-1 py-2.5 bg-[var(--blue)] text-white rounded-xl text-sm font-semibold hover:opacity-90 cursor-pointer">
+            </Button>
+            <Button
+              variant="contained"
+              disableElevation
+              sx={{ flex: 1, minWidth: 140, py: 1.25, bgcolor: 'var(--blue)', color: '#fff', borderRadius: '12px', textTransform: 'none', fontWeight: 600, '&:hover': { bgcolor: 'var(--blue-dark)' } }}
+            >
               Download PDF
-            </button>
-          </div>
+            </Button>
+          </Box>
 
-        </div>
+        </Box>
       )}
-    </div>
+    </Box>
   )
 }

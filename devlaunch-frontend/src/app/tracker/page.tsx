@@ -1,10 +1,19 @@
 'use client'
 import { useState, useEffect } from 'react'
 import API_URL from '@/lib/config'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Paper from '@mui/material/Paper'
+import Button from '@mui/material/Button'
+import Chip from '@mui/material/Chip'
+import TextField from '@mui/material/TextField'
+import MenuItem from '@mui/material/MenuItem'
+import LinearProgress from '@mui/material/LinearProgress'
+import Link from 'next/link'
 
 const STAGES = ['discovery', 'design', 'development', 'testing', 'deploy', 'live']
 
-const STAGE_LABELS = {
+const STAGE_LABELS: Record<string, string> = {
   discovery:   'Discovery',
   design:      'Design',
   development: 'Development',
@@ -13,10 +22,10 @@ const STAGE_LABELS = {
   live:        'Live',
 }
 
-const STATUS_COLORS = {
-  pending:     'bg-gray-200 text-gray-600',
-  in_progress: 'bg-blue-100 text-blue-700',
-  done:        'bg-green-100 text-green-700',
+const STATUS_COLORS: Record<string, { bg: string; fg: string }> = {
+  pending:     { bg: '#e5e7eb', fg: '#4b5563' },
+  in_progress: { bg: '#dbeafe', fg: '#1d4ed8' },
+  done:        { bg: '#dcfce7', fg: '#15803d' },
 }
 
 function getProgress(status) {
@@ -142,248 +151,293 @@ export default function TrackerPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-400 text-sm">Loading projects...</div>
-      </div>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 256 }}>
+        <Typography sx={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Loading projects...</Typography>
+      </Box>
     )
   }
 
   if (projects.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 gap-3">
-        <div className="text-gray-400 text-sm">No projects yet</div>
-        <a href="/wizard"
-          className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 256, gap: 1.5 }}>
+        <Typography sx={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>No projects yet</Typography>
+        <Button
+          component={Link}
+          href="/wizard"
+          variant="contained"
+          disableElevation
+          sx={{ bgcolor: 'var(--blue)', color: '#fff', borderRadius: '8px', textTransform: 'none', fontWeight: 600, '&:hover': { bgcolor: 'var(--blue-dark)' } }}
+        >
           Start a project →
-        </a>
-      </div>
+        </Button>
+      </Box>
     )
   }
 
   const progress = selected ? getProgress(selected.status) : 0
 
+  const labelSx = { fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', mb: 2 } as const
+
   return (
-    <div className="w-full">
+    <Box sx={{ width: '100%' }}>
 
       {/* Project selector */}
       {projects.length > 1 && (
-        <div className="flex gap-2 mb-5 flex-wrap">
+        <Box sx={{ display: 'flex', gap: 1, mb: 2.5, flexWrap: 'wrap' }}>
           {projects.map(p => (
-            <button
+            <Button
               key={p.id}
               onClick={() => setSelected(p)}
-              className={`px-4 py-1.5 text-sm rounded-lg border transition-colors
-                ${selected?.id === p.id
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white text-gray-600 border-gray-300 hover:border-blue-300'
-                }`}
+              disableElevation
+              variant={selected?.id === p.id ? 'contained' : 'outlined'}
+              sx={{
+                textTransform: 'none',
+                fontSize: '0.875rem',
+                borderRadius: '8px',
+                py: 0.5,
+                ...(selected?.id === p.id
+                  ? { bgcolor: 'var(--blue)', color: '#fff', '&:hover': { bgcolor: 'var(--blue-dark)' } }
+                  : { borderColor: 'var(--border)', color: 'var(--text-secondary)', '&:hover': { bgcolor: 'var(--bg-tertiary)', borderColor: 'var(--blue-light)' } }),
+              }}
             >
               {p.title}
-            </button>
+            </Button>
           ))}
-        </div>
+        </Box>
       )}
 
       {selected && (
-        <div>
+        <Box>
           {/* Project header */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-5">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h2 className="text-base font-bold text-gray-900">{selected.title}</h2>
-                <p className="text-sm text-gray-400 mt-0.5">{selected.description}</p>
-              </div>
-              <span className="text-xs font-semibold bg-blue-50 text-blue-700 px-3 py-1 rounded-full capitalize">
-                {selected.status}
-              </span>
-            </div>
+          <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5, mb: 2.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, mb: 2, flexWrap: 'wrap' }}>
+              <Box sx={{ minWidth: 0, flex: 1 }}>
+                <Typography sx={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>{selected.title}</Typography>
+                <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-muted)', mt: 0.25 }}>{selected.description}</Typography>
+              </Box>
+              <Chip
+                label={selected.status}
+                size="small"
+                sx={{ bgcolor: 'var(--blue-light)', color: 'var(--blue)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'capitalize', flexShrink: 0 }}
+              />
+            </Box>
 
             {/* Stage bar */}
-            <div className="flex items-start mb-4">
-              {STAGES.map((stage, i) => (
-                <div key={stage} className="flex items-center flex-1">
-                  <div className="flex flex-col items-center w-full">
-                    <button
+            <Box sx={{ display: 'flex', alignItems: 'stretch', mb: 2, flexWrap: 'wrap' }}>
+              {STAGES.map((stage, i) => {
+                const isCurrent = selected.status === stage
+                const isDone = STAGES.indexOf(selected.status) > i
+                return (
+                  <Box key={stage} sx={{ flex: 1, minWidth: 80 }}>
+                    <Button
                       onClick={() => updateStatus(stage)}
-                      className={`w-full py-1.5 text-xs font-semibold border-t-2 transition-all text-center
-                        ${selected.status === stage
-                          ? 'border-blue-500 text-blue-600'
-                          : STAGES.indexOf(selected.status) > i
-                            ? 'border-green-500 text-green-600'
-                            : 'border-gray-200 text-gray-400 hover:border-gray-400'
-                        }`}
+                      fullWidth
+                      disableElevation
+                      sx={{
+                        py: 0.75,
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        textTransform: 'none',
+                        borderRadius: 0,
+                        borderTop: '2px solid',
+                        minWidth: 0,
+                        ...(isCurrent
+                          ? { borderTopColor: 'var(--blue)', color: 'var(--blue)' }
+                          : isDone
+                            ? { borderTopColor: '#22c55e', color: '#16a34a' }
+                            : { borderTopColor: 'var(--border)', color: 'var(--text-muted)', '&:hover': { borderTopColor: 'var(--text-muted)' } }),
+                      }}
                     >
-                      {STAGES.indexOf(selected.status) > i ? '✓ ' : ''}
+                      {isDone ? '✓ ' : ''}
                       {STAGE_LABELS[stage]}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                    </Button>
+                  </Box>
+                )
+              })}
+            </Box>
 
             {/* Progress bar */}
-            <div>
-              <div className="flex justify-between text-xs text-gray-400 mb-1.5">
-                <span>Overall progress</span>
-                <span className="font-semibold text-gray-700">{progress}%</span>
-              </div>
-              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-blue-500 rounded-full transition-all duration-500"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-            </div>
-          </div>
+            <Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)', mb: 0.75 }}>
+                <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Overall progress</Typography>
+                <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{progress}%</Typography>
+              </Box>
+              <LinearProgress
+                variant="determinate"
+                value={progress}
+                sx={{
+                  height: 8,
+                  borderRadius: '9999px',
+                  bgcolor: 'var(--bg-tertiary)',
+                  '& .MuiLinearProgress-bar': { bgcolor: 'var(--blue)', borderRadius: '9999px' },
+                }}
+              />
+            </Box>
+          </Paper>
 
-          <div className="grid grid-cols-2 gap-5">
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2.5 }}>
 
             {/* Milestones */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-5">
-              <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
-                Milestones
-              </div>
+            <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5 }}>
+              <Typography sx={labelSx}>Milestones</Typography>
 
               {milestones.length === 0 ? (
-                <div className="text-sm text-gray-400 text-center py-4">
+                <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-muted)', textAlign: 'center', py: 2 }}>
                   No milestones yet
-                </div>
+                </Typography>
               ) : (
-                <div className="flex flex-col gap-1 mb-4">
-                  {milestones.map(m => (
-                    <div
-                      key={m.id}
-                      className="flex items-center gap-3 py-2.5 border-b border-gray-50 last:border-none"
-                    >
-                      <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0
-                        ${m.status === 'done'        ? 'bg-green-500' :
-                          m.status === 'in_progress' ? 'bg-blue-500'  : 'bg-gray-300'
-                        }`}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm text-gray-800 truncate">{m.title}</div>
-                        {m.due_date && (
-                          <div className="text-xs text-gray-400 mt-0.5">
-                            {new Date(m.due_date).toLocaleDateString('en-IN', {
-                              day: 'numeric', month: 'short', year: 'numeric'
-                            })}
-                          </div>
-                        )}
-                      </div>
-                      <select
-                        value={m.status}
-                        onChange={e => updateMilestone(m.id, e.target.value)}
-                        className={`text-xs px-2 py-1 rounded-full border-none outline-none cursor-pointer font-semibold
-                          ${STATUS_COLORS[m.status] || STATUS_COLORS.pending}`}
+                <Box sx={{ display: 'flex', flexDirection: 'column', mb: 2 }}>
+                  {milestones.map((m, i) => {
+                    const dot =
+                      m.status === 'done' ? '#22c55e' :
+                      m.status === 'in_progress' ? 'var(--blue)' : '#d1d5db'
+                    return (
+                      <Box
+                        key={m.id}
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1.5,
+                          py: 1.25,
+                          borderBottom: i === milestones.length - 1 ? 'none' : '1px solid var(--border-light)',
+                        }}
                       >
-                        <option value="pending">Pending</option>
-                        <option value="in_progress">In progress</option>
-                        <option value="done">Done</option>
-                      </select>
-                      <button
-                        onClick={() => deleteMilestone(m.id)}
-                        className="text-gray-300 hover:text-red-400 text-lg leading-none"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: dot, flexShrink: 0 }} />
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {m.title}
+                          </Typography>
+                          {m.due_date && (
+                            <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', mt: 0.25 }}>
+                              {new Date(m.due_date).toLocaleDateString('en-IN', {
+                                day: 'numeric', month: 'short', year: 'numeric'
+                              })}
+                            </Typography>
+                          )}
+                        </Box>
+                        <TextField
+                          select
+                          value={m.status}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateMilestone(m.id, e.target.value)}
+                          size="small"
+                          sx={{
+                            flexShrink: 0,
+                            '& .MuiOutlinedInput-root': {
+                              fontSize: '0.7rem',
+                              fontWeight: 600,
+                              borderRadius: '9999px',
+                              bgcolor: (STATUS_COLORS[m.status] || STATUS_COLORS.pending).bg,
+                              color: (STATUS_COLORS[m.status] || STATUS_COLORS.pending).fg,
+                              '& fieldset': { border: 'none' },
+                            },
+                            '& .MuiSelect-select': { py: 0.5, pl: 1.25 },
+                          }}
+                        >
+                          <MenuItem value="pending">Pending</MenuItem>
+                          <MenuItem value="in_progress">In progress</MenuItem>
+                          <MenuItem value="done">Done</MenuItem>
+                        </TextField>
+                        <Button
+                          onClick={() => deleteMilestone(m.id)}
+                          sx={{ minWidth: 'auto', p: 0.5, color: 'var(--text-muted)', fontSize: '1.125rem', lineHeight: 1, flexShrink: 0, '&:hover': { color: '#f87171', bgcolor: 'transparent' } }}
+                        >
+                          ×
+                        </Button>
+                      </Box>
+                    )
+                  })}
+                </Box>
               )}
 
               {/* Add milestone */}
-              <div className="border-t border-gray-100 pt-3 flex flex-col gap-2">
-                <input
+              <Box sx={{ borderTop: '1px solid var(--border)', pt: 1.5, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <TextField
                   value={newTitle}
-                  onChange={e => setNewTitle(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && addMilestone()}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTitle(e.target.value)}
+                  onKeyDown={(e: React.KeyboardEvent) => e.key === 'Enter' && addMilestone()}
                   placeholder="Add new milestone..."
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-blue-500"
+                  size="small"
+                  fullWidth
                 />
-                <div className="flex gap-2">
-                  <input
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <TextField
                     type="date"
                     value={newDate}
-                    onChange={e => setNewDate(e.target.value)}
-                    className="flex-1 px-3 py-1.5 text-xs border border-gray-200 rounded-lg outline-none focus:border-blue-500"
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewDate(e.target.value)}
+                    size="small"
+                    sx={{ flex: 1 }}
                   />
-                  <button
+                  <Button
                     onClick={addMilestone}
                     disabled={adding || !newTitle.trim()}
-                    className="px-4 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                    variant="contained"
+                    disableElevation
+                    sx={{ bgcolor: 'var(--blue)', color: '#fff', fontSize: '0.75rem', fontWeight: 600, borderRadius: '8px', textTransform: 'none', whiteSpace: 'nowrap', '&:hover': { bgcolor: 'var(--blue-dark)' } }}
                   >
                     {adding ? '...' : '+ Add'}
-                  </button>
-                </div>
-              </div>
-            </div>
+                  </Button>
+                </Box>
+              </Box>
+            </Paper>
 
             {/* Contract & details */}
-            <div className="flex flex-col gap-4">
-              <div className="bg-white border border-gray-200 rounded-2xl p-5">
-                <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
-                  Project details
-                </div>
-                <div className="flex flex-col gap-2.5 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Project ID</span>
-                    <span className="font-semibold">#{selected.id}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Status</span>
-                    <span className="font-semibold capitalize">{selected.status}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Budget</span>
-                    <span className="font-semibold">
-                      {selected.budget_min
-                        ? `₹${selected.budget_min.toLocaleString('en-IN')}`
-                        : 'Not set'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Timeline</span>
-                    <span className="font-semibold">
-                      {selected.timeline_weeks
-                        ? `${selected.timeline_weeks} weeks`
-                        : 'Not set'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Started</span>
-                    <span className="font-semibold">
-                      {new Date(selected.created_at).toLocaleDateString('en-IN', {
-                        day: 'numeric', month: 'short', year: 'numeric'
-                      })}
-                    </span>
-                  </div>
-                </div>
-              </div>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5 }}>
+                <Typography sx={{ ...labelSx, mb: 1.5 }}>Project details</Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+                  {[
+                    { k: 'Project ID', v: `#${selected.id}` },
+                    { k: 'Status', v: selected.status, cap: true },
+                    { k: 'Budget', v: selected.budget_min ? `₹${selected.budget_min.toLocaleString('en-IN')}` : 'Not set' },
+                    { k: 'Timeline', v: selected.timeline_weeks ? `${selected.timeline_weeks} weeks` : 'Not set' },
+                    { k: 'Started', v: new Date(selected.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) },
+                  ].map(row => (
+                    <Box key={row.k} sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
+                      <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>{row.k}</Typography>
+                      <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', textTransform: row.cap ? 'capitalize' : 'none', textAlign: 'right', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {row.v}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Paper>
 
-              <div className="bg-white border border-gray-200 rounded-2xl p-5">
-                <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
-                  Quick actions
-                </div>
-                <div className="flex flex-col gap-2">
-                  <a href="/proposal"
-                    className="w-full py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 text-center transition-colors">
-                    View proposal
-                  </a>
-                  <a href="/chatbot"
-                    className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 text-center transition-colors">
-                    Ask AI assistant
-                  </a>
-                  <a href="/collab"
-                    className="w-full py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 text-center transition-colors">
-                    Team collaboration
-                  </a>
-                </div>
-              </div>
-            </div>
+              <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5 }}>
+                <Typography sx={{ ...labelSx, mb: 1.5 }}>Quick actions</Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  {[
+                    { href: '/proposal', label: 'View proposal', primary: false },
+                    { href: '/chatbot', label: 'Ask AI assistant', primary: true },
+                    { href: '/collab', label: 'Team collaboration', primary: false },
+                  ].map(link => (
+                    <Button
+                      key={link.href}
+                      component={Link}
+                      href={link.href}
+                      fullWidth
+                      variant={link.primary ? 'contained' : 'outlined'}
+                      disableElevation
+                      sx={{
+                        py: 1,
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        fontSize: '0.875rem',
+                        borderRadius: '8px',
+                        ...(link.primary
+                          ? { bgcolor: 'var(--blue)', color: '#fff', '&:hover': { bgcolor: 'var(--blue-dark)' } }
+                          : { borderColor: 'var(--border)', color: 'var(--text-secondary)', '&:hover': { bgcolor: 'var(--bg-tertiary)', borderColor: 'var(--border)' } }),
+                      }}
+                    >
+                      {link.label}
+                    </Button>
+                  ))}
+                </Box>
+              </Paper>
+            </Box>
 
-          </div>
-        </div>
+          </Box>
+        </Box>
       )}
-    </div>
+    </Box>
   )
 }

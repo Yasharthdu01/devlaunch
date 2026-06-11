@@ -1,6 +1,14 @@
 'use client'
 import API_URL from '@/lib/config'
 import { useState } from 'react'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Paper from '@mui/material/Paper'
+import Button from '@mui/material/Button'
+import Chip from '@mui/material/Chip'
+import TextField from '@mui/material/TextField'
+import MenuItem from '@mui/material/MenuItem'
+import Alert from '@mui/material/Alert'
 
 interface InstagramPost {
   day:      string
@@ -23,6 +31,10 @@ interface MarketingData {
   email_preview:    string
 }
 
+const INDUSTRIES = ['Travel & Hospitality', 'E-commerce', 'Healthcare', 'EdTech', 'SaaS', 'Food & Restaurant', 'Real Estate']
+
+const labelSx = { fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' } as const
+
 export default function MarketingPage() {
   const [form, setForm] = useState({
     business_type: '',
@@ -36,7 +48,7 @@ export default function MarketingPage() {
   const token = typeof window !== 'undefined'
     ? localStorage.getItem('token') : ''
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
@@ -67,168 +79,151 @@ export default function MarketingPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto w-full">
+    <Box sx={{ maxWidth: 768, mx: 'auto', width: '100%' }}>
 
       {/* Input card */}
-      <div className="bg-[var(--bg-primary)] dark:bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-6 mb-6">
-        <h1 className="text-lg font-bold text-[var(--text-primary)] mb-1">Marketing AI</h1>
-        <p className="text-sm text-[var(--text-muted)] mb-5">
+      <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 3, mb: 3 }}>
+        <Typography component="h1" sx={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--text-primary)', mb: 0.5 }}>
+          Marketing AI
+        </Typography>
+        <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-muted)', mb: 2.5 }}>
           Generate SEO keywords, social posts and ad copy for your business
-        </p>
+        </Typography>
 
-        <div className="grid grid-cols-3 gap-3 mb-4">
-          <div>
-            <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
-              Business name
-            </label>
-            <input
-              name="business_type"
-              value={form.business_type}
-              onChange={handleChange}
-              placeholder="TravelNest Agency"
-              className="mt-1 w-full px-3 py-2 text-sm border border-[var(--border)] bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-lg outline-none focus:border-[var(--blue)]"
-            />
-          </div>
-          <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Location
-            </label>
-            <input
-              name="location"
-              value={form.location}
-              onChange={handleChange}
-              placeholder="Varanasi, UP"
-              className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500"
-            />
-          </div>
-          <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Industry
-            </label>
-            <select
-              name="industry"
-              value={form.industry}
-              onChange={handleChange}
-              className="mt-1 w-full px-3 py-2 text-sm border border-[var(--border)] bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-lg outline-none focus:border-[var(--blue)]"
-            >
-              <option value="">Select...</option>
-              <option>Travel & Hospitality</option>
-              <option>E-commerce</option>
-              <option>Healthcare</option>
-              <option>EdTech</option>
-              <option>SaaS</option>
-              <option>Food & Restaurant</option>
-              <option>Real Estate</option>
-            </select>
-          </div>
-        </div>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 1.5, mb: 2 }}>
+          <TextField
+            label="Business name"
+            name="business_type"
+            value={form.business_type}
+            onChange={handleChange}
+            placeholder="TravelNest Agency"
+            size="small"
+            fullWidth
+          />
+          <TextField
+            label="Location"
+            name="location"
+            value={form.location}
+            onChange={handleChange}
+            placeholder="Varanasi, UP"
+            size="small"
+            fullWidth
+          />
+          <TextField
+            select
+            label="Industry"
+            name="industry"
+            value={form.industry}
+            onChange={handleChange}
+            size="small"
+            fullWidth
+          >
+            <MenuItem value="">Select...</MenuItem>
+            {INDUSTRIES.map(i => <MenuItem key={i} value={i}>{i}</MenuItem>)}
+          </TextField>
+        </Box>
 
         {error && (
-          <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm rounded-lg px-4 py-2 mb-3">
+          <Alert severity="error" sx={{ mb: 1.5, borderRadius: '8px' }}>
             {error}
-          </div>
+          </Alert>
         )}
 
-        <button
+        <Button
           onClick={generate}
           disabled={loading}
-          className="w-full py-2.5 bg-[var(--blue)] text-white text-sm font-semibold rounded-lg hover:opacity-90 disabled:opacity-50 transition-colors cursor-pointer"
+          variant="contained"
+          disableElevation
+          fullWidth
+          sx={{
+            py: 1.25,
+            bgcolor: 'var(--blue)',
+            color: '#fff',
+            fontWeight: 600,
+            fontSize: '0.875rem',
+            borderRadius: '8px',
+            textTransform: 'none',
+            '&:hover': { bgcolor: 'var(--blue-dark)' },
+          }}
         >
           {loading ? '✦ Generating with AI...' : '✦ Generate marketing content'}
-        </button>
-      </div>
+        </Button>
+      </Paper>
 
       {/* Results */}
       {data && (
-        <div className="flex flex-col gap-5">
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
 
           {/* SEO Keywords */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                SEO keywords
-              </div>
-              <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">
-                High intent
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-2">
+          <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, gap: 1, flexWrap: 'wrap' }}>
+              <Typography sx={labelSx}>SEO keywords</Typography>
+              <Chip label="High intent" size="small" sx={{ fontSize: '0.75rem', fontWeight: 600, bgcolor: '#dcfce7', color: '#15803d' }} />
+            </Box>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
               {data.seo_keywords.map((kw, i) => (
-                <span
+                <Chip
                   key={i}
-                  className="text-sm px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full font-medium border border-blue-100"
-                >
-                  {kw}
-                </span>
+                  label={kw}
+                  sx={{ fontSize: '0.875rem', fontWeight: 500, bgcolor: '#eff6ff', color: '#1d4ed8', border: '1px solid #dbeafe' }}
+                />
               ))}
-            </div>
-          </div>
+            </Box>
+          </Paper>
 
           {/* Instagram posts */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-5">
-            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
-              Instagram content plan (7-day)
-            </div>
-            <div className="flex flex-col gap-3">
+          <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5 }}>
+            <Typography sx={{ ...labelSx, mb: 2 }}>Instagram content plan (7-day)</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
               {data.instagram_posts.map((post, i) => (
-                <div key={i} className="bg-gray-50 rounded-xl p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs font-bold text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full">
-                      {post.day}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-800 leading-relaxed mb-2">
+                <Box key={i} sx={{ bgcolor: 'var(--bg-tertiary)', borderRadius: '12px', p: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <Chip label={post.day} size="small" sx={{ fontSize: '0.7rem', fontWeight: 700, color: '#9333ea', bgcolor: '#f3e8ff' }} />
+                  </Box>
+                  <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-primary)', lineHeight: 1.6, mb: 1 }}>
                     {post.caption}
-                  </p>
-                  <p className="text-xs text-blue-500">{post.hashtags}</p>
-                </div>
+                  </Typography>
+                  <Typography sx={{ fontSize: '0.75rem', color: '#3b82f6' }}>{post.hashtags}</Typography>
+                </Box>
               ))}
-            </div>
-          </div>
+            </Box>
+          </Paper>
 
           {/* Google Ads */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                Google Ads copy
-              </div>
-              <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">
-                High CTR format
-              </span>
-            </div>
-            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
-              <div className="text-xs text-green-700 mb-1 font-semibold">
+          <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, gap: 1, flexWrap: 'wrap' }}>
+              <Typography sx={labelSx}>Google Ads copy</Typography>
+              <Chip label="High CTR format" size="small" sx={{ fontSize: '0.75rem', fontWeight: 600, bgcolor: '#fef3c7', color: '#b45309' }} />
+            </Box>
+            <Box sx={{ bgcolor: '#eff6ff', border: '1px solid #dbeafe', borderRadius: '12px', p: 2 }}>
+              <Typography sx={{ fontSize: '0.75rem', color: '#15803d', mb: 0.5, fontWeight: 600 }}>
                 {form.business_type || 'Your Business'} · Ad
-              </div>
-              <div className="text-blue-700 font-bold text-sm mb-1">
+              </Typography>
+              <Typography sx={{ color: '#1d4ed8', fontWeight: 700, fontSize: '0.875rem', mb: 0.5 }}>
                 {data.google_ads.headline1} — {data.google_ads.headline2}
-              </div>
-              <div className="text-sm text-gray-600 mb-3">
+              </Typography>
+              <Typography sx={{ fontSize: '0.875rem', color: '#4b5563', mb: 1.5 }}>
                 {data.google_ads.description}
-              </div>
-              <span className="text-xs bg-blue-600 text-white px-3 py-1 rounded-full font-semibold">
-                {data.google_ads.cta}
-              </span>
-            </div>
-          </div>
+              </Typography>
+              <Chip label={data.google_ads.cta} size="small" sx={{ fontSize: '0.75rem', fontWeight: 600, bgcolor: '#2563eb', color: '#fff' }} />
+            </Box>
+          </Paper>
 
           {/* Email marketing */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-5">
-            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
-              Email marketing
-            </div>
-            <div className="bg-gray-50 rounded-xl p-4">
-              <div className="text-xs text-gray-400 mb-1">Subject line</div>
-              <div className="text-sm font-semibold text-gray-800 mb-3">
+          <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5 }}>
+            <Typography sx={{ ...labelSx, mb: 2 }}>Email marketing</Typography>
+            <Box sx={{ bgcolor: 'var(--bg-tertiary)', borderRadius: '12px', p: 2 }}>
+              <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', mb: 0.5 }}>Subject line</Typography>
+              <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', mb: 1.5 }}>
                 {data.email_subject}
-              </div>
-              <div className="text-xs text-gray-400 mb-1">Preview text</div>
-              <div className="text-sm text-gray-600">{data.email_preview}</div>
-            </div>
-          </div>
+              </Typography>
+              <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', mb: 0.5 }}>Preview text</Typography>
+              <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{data.email_preview}</Typography>
+            </Box>
+          </Paper>
 
-        </div>
+        </Box>
       )}
-    </div>
+    </Box>
   )
 }

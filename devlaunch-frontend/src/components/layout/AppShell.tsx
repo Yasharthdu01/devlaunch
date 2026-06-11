@@ -1,5 +1,6 @@
 'use client'
 import { usePathname } from 'next/navigation'
+import Box from '@mui/material/Box'
 import Sidebar from './Sidebar'
 import Topbar from './Topbar'
 
@@ -12,23 +13,19 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const isPublicPage = PUBLIC_PAGES.includes(pathname) || pathname === '/'
   const isAuthPage   = AUTH_PAGES.includes(pathname)
 
-  if (isAuthPage) {
-    return <>{children}</>
-  }
-
-  if (isPublicPage) {
+  if (isAuthPage || isPublicPage) {
     return <>{children}</>
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[var(--bg-primary)]">
+    <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden', bgcolor: 'var(--bg-primary)' }}>
       <Sidebar />
-      <div className="flex flex-col flex-1 min-w-0 bg-[var(--bg-secondary)]">
+      <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, bgcolor: 'var(--bg-secondary)' }}>
         <Topbar />
-        <main className="flex-1 overflow-y-auto p-6">
+        <Box component="main" sx={{ flex: 1, overflowY: 'auto', p: 3 }}>
           {children}
-        </main>
-      </div>
-    </div>
+        </Box>
+      </Box>
+    </Box>
   )
 }

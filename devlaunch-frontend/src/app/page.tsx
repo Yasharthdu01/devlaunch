@@ -3,6 +3,12 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useTheme } from 'next-themes'
 import { Sun, Moon, Menu, X, ArrowRight, CheckCircle, Star, ChevronDown } from 'lucide-react'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Paper from '@mui/material/Paper'
+import Button from '@mui/material/Button'
+import Chip from '@mui/material/Chip'
+import Avatar from '@mui/material/Avatar'
 
 // ── Nav ────────────────────────────────────────────────
 function Navbar() {
@@ -30,133 +36,342 @@ function Navbar() {
   ]
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300
-      ${scrolled
-        ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm border-b border-gray-100 dark:border-gray-800'
-        : 'bg-transparent'
-      }`}>
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
+    <Box
+      component="nav"
+      sx={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 50,
+        transition: 'all 0.3s',
+        ...(scrolled
+          ? {
+              bgcolor: 'var(--bg-primary)',
+              backdropFilter: 'blur(12px)',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+              borderBottom: '1px solid var(--border)',
+            }
+          : { bgcolor: 'transparent' }),
+      }}
+    >
+      <Box sx={{ maxWidth: 1280, mx: 'auto', px: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64 }}>
 
         {/* Logo */}
-        <Link href="/" className="text-xl font-black text-blue-600 dark:text-blue-400 tracking-tight">
-          Dev<span className="text-gray-900 dark:text-white">Launch</span>
-        </Link>
+        <Typography
+          component={Link}
+          href="/"
+          sx={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--blue)', letterSpacing: '-0.02em', textDecoration: 'none' }}
+        >
+          Dev<Box component="span" sx={{ color: 'var(--text-primary)' }}>Launch</Box>
+        </Typography>
 
         {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-8">
+        <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 4 }}>
           {navLinks.map(l => (
-            <a key={l.href} href={l.href}
-              className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+            <Box
+              key={l.href}
+              component="a"
+              href={l.href}
+              sx={{
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                color: 'var(--text-secondary)',
+                textDecoration: 'none',
+                transition: 'color 0.2s',
+                '&:hover': { color: 'var(--blue)' },
+              }}
+            >
               {l.label}
-            </a>
+            </Box>
           ))}
-        </div>
+        </Box>
 
         {/* Right actions */}
-        <div className="flex items-center gap-3">
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           {mounted && (
-            <button
+            <Button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="w-9 h-9 rounded-xl flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-yellow-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+              disableElevation
+              sx={{
+                minWidth: 0,
+                width: 36,
+                height: 36,
+                p: 0,
+                borderRadius: '12px',
+                bgcolor: 'var(--bg-tertiary)',
+                color: theme === 'dark' ? '#facc15' : 'var(--text-secondary)',
+                '&:hover': { bgcolor: 'var(--border)' },
+              }}
+            >
               {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-            </button>
+            </Button>
           )}
-          <Link href="/login">
-            <button className="hidden md:block text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-              Sign in
-            </button>
-          </Link>
-          <Link href="/register">
-            <button className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors">
-              Get started free
-            </button>
-          </Link>
-          <button
+          <Button
+            component={Link}
+            href="/login"
+            disableElevation
+            sx={{
+              display: { xs: 'none', md: 'block' },
+              minWidth: 0,
+              p: 0,
+              textTransform: 'none',
+              fontSize: '0.875rem',
+              fontWeight: 600,
+              color: 'var(--text-secondary)',
+              '&:hover': { color: 'var(--blue)', bgcolor: 'transparent' },
+            }}
+          >
+            Sign in
+          </Button>
+          <Button
+            component={Link}
+            href="/register"
+            disableElevation
+            variant="contained"
+            sx={{
+              bgcolor: 'var(--blue)',
+              color: '#fff',
+              fontSize: '0.875rem',
+              fontWeight: 600,
+              px: 2,
+              py: 1,
+              borderRadius: '12px',
+              textTransform: 'none',
+              '&:hover': { bgcolor: 'var(--blue-dark)' },
+            }}
+          >
+            Get started free
+          </Button>
+          <Button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden w-9 h-9 flex items-center justify-center text-gray-600 dark:text-gray-300">
+            disableElevation
+            sx={{
+              display: { xs: 'flex', md: 'none' },
+              minWidth: 0,
+              width: 36,
+              height: 36,
+              p: 0,
+              color: 'var(--text-secondary)',
+            }}
+          >
             {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-        </div>
-      </div>
+          </Button>
+        </Box>
+      </Box>
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 px-6 py-4">
+        <Box
+          sx={{
+            display: { xs: 'block', md: 'none' },
+            bgcolor: 'var(--bg-primary)',
+            borderTop: '1px solid var(--border)',
+            px: 3,
+            py: 2,
+          }}
+        >
           {navLinks.map(l => (
-            <a key={l.href} href={l.href}
+            <Box
+              key={l.href}
+              component="a"
+              href={l.href}
               onClick={() => setMobileOpen(false)}
-              className="block py-3 text-sm font-medium text-gray-600 dark:text-gray-300 border-b border-gray-50 dark:border-gray-800">
+              sx={{
+                display: 'block',
+                py: 1.5,
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                color: 'var(--text-secondary)',
+                textDecoration: 'none',
+                borderBottom: '1px solid var(--border-light)',
+              }}
+            >
               {l.label}
-            </a>
+            </Box>
           ))}
-          <div className="flex gap-3 pt-4">
-            <Link href="/login" className="flex-1">
-              <button className="w-full py-2 border border-gray-300 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Sign in
-              </button>
-            </Link>
-            <Link href="/register" className="flex-1">
-              <button className="w-full py-2 bg-blue-600 text-white rounded-xl text-sm font-semibold">
-                Get started
-              </button>
-            </Link>
-          </div>
-        </div>
+          <Box sx={{ display: 'flex', gap: 1.5, pt: 2 }}>
+            <Button
+              component={Link}
+              href="/login"
+              fullWidth
+              variant="outlined"
+              disableElevation
+              sx={{
+                flex: 1,
+                py: 1,
+                borderColor: 'var(--border)',
+                borderRadius: '12px',
+                textTransform: 'none',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                color: 'var(--text-secondary)',
+              }}
+            >
+              Sign in
+            </Button>
+            <Button
+              component={Link}
+              href="/register"
+              fullWidth
+              variant="contained"
+              disableElevation
+              sx={{
+                flex: 1,
+                py: 1,
+                bgcolor: 'var(--blue)',
+                color: '#fff',
+                borderRadius: '12px',
+                textTransform: 'none',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                '&:hover': { bgcolor: 'var(--blue-dark)' },
+              }}
+            >
+              Get started
+            </Button>
+          </Box>
+        </Box>
       )}
-    </nav>
+    </Box>
   )
 }
 
 // ── Hero ───────────────────────────────────────────────
 function Hero() {
   return (
-    <section className="pt-24 pb-20 px-6 bg-gradient-to-b from-blue-50/50 via-white to-white dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
-      <div className="max-w-5xl mx-auto text-center">
+    <Box
+      component="section"
+      sx={{
+        pt: 12,
+        pb: { xs: 8, md: 10 },
+        px: 3,
+        bgcolor: 'var(--bg-primary)',
+      }}
+    >
+      <Box sx={{ maxWidth: 1024, mx: 'auto', textAlign: 'center' }}>
 
-        <div className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 text-xs font-bold px-4 py-2 rounded-full mb-8 border border-blue-100 dark:border-blue-900">
-          🚀 India's AI-powered software delivery platform
-        </div>
+        <Chip
+          label="🚀 India's AI-powered software delivery platform"
+          sx={{
+            mb: 4,
+            bgcolor: 'var(--bg-tertiary)',
+            color: 'var(--blue)',
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            border: '1px solid var(--border)',
+            borderRadius: '9999px',
+            height: 'auto',
+            py: 1,
+            '& .MuiChip-label': { px: 2 },
+          }}
+        />
 
-        <h1 className="text-5xl md:text-6xl font-black text-gray-900 dark:text-white leading-tight tracking-tight mb-6">
+        <Typography
+          component="h1"
+          sx={{
+            fontSize: { xs: '2.5rem', md: '3.75rem' },
+            fontWeight: 900,
+            color: 'var(--text-primary)',
+            lineHeight: 1.1,
+            letterSpacing: '-0.02em',
+            mb: 3,
+          }}
+        >
           We Build Digital Products<br />
-          <span className="text-blue-600 dark:text-blue-400">That Grow Your Business</span>
-        </h1>
+          <Box component="span" sx={{ color: 'var(--blue)' }}>That Grow Your Business</Box>
+        </Typography>
 
-        <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+        <Typography
+          sx={{
+            fontSize: '1.125rem',
+            color: 'var(--text-secondary)',
+            maxWidth: 672,
+            mx: 'auto',
+            mb: 5,
+            lineHeight: 1.7,
+          }}
+        >
           From dental clinics to real estate — we deliver full-stack web and mobile applications
           with AI automation in 6-10 weeks. Onboard yourself in 10 minutes with our AI wizard.
-        </p>
+        </Typography>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-          <Link href="/register">
-            <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-4 rounded-2xl text-base transition-all hover:shadow-lg hover:shadow-blue-200 dark:hover:shadow-blue-900">
-              Start project wizard
-              <ArrowRight size={18} />
-            </button>
-          </Link>
-          <a href="#portfolio">
-            <button className="flex items-center gap-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold px-8 py-4 rounded-2xl text-base border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all">
-              View our work
-            </button>
-          </a>
-        </div>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, justifyContent: 'center', mb: 8 }}>
+          <Button
+            component={Link}
+            href="/register"
+            disableElevation
+            variant="contained"
+            endIcon={<ArrowRight size={18} />}
+            sx={{
+              bgcolor: 'var(--blue)',
+              color: '#fff',
+              fontWeight: 700,
+              px: 4,
+              py: 1.75,
+              borderRadius: '16px',
+              fontSize: '1rem',
+              textTransform: 'none',
+              '&:hover': { bgcolor: 'var(--blue-dark)' },
+            }}
+          >
+            Start project wizard
+          </Button>
+          <Button
+            component="a"
+            href="#portfolio"
+            disableElevation
+            variant="outlined"
+            sx={{
+              bgcolor: 'var(--bg-secondary)',
+              color: 'var(--text-secondary)',
+              fontWeight: 700,
+              px: 4,
+              py: 1.75,
+              borderRadius: '16px',
+              fontSize: '1rem',
+              textTransform: 'none',
+              borderColor: 'var(--border)',
+              '&:hover': { borderColor: 'var(--blue)', bgcolor: 'var(--bg-secondary)' },
+            }}
+          >
+            View our work
+          </Button>
+        </Box>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: 'repeat(2,1fr)', md: 'repeat(4,1fr)' },
+            gap: 3,
+            maxWidth: 768,
+            mx: 'auto',
+          }}
+        >
           {[
             { num: '48+',    label: 'Projects delivered' },
             { num: '40+',    label: 'Happy clients'       },
             { num: '6-10',   label: 'Weeks delivery'      },
             { num: '4.9★',   label: 'Client rating'       },
           ].map(s => (
-            <div key={s.label} className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-              <div className="text-3xl font-black text-blue-600 dark:text-blue-400">{s.num}</div>
-              <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">{s.label}</div>
-            </div>
+            <Paper
+              key={s.label}
+              elevation={0}
+              sx={{
+                bgcolor: 'var(--bg-secondary)',
+                borderRadius: '16px',
+                p: 2,
+                border: '1px solid var(--border)',
+              }}
+            >
+              <Typography sx={{ fontSize: '1.875rem', fontWeight: 900, color: 'var(--blue)' }}>{s.num}</Typography>
+              <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', mt: 0.5 }}>{s.label}</Typography>
+            </Paper>
           ))}
-        </div>
-      </div>
-    </section>
+        </Box>
+      </Box>
+    </Box>
   )
 }
 
@@ -164,57 +379,74 @@ function Hero() {
 function TechStrip() {
   const techs = ['⚛️ React / Next.js', '🟢 Node.js', '🐘 PostgreSQL', '📱 React Native', '☁️ AWS / Vercel', '🤖 AI / LLM', '🔥 Firebase', '🐳 Docker']
   return (
-    <div className="bg-gray-50 dark:bg-gray-800/50 border-y border-gray-100 dark:border-gray-800 py-4">
-      <div className="max-w-7xl mx-auto px-6 flex flex-wrap gap-6 justify-center">
+    <Box sx={{ bgcolor: 'var(--bg-secondary)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', py: 2 }}>
+      <Box sx={{ maxWidth: 1280, mx: 'auto', px: 3, display: 'flex', flexWrap: 'wrap', gap: 3, justifyContent: 'center' }}>
         {techs.map(t => (
-          <span key={t} className="text-sm font-semibold text-gray-400 dark:text-gray-500">{t}</span>
+          <Typography key={t} sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-muted)' }}>{t}</Typography>
         ))}
-      </div>
-    </div>
+      </Box>
+    </Box>
   )
 }
 
 // ── Services ─────────────────────────────────────────
 function Services() {
   const services = [
-    { icon: '🌐', title: 'Web application',      desc: 'Custom portals, dashboards, booking systems and management platforms.',         tags: ['Next.js', 'Node.js', 'PostgreSQL'], color: 'bg-blue-50 dark:bg-blue-950/50' },
-    { icon: '📱', title: 'Mobile application',   desc: 'iOS and Android apps with offline support and push notifications.',            tags: ['React Native', 'Flutter', 'Firebase'], color: 'bg-green-50 dark:bg-green-950/50' },
-    { icon: '🤖', title: 'AI automation',         desc: 'Automate tasks, add AI chatbots, smart recommendations and workflows.',       tags: ['LLM', 'LangChain', 'Ollama'],          color: 'bg-purple-50 dark:bg-purple-950/50' },
-    { icon: '🛒', title: 'E-commerce platform',   desc: 'Multi-vendor stores, inventory, payment gateway and order tracking.',         tags: ['Razorpay', 'Stripe', 'Admin panel'],   color: 'bg-amber-50 dark:bg-amber-950/50' },
-    { icon: '📣', title: 'Digital marketing',     desc: 'SEO optimization, Google Ads, social media and landing pages.',               tags: ['SEO', 'Google Ads', 'Meta Ads'],       color: 'bg-pink-50 dark:bg-pink-950/50' },
-    { icon: '🔧', title: 'Maintenance & support', desc: 'Monthly plans, bug fixes, feature updates and 24/7 technical support.',       tags: ['₹3,000/mo', 'Support', 'Updates'],    color: 'bg-teal-50 dark:bg-teal-950/50' },
+    { icon: '🌐', title: 'Web application',      desc: 'Custom portals, dashboards, booking systems and management platforms.',         tags: ['Next.js', 'Node.js', 'PostgreSQL'],   color: '#eff6ff' },
+    { icon: '📱', title: 'Mobile application',   desc: 'iOS and Android apps with offline support and push notifications.',            tags: ['React Native', 'Flutter', 'Firebase'], color: '#f0fdf4' },
+    { icon: '🤖', title: 'AI automation',         desc: 'Automate tasks, add AI chatbots, smart recommendations and workflows.',       tags: ['LLM', 'LangChain', 'Ollama'],          color: '#faf5ff' },
+    { icon: '🛒', title: 'E-commerce platform',   desc: 'Multi-vendor stores, inventory, payment gateway and order tracking.',         tags: ['Razorpay', 'Stripe', 'Admin panel'],   color: '#fffbeb' },
+    { icon: '📣', title: 'Digital marketing',     desc: 'SEO optimization, Google Ads, social media and landing pages.',               tags: ['SEO', 'Google Ads', 'Meta Ads'],       color: '#fdf2f8' },
+    { icon: '🔧', title: 'Maintenance & support', desc: 'Monthly plans, bug fixes, feature updates and 24/7 technical support.',       tags: ['₹3,000/mo', 'Support', 'Updates'],     color: '#f0fdfa' },
   ]
 
   return (
-    <section id="services" className="py-20 px-6 bg-white dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-14">
-          <div>
-            <div className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-3">What we build</div>
-            <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">End-to-end software<br />delivery services</h2>
-          </div>
-          <p className="text-gray-400 dark:text-gray-500 max-w-sm mt-4 md:mt-0 leading-relaxed text-sm">
+    <Box component="section" id="services" sx={{ py: { xs: 8, md: 10 }, px: 3, bgcolor: 'var(--bg-primary)' }}>
+      <Box sx={{ maxWidth: 1280, mx: 'auto' }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: { md: 'flex-end' }, justifyContent: 'space-between', mb: 7 }}>
+          <Box>
+            <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--blue)', textTransform: 'uppercase', letterSpacing: '0.1em', mb: 1.5 }}>What we build</Typography>
+            <Typography component="h2" sx={{ fontSize: '2.25rem', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em', lineHeight: 1.15 }}>End-to-end software<br />delivery services</Typography>
+          </Box>
+          <Typography sx={{ color: 'var(--text-muted)', maxWidth: 384, mt: { xs: 2, md: 0 }, lineHeight: 1.7, fontSize: '0.875rem' }}>
             We handle everything — design, development, deployment and maintenance.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2,1fr)', lg: 'repeat(3,1fr)' }, gap: 2.5 }}>
           {services.map(s => (
-            <div key={s.title} className="group bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 hover:border-blue-200 dark:hover:border-blue-700 hover:shadow-lg transition-all cursor-pointer">
-              <div className={`w-12 h-12 ${s.color} rounded-2xl flex items-center justify-center text-2xl mb-5`}>
+            <Paper
+              key={s.title}
+              elevation={0}
+              sx={{
+                bgcolor: 'var(--bg-secondary)',
+                border: '1px solid var(--border)',
+                borderRadius: '16px',
+                p: 3,
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                '&:hover': { borderColor: 'var(--blue)', boxShadow: '0 10px 15px rgba(0,0,0,0.08)' },
+              }}
+            >
+              <Box sx={{ width: 48, height: 48, bgcolor: s.color, borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', mb: 2.5 }}>
                 {s.icon}
-              </div>
-              <h3 className="text-base font-bold text-gray-900 dark:text-white mb-2">{s.title}</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-4">{s.desc}</p>
-              <div className="flex flex-wrap gap-2">
+              </Box>
+              <Typography component="h3" sx={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', mb: 1 }}>{s.title}</Typography>
+              <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.7, mb: 2 }}>{s.desc}</Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                 {s.tags.map(t => (
-                  <span key={t} className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-lg">{t}</span>
+                  <Chip
+                    key={t}
+                    label={t}
+                    size="small"
+                    sx={{ bgcolor: 'var(--bg-tertiary)', color: 'var(--text-muted)', fontSize: '0.75rem', borderRadius: '8px' }}
+                  />
                 ))}
-              </div>
-            </div>
+              </Box>
+            </Paper>
           ))}
-        </div>
-      </div>
-    </section>
+        </Box>
+      </Box>
+    </Box>
   )
 }
 
@@ -232,135 +464,177 @@ function Industries() {
   ]
 
   return (
-    <section id="industries" className="py-20 px-6 bg-gray-50 dark:bg-gray-800/30">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-14">
-          <div className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-3">Industries we serve</div>
-          <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">Built for every industry</h2>
-          <p className="text-gray-400 dark:text-gray-500 mt-4 max-w-xl mx-auto text-sm leading-relaxed">
+    <Box component="section" id="industries" sx={{ py: { xs: 8, md: 10 }, px: 3, bgcolor: 'var(--bg-secondary)' }}>
+      <Box sx={{ maxWidth: 1280, mx: 'auto' }}>
+        <Box sx={{ textAlign: 'center', mb: 7 }}>
+          <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--blue)', textTransform: 'uppercase', letterSpacing: '0.1em', mb: 1.5 }}>Industries we serve</Typography>
+          <Typography component="h2" sx={{ fontSize: '2.25rem', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Built for every industry</Typography>
+          <Typography sx={{ color: 'var(--text-muted)', mt: 2, maxWidth: 576, mx: 'auto', fontSize: '0.875rem', lineHeight: 1.7 }}>
             From healthcare to real estate — we understand your specific needs and compliance requirements.
-          </p>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2,1fr)', md: 'repeat(4,1fr)' }, gap: 2 }}>
           {industries.map(ind => (
-            <div key={ind.name} className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-5 text-center hover:border-blue-200 dark:hover:border-blue-700 hover:shadow-md transition-all cursor-pointer group">
-              <div className="text-3xl mb-3">{ind.icon}</div>
-              <div className="text-sm font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{ind.name}</div>
-              <div className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed">{ind.desc}</div>
-            </div>
+            <Paper
+              key={ind.name}
+              elevation={0}
+              sx={{
+                bgcolor: 'var(--bg-primary)',
+                border: '1px solid var(--border)',
+                borderRadius: '16px',
+                p: 2.5,
+                textAlign: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                '&:hover': { borderColor: 'var(--blue)', boxShadow: '0 4px 6px rgba(0,0,0,0.06)' },
+              }}
+            >
+              <Box sx={{ fontSize: '1.875rem', mb: 1.5 }}>{ind.icon}</Box>
+              <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)', mb: 1 }}>{ind.name}</Typography>
+              <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.7 }}>{ind.desc}</Typography>
+            </Paper>
           ))}
-        </div>
-      </div>
-    </section>
+        </Box>
+      </Box>
+    </Box>
   )
 }
 
 // ── Process ───────────────────────────────────────────
 function Process() {
   const steps = [
-    { num: '01', title: 'AI wizard',     desc: 'Fill 6 steps. Get instant tech stack + cost estimate',  color: 'bg-blue-600'   },
-    { num: '02', title: 'Proposal',      desc: 'AI generates full proposal PDF in 30 seconds',          color: 'bg-indigo-600' },
-    { num: '03', title: 'Design',        desc: 'Figma prototypes shared for your approval',             color: 'bg-purple-600' },
-    { num: '04', title: 'Development',   desc: 'Frontend + backend built in parallel',                  color: 'bg-pink-600'   },
-    { num: '05', title: 'Testing',       desc: 'Full QA + client feedback rounds',                      color: 'bg-orange-600' },
-    { num: '06', title: 'Live & support', desc: 'Deployed with CI/CD + monthly maintenance',            color: 'bg-green-600'  },
+    { num: '01', title: 'AI wizard',      desc: 'Fill 6 steps. Get instant tech stack + cost estimate', color: '#2563eb' },
+    { num: '02', title: 'Proposal',       desc: 'AI generates full proposal PDF in 30 seconds',         color: '#4f46e5' },
+    { num: '03', title: 'Design',         desc: 'Figma prototypes shared for your approval',            color: '#9333ea' },
+    { num: '04', title: 'Development',    desc: 'Frontend + backend built in parallel',                 color: '#db2777' },
+    { num: '05', title: 'Testing',        desc: 'Full QA + client feedback rounds',                     color: '#ea580c' },
+    { num: '06', title: 'Live & support', desc: 'Deployed with CI/CD + monthly maintenance',            color: '#16a34a' },
   ]
 
   return (
-    <section id="process" className="py-20 px-6 bg-white dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-14">
-          <div className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-3">How it works</div>
-          <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">From idea to live<br />in 6-10 weeks</h2>
-          <p className="text-gray-400 dark:text-gray-500 mt-4 max-w-xl mx-auto text-sm leading-relaxed">
+    <Box component="section" id="process" sx={{ py: { xs: 8, md: 10 }, px: 3, bgcolor: 'var(--bg-primary)' }}>
+      <Box sx={{ maxWidth: 1280, mx: 'auto' }}>
+        <Box sx={{ textAlign: 'center', mb: 7 }}>
+          <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--blue)', textTransform: 'uppercase', letterSpacing: '0.1em', mb: 1.5 }}>How it works</Typography>
+          <Typography component="h2" sx={{ fontSize: '2.25rem', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em', lineHeight: 1.15 }}>From idea to live<br />in 6-10 weeks</Typography>
+          <Typography sx={{ color: 'var(--text-muted)', mt: 2, maxWidth: 576, mx: 'auto', fontSize: '0.875rem', lineHeight: 1.7 }}>
             Our AI-guided platform captures your requirements and delivers your product — with full transparency at every step.
-          </p>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2,1fr)', md: 'repeat(3,1fr)', lg: 'repeat(6,1fr)' }, gap: 2 }}>
           {steps.map((s, i) => (
-            <div key={s.num} className="relative text-center">
+            <Box key={s.num} sx={{ position: 'relative', textAlign: 'center' }}>
               {i < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-6 left-3/4 w-1/2 h-px bg-gray-200 dark:bg-gray-700 z-0" />
+                <Box sx={{ display: { xs: 'none', lg: 'block' }, position: 'absolute', top: 24, left: '75%', width: '50%', height: '1px', bgcolor: 'var(--border)', zIndex: 0 }} />
               )}
-              <div className={`${s.color} w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black text-sm mx-auto mb-4 relative z-10`}>
+              <Box sx={{ bgcolor: s.color, width: 48, height: 48, borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: '0.875rem', mx: 'auto', mb: 2, position: 'relative', zIndex: 10 }}>
                 {s.num}
-              </div>
-              <div className="text-sm font-bold text-gray-900 dark:text-white mb-2">{s.title}</div>
-              <div className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed">{s.desc}</div>
-            </div>
+              </Box>
+              <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)', mb: 1 }}>{s.title}</Typography>
+              <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.7 }}>{s.desc}</Typography>
+            </Box>
           ))}
-        </div>
+        </Box>
 
         {/* Why us bullets */}
-        <div className="mt-16 bg-blue-600 dark:bg-blue-700 rounded-3xl p-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Paper
+          elevation={0}
+          sx={{
+            mt: 8,
+            bgcolor: 'var(--blue)',
+            borderRadius: '24px',
+            p: 4,
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', md: 'repeat(3,1fr)' },
+            gap: 3,
+          }}
+        >
           {[
-            { icon: '🤖', title: 'AI wizard onboarding',     desc: 'No calls, no emails. Clients onboard themselves in 10 minutes with our AI wizard.' },
-            { icon: '📊', title: 'Live project tracker',     desc: 'Clients see every milestone in real time. Zero black box. Full transparency.'       },
-            { icon: '⚡', title: 'Instant proposal PDF',     desc: 'AI generates scope, timeline and cost breakdown in 30 seconds — not 5 days.'       },
+            { icon: '🤖', title: 'AI wizard onboarding', desc: 'No calls, no emails. Clients onboard themselves in 10 minutes with our AI wizard.' },
+            { icon: '📊', title: 'Live project tracker', desc: 'Clients see every milestone in real time. Zero black box. Full transparency.'       },
+            { icon: '⚡', title: 'Instant proposal PDF', desc: 'AI generates scope, timeline and cost breakdown in 30 seconds — not 5 days.'       },
           ].map(w => (
-            <div key={w.title} className="flex gap-4">
-              <div className="text-2xl flex-shrink-0">{w.icon}</div>
-              <div>
-                <div className="text-sm font-bold text-white mb-1">{w.title}</div>
-                <div className="text-xs text-blue-200 leading-relaxed">{w.desc}</div>
-              </div>
-            </div>
+            <Box key={w.title} sx={{ display: 'flex', gap: 2 }}>
+              <Box sx={{ fontSize: '1.5rem', flexShrink: 0 }}>{w.icon}</Box>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: '#fff', mb: 0.5 }}>{w.title}</Typography>
+                <Typography sx={{ fontSize: '0.75rem', color: 'var(--blue-light)', lineHeight: 1.7 }}>{w.desc}</Typography>
+              </Box>
+            </Box>
           ))}
-        </div>
-      </div>
-    </section>
+        </Paper>
+      </Box>
+    </Box>
   )
 }
 
 // ── Portfolio ─────────────────────────────────────────
 function Portfolio() {
   const projects = [
-    { emoji: '✈️', bg: 'bg-blue-50 dark:bg-blue-950/50',   badge: 'Delivered', badgeColor: 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400', title: 'TravelNest booking portal',   subtitle: 'Flight + hotel + tour management',   desc: 'Full-stack booking platform with real-time availability, Razorpay payments and admin CMS. Built in 8 weeks.',        tags: ['React', 'Node.js', 'PostgreSQL', 'AWS']       },
-    { emoji: '🏥', bg: 'bg-green-50 dark:bg-green-950/50',  badge: 'Live',      badgeColor: 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-400',   title: 'MediBook healthcare portal',  subtitle: 'Telemedicine + appointments',         desc: 'Multi-doctor video consultation, e-prescriptions, HIPAA-compliant architecture.',                                   tags: ['Vue.js', 'Django', 'WebRTC']                  },
-    { emoji: '🛒', bg: 'bg-purple-50 dark:bg-purple-950/50', badge: 'Growing',  badgeColor: 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-400', title: 'ShopX e-commerce marketplace', subtitle: 'Multi-vendor marketplace',          desc: 'Seller dashboard, AI recommendations, SEO-optimized pages and warehouse integrations.',                             tags: ['Next.js', 'Node.js', 'MongoDB']               },
-    { emoji: '🎓', bg: 'bg-amber-50 dark:bg-amber-950/50',  badge: 'Delivered', badgeColor: 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400', title: 'EdQuest learning platform',   subtitle: 'Full LMS platform',                  desc: 'Video courses, quiz engine, student dashboard, instructor panel and certificate generation.',                        tags: ['React', 'Django', 'AWS S3']                   },
+    { emoji: '✈️', bg: '#eff6ff',  badge: 'Delivered', badgeBg: '#dcfce7', badgeFg: '#15803d', title: 'TravelNest booking portal',    subtitle: 'Flight + hotel + tour management',  desc: 'Full-stack booking platform with real-time availability, Razorpay payments and admin CMS. Built in 8 weeks.',        tags: ['React', 'Node.js', 'PostgreSQL', 'AWS'] },
+    { emoji: '🏥', bg: '#f0fdf4',  badge: 'Live',      badgeBg: '#dbeafe', badgeFg: '#1d4ed8', title: 'MediBook healthcare portal',   subtitle: 'Telemedicine + appointments',        desc: 'Multi-doctor video consultation, e-prescriptions, HIPAA-compliant architecture.',                                   tags: ['Vue.js', 'Django', 'WebRTC'] },
+    { emoji: '🛒', bg: '#faf5ff',  badge: 'Growing',   badgeBg: '#f3e8ff', badgeFg: '#7e22ce', title: 'ShopX e-commerce marketplace', subtitle: 'Multi-vendor marketplace',           desc: 'Seller dashboard, AI recommendations, SEO-optimized pages and warehouse integrations.',                             tags: ['Next.js', 'Node.js', 'MongoDB'] },
+    { emoji: '🎓', bg: '#fffbeb',  badge: 'Delivered', badgeBg: '#dcfce7', badgeFg: '#15803d', title: 'EdQuest learning platform',    subtitle: 'Full LMS platform',                  desc: 'Video courses, quiz engine, student dashboard, instructor panel and certificate generation.',                        tags: ['React', 'Django', 'AWS S3'] },
   ]
 
   return (
-    <section id="portfolio" className="py-20 px-6 bg-gray-50 dark:bg-gray-800/30">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-14">
-          <div>
-            <div className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-3">Our work</div>
-            <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">Projects we've delivered</h2>
-          </div>
-          <p className="text-gray-400 dark:text-gray-500 max-w-sm mt-4 md:mt-0 text-sm leading-relaxed">
+    <Box component="section" id="portfolio" sx={{ py: { xs: 8, md: 10 }, px: 3, bgcolor: 'var(--bg-secondary)' }}>
+      <Box sx={{ maxWidth: 1280, mx: 'auto' }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: { md: 'flex-end' }, justifyContent: 'space-between', mb: 7 }}>
+          <Box>
+            <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--blue)', textTransform: 'uppercase', letterSpacing: '0.1em', mb: 1.5 }}>Our work</Typography>
+            <Typography component="h2" sx={{ fontSize: '2.25rem', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Projects we've delivered</Typography>
+          </Box>
+          <Typography sx={{ color: 'var(--text-muted)', maxWidth: 384, mt: { xs: 2, md: 0 }, fontSize: '0.875rem', lineHeight: 1.7 }}>
             Real products for real businesses across India.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2,1fr)' }, gap: 3 }}>
           {projects.map(p => (
-            <div key={p.title} className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl overflow-hidden hover:shadow-lg transition-all group">
-              <div className={`${p.bg} h-44 flex items-center justify-center text-6xl`}>
+            <Paper
+              key={p.title}
+              elevation={0}
+              sx={{
+                bgcolor: 'var(--bg-primary)',
+                border: '1px solid var(--border)',
+                borderRadius: '16px',
+                overflow: 'hidden',
+                transition: 'all 0.2s',
+                '&:hover': { boxShadow: '0 10px 15px rgba(0,0,0,0.08)' },
+              }}
+            >
+              <Box sx={{ bgcolor: p.bg, height: 176, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3.75rem' }}>
                 {p.emoji}
-              </div>
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h3 className="text-base font-bold text-gray-900 dark:text-white">{p.title}</h3>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{p.subtitle}</p>
-                  </div>
-                  <span className={`text-xs font-bold px-2 py-1 rounded-full ${p.badgeColor}`}>
-                    {p.badge}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-4">{p.desc}</p>
-                <div className="flex flex-wrap gap-2">
+              </Box>
+              <Box sx={{ p: 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 1.5, mb: 1.5 }}>
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography component="h3" sx={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>{p.title}</Typography>
+                    <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', mt: 0.25 }}>{p.subtitle}</Typography>
+                  </Box>
+                  <Chip
+                    label={p.badge}
+                    size="small"
+                    sx={{ bgcolor: p.badgeBg, color: p.badgeFg, fontSize: '0.75rem', fontWeight: 700, borderRadius: '9999px', flexShrink: 0 }}
+                  />
+                </Box>
+                <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.7, mb: 2 }}>{p.desc}</Typography>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                   {p.tags.map(t => (
-                    <span key={t} className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-lg">{t}</span>
+                    <Chip
+                      key={t}
+                      label={t}
+                      size="small"
+                      sx={{ bgcolor: 'var(--bg-tertiary)', color: 'var(--text-muted)', fontSize: '0.75rem', borderRadius: '8px' }}
+                    />
                   ))}
-                </div>
-              </div>
-            </div>
+                </Box>
+              </Box>
+            </Paper>
           ))}
-        </div>
-      </div>
-    </section>
+        </Box>
+      </Box>
+    </Box>
   )
 }
 
@@ -388,190 +662,270 @@ function Pricing() {
   ]
 
   return (
-    <section id="pricing" className="py-20 px-6 bg-white dark:bg-gray-900">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-14">
-          <div className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-3">Transparent pricing</div>
-          <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">Simple monthly plans</h2>
-          <p className="text-gray-400 dark:text-gray-500 mt-4 max-w-xl mx-auto text-sm leading-relaxed">
+    <Box component="section" id="pricing" sx={{ py: { xs: 8, md: 10 }, px: 3, bgcolor: 'var(--bg-primary)' }}>
+      <Box sx={{ maxWidth: 1152, mx: 'auto' }}>
+        <Box sx={{ textAlign: 'center', mb: 7 }}>
+          <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--blue)', textTransform: 'uppercase', letterSpacing: '0.1em', mb: 1.5 }}>Transparent pricing</Typography>
+          <Typography component="h2" sx={{ fontSize: '2.25rem', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Simple monthly plans</Typography>
+          <Typography sx={{ color: 'var(--text-muted)', mt: 2, maxWidth: 576, mx: 'auto', fontSize: '0.875rem', lineHeight: 1.7 }}>
             No hidden charges. Cancel anytime. All plans include hosting, SSL and basic support.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3,1fr)' }, gap: 2.5, alignItems: 'start' }}>
           {plans.map(plan => (
-            <div key={plan.name} className={`relative rounded-2xl p-8 transition-all
-              ${plan.featured
-                ? 'bg-blue-600 dark:bg-blue-700 text-white shadow-xl shadow-blue-200 dark:shadow-blue-900 scale-105'
-                : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:shadow-lg'
-              }`}>
+            <Paper
+              key={plan.name}
+              elevation={0}
+              sx={{
+                position: 'relative',
+                borderRadius: '16px',
+                p: 4,
+                transition: 'all 0.2s',
+                ...(plan.featured
+                  ? { bgcolor: 'var(--blue)', color: '#fff', boxShadow: '0 20px 25px rgba(37,99,235,0.25)', transform: { md: 'scale(1.05)' } }
+                  : { bgcolor: 'var(--bg-secondary)', border: '1px solid var(--border)', '&:hover': { boxShadow: '0 10px 15px rgba(0,0,0,0.08)' } }),
+              }}
+            >
               {plan.featured && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-400 text-yellow-900 text-xs font-black px-4 py-1 rounded-full">
-                  Most popular
-                </div>
+                <Chip
+                  label="Most popular"
+                  sx={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', bgcolor: '#facc15', color: '#713f12', fontSize: '0.75rem', fontWeight: 900, borderRadius: '9999px', height: 'auto', py: 0.5 }}
+                />
               )}
-              <div className={`text-xs font-bold uppercase tracking-widest mb-2 ${plan.featured ? 'text-blue-200' : 'text-gray-400 dark:text-gray-500'}`}>
+              <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', mb: 1, color: plan.featured ? 'var(--blue-light)' : 'var(--text-muted)' }}>
                 {plan.name}
-              </div>
-              <div className={`text-4xl font-black mb-1 ${plan.featured ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
+              </Typography>
+              <Typography sx={{ fontSize: '2.25rem', fontWeight: 900, mb: 0.5, color: plan.featured ? '#fff' : 'var(--text-primary)' }}>
                 {plan.price}
-                <span className={`text-base font-normal ${plan.featured ? 'text-blue-200' : 'text-gray-400 dark:text-gray-500'}`}>
+                <Box component="span" sx={{ fontSize: '1rem', fontWeight: 400, color: plan.featured ? 'var(--blue-light)' : 'var(--text-muted)' }}>
                   {plan.period}
-                </span>
-              </div>
-              <div className={`text-sm mb-6 ${plan.featured ? 'text-blue-200' : 'text-gray-400 dark:text-gray-500'}`}>
+                </Box>
+              </Typography>
+              <Typography sx={{ fontSize: '0.875rem', mb: 3, color: plan.featured ? 'var(--blue-light)' : 'var(--text-muted)' }}>
                 {plan.desc}
-              </div>
-              <ul className="space-y-3 mb-8">
+              </Typography>
+              <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0, mb: 4, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                 {plan.features.map(f => (
-                  <li key={f} className={`flex items-center gap-2 text-sm ${plan.featured ? 'text-white' : 'text-gray-600 dark:text-gray-300'}`}>
-                    <CheckCircle size={14} className={plan.featured ? 'text-blue-300' : 'text-blue-600 dark:text-blue-400'} />
+                  <Box component="li" key={f} sx={{ display: 'flex', alignItems: 'center', gap: 1, fontSize: '0.875rem', color: plan.featured ? '#fff' : 'var(--text-secondary)' }}>
+                    <Box component="span" sx={{ flexShrink: 0, display: 'flex', color: plan.featured ? 'var(--blue-light)' : 'var(--blue)' }}>
+                      <CheckCircle size={14} />
+                    </Box>
                     {f}
-                  </li>
+                  </Box>
                 ))}
-              </ul>
-              <Link href="/register">
-                <button className={`w-full py-3 rounded-xl font-bold text-sm transition-all
-                  ${plan.featured
-                    ? 'bg-white text-blue-600 hover:bg-blue-50'
-                    : 'bg-blue-600 dark:bg-blue-600 text-white hover:bg-blue-700'
-                  }`}>
-                  {plan.cta}
-                </button>
-              </Link>
-            </div>
+              </Box>
+              <Button
+                component={Link}
+                href="/register"
+                fullWidth
+                disableElevation
+                variant="contained"
+                sx={{
+                  py: 1.5,
+                  borderRadius: '12px',
+                  fontWeight: 700,
+                  fontSize: '0.875rem',
+                  textTransform: 'none',
+                  ...(plan.featured
+                    ? { bgcolor: '#fff', color: 'var(--blue)', '&:hover': { bgcolor: 'var(--blue-light)' } }
+                    : { bgcolor: 'var(--blue)', color: '#fff', '&:hover': { bgcolor: 'var(--blue-dark)' } }),
+                }}
+              >
+                {plan.cta}
+              </Button>
+            </Paper>
           ))}
-        </div>
-      </div>
-    </section>
+        </Box>
+      </Box>
+    </Box>
   )
 }
 
 // ── Reviews ───────────────────────────────────────────
 function Reviews() {
   const reviews = [
-    { initials: 'RK', bg: 'bg-green-100 dark:bg-green-900', text: 'text-green-800 dark:text-green-200', name: 'Rajesh Kumar',    company: 'TravelNest Agency, Varanasi', rating: 5, review: '"They built our entire travel portal in 8 weeks. The AI wizard was incredible — they understood our requirements perfectly. Best tech team in India."' },
-    { initials: 'DM', bg: 'bg-blue-100 dark:bg-blue-900',   text: 'text-blue-800 dark:text-blue-200',   name: 'Dr. Meena Sharma', company: 'Sharma Dental Clinic, Lucknow', rating: 5, review: '"Our clinic\'s appointment system is fully automated now. Patients book online, we get notifications. No more missed appointments. Worth every rupee."' },
-    { initials: 'MV', bg: 'bg-purple-100 dark:bg-purple-900', text: 'text-purple-800 dark:text-purple-200', name: 'Mohammed Viqar', company: 'ShopX Marketplace, Delhi', rating: 5, review: '"Our sales increased 3x after DevLaunch built our platform. The AI product recommendations are amazing. Very professional team."' },
+    { initials: 'RK', bg: '#dcfce7', fg: '#166534', name: 'Rajesh Kumar',    company: 'TravelNest Agency, Varanasi',   rating: 5, review: '"They built our entire travel portal in 8 weeks. The AI wizard was incredible — they understood our requirements perfectly. Best tech team in India."' },
+    { initials: 'DM', bg: '#dbeafe', fg: '#1e40af', name: 'Dr. Meena Sharma', company: 'Sharma Dental Clinic, Lucknow', rating: 5, review: '"Our clinic\'s appointment system is fully automated now. Patients book online, we get notifications. No more missed appointments. Worth every rupee."' },
+    { initials: 'MV', bg: '#f3e8ff', fg: '#6b21a8', name: 'Mohammed Viqar',   company: 'ShopX Marketplace, Delhi',      rating: 5, review: '"Our sales increased 3x after DevLaunch built our platform. The AI product recommendations are amazing. Very professional team."' },
   ]
 
   return (
-    <section id="reviews" className="py-20 px-6 bg-gray-50 dark:bg-gray-800/30">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-14">
-          <div className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-3">Client reviews</div>
-          <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">What our clients say</h2>
-          <div className="flex items-center justify-center gap-1 mt-4">
-            {[1,2,3,4,5].map(i => <Star key={i} size={18} className="text-yellow-400 fill-yellow-400" />)}
-            <span className="text-sm font-bold text-gray-700 dark:text-gray-300 ml-2">4.9 / 5 from 40+ clients</span>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <Box component="section" id="reviews" sx={{ py: { xs: 8, md: 10 }, px: 3, bgcolor: 'var(--bg-secondary)' }}>
+      <Box sx={{ maxWidth: 1280, mx: 'auto' }}>
+        <Box sx={{ textAlign: 'center', mb: 7 }}>
+          <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--blue)', textTransform: 'uppercase', letterSpacing: '0.1em', mb: 1.5 }}>Client reviews</Typography>
+          <Typography component="h2" sx={{ fontSize: '2.25rem', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>What our clients say</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mt: 2 }}>
+            {[1,2,3,4,5].map(i => <Box key={i} component="span" sx={{ display: 'flex', color: '#facc15' }}><Star size={18} fill="#facc15" /></Box>)}
+            <Typography component="span" sx={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-secondary)', ml: 1 }}>4.9 / 5 from 40+ clients</Typography>
+          </Box>
+        </Box>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3,1fr)' }, gap: 3 }}>
           {reviews.map(r => (
-            <div key={r.name} className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 hover:shadow-md transition-all">
-              <div className="flex gap-1 mb-4">
-                {[1,2,3,4,5].map(i => <Star key={i} size={14} className="text-yellow-400 fill-yellow-400" />)}
-              </div>
-              <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed italic mb-6">{r.review}</p>
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full ${r.bg} ${r.text} flex items-center justify-center text-xs font-black`}>
+            <Paper
+              key={r.name}
+              elevation={0}
+              sx={{
+                bgcolor: 'var(--bg-primary)',
+                border: '1px solid var(--border)',
+                borderRadius: '16px',
+                p: 3,
+                transition: 'all 0.2s',
+                '&:hover': { boxShadow: '0 4px 6px rgba(0,0,0,0.06)' },
+              }}
+            >
+              <Box sx={{ display: 'flex', gap: 0.5, mb: 2 }}>
+                {[1,2,3,4,5].map(i => <Box key={i} component="span" sx={{ display: 'flex', color: '#facc15' }}><Star size={14} fill="#facc15" /></Box>)}
+              </Box>
+              <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.7, fontStyle: 'italic', mb: 3 }}>{r.review}</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Avatar sx={{ width: 40, height: 40, bgcolor: r.bg, color: r.fg, fontSize: '0.75rem', fontWeight: 900 }}>
                   {r.initials}
-                </div>
-                <div>
-                  <div className="text-sm font-bold text-gray-900 dark:text-white">{r.name}</div>
-                  <div className="text-xs text-gray-400 dark:text-gray-500">{r.company}</div>
-                </div>
-              </div>
-            </div>
+                </Avatar>
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' }}>{r.name}</Typography>
+                  <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{r.company}</Typography>
+                </Box>
+              </Box>
+            </Paper>
           ))}
-        </div>
-      </div>
-    </section>
+        </Box>
+      </Box>
+    </Box>
   )
 }
 
 // ── CTA ───────────────────────────────────────────────
 function CTA() {
   return (
-    <section className="py-20 px-6 bg-blue-600 dark:bg-blue-700">
-      <div className="max-w-4xl mx-auto text-center">
-        <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-6">
+    <Box component="section" sx={{ py: { xs: 8, md: 10 }, px: 3, bgcolor: 'var(--blue)' }}>
+      <Box sx={{ maxWidth: 896, mx: 'auto', textAlign: 'center' }}>
+        <Typography component="h2" sx={{ fontSize: { xs: '2.25rem', md: '3rem' }, fontWeight: 900, color: '#fff', letterSpacing: '-0.02em', mb: 3 }}>
           Ready to build your product?
-        </h2>
-        <p className="text-blue-200 text-lg mb-10 leading-relaxed">
+        </Typography>
+        <Typography sx={{ color: 'var(--blue-light)', fontSize: '1.125rem', mb: 5, lineHeight: 1.7 }}>
           Go through our 6-step AI wizard and get a detailed proposal with timeline
           and cost estimate within 24 hours.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link href="/register">
-            <button className="flex items-center gap-2 bg-white text-blue-600 font-bold px-8 py-4 rounded-2xl text-base hover:bg-blue-50 transition-all">
-              Start project wizard
-              <ArrowRight size={18} />
-            </button>
-          </Link>
-          <a href="https://wa.me/91XXXXXXXXXX" target="_blank" rel="noreferrer">
-            <button className="flex items-center gap-2 bg-transparent text-white font-bold px-8 py-4 rounded-2xl text-base border-2 border-white/40 hover:border-white/70 transition-all">
-              💬 WhatsApp us
-            </button>
-          </a>
-        </div>
-      </div>
-    </section>
+        </Typography>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, justifyContent: 'center' }}>
+          <Button
+            component={Link}
+            href="/register"
+            disableElevation
+            variant="contained"
+            endIcon={<ArrowRight size={18} />}
+            sx={{
+              bgcolor: '#fff',
+              color: 'var(--blue)',
+              fontWeight: 700,
+              px: 4,
+              py: 1.75,
+              borderRadius: '16px',
+              fontSize: '1rem',
+              textTransform: 'none',
+              '&:hover': { bgcolor: 'var(--blue-light)' },
+            }}
+          >
+            Start project wizard
+          </Button>
+          <Button
+            component="a"
+            href="https://wa.me/91XXXXXXXXXX"
+            target="_blank"
+            rel="noreferrer"
+            disableElevation
+            sx={{
+              bgcolor: 'transparent',
+              color: '#fff',
+              fontWeight: 700,
+              px: 4,
+              py: 1.75,
+              borderRadius: '16px',
+              fontSize: '1rem',
+              textTransform: 'none',
+              border: '2px solid rgba(255,255,255,0.4)',
+              '&:hover': { borderColor: 'rgba(255,255,255,0.7)', bgcolor: 'transparent' },
+            }}
+          >
+            💬 WhatsApp us
+          </Button>
+        </Box>
+      </Box>
+    </Box>
   )
 }
 
 // ── Footer ────────────────────────────────────────────
 function Footer() {
   return (
-    <footer className="bg-gray-950 dark:bg-black text-white py-16 px-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
-          <div>
-            <div className="text-xl font-black text-blue-400 mb-3">DevLaunch</div>
-            <p className="text-sm text-gray-400 leading-relaxed mb-5">
+    <Box component="footer" sx={{ bgcolor: '#030712', color: '#fff', py: 8, px: 3 }}>
+      <Box sx={{ maxWidth: 1280, mx: 'auto' }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(4,1fr)' }, gap: 5, mb: 6 }}>
+          <Box>
+            <Typography sx={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--blue-light)', mb: 1.5 }}>DevLaunch</Typography>
+            <Typography sx={{ fontSize: '0.875rem', color: '#9ca3af', lineHeight: 1.7, mb: 2.5 }}>
               India's AI-powered software delivery platform for SMEs and growing businesses.
-            </p>
-            <div className="flex gap-2">
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1 }}>
               {['in', 'tw', 'ig', 'wa'].map(s => (
-                <div key={s} className="w-8 h-8 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-xs text-gray-400 cursor-pointer transition-colors">
+                <Box
+                  key={s}
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '8px',
+                    bgcolor: '#1f2937',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.75rem',
+                    color: '#9ca3af',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s',
+                    '&:hover': { bgcolor: '#374151' },
+                  }}
+                >
                   {s}
-                </div>
+                </Box>
               ))}
-            </div>
-          </div>
+            </Box>
+          </Box>
           {[
             { title: 'Services',   links: ['Web development', 'Mobile apps', 'AI automation', 'E-commerce', 'Digital marketing'] },
             { title: 'Industries', links: ['Healthcare', 'Real estate', 'Travel', 'Education', 'Restaurant'] },
             { title: 'Company',    links: ['About us', 'Portfolio', 'Pricing', 'Blog', 'Contact'] },
           ].map(col => (
-            <div key={col.title}>
-              <div className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">{col.title}</div>
-              <ul className="space-y-3">
+            <Box key={col.title}>
+              <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#6b7280', mb: 2 }}>{col.title}</Typography>
+              <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                 {col.links.map(l => (
-                  <li key={l}><a href="#" className="text-sm text-gray-400 hover:text-white transition-colors">{l}</a></li>
+                  <Box component="li" key={l}>
+                    <Box component="a" href="#" sx={{ fontSize: '0.875rem', color: '#9ca3af', textDecoration: 'none', transition: 'color 0.2s', '&:hover': { color: '#fff' } }}>{l}</Box>
+                  </Box>
                 ))}
-              </ul>
-            </div>
+              </Box>
+            </Box>
           ))}
-        </div>
-        <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="text-xs text-gray-500">© 2026 DevLaunch. All rights reserved.</div>
-          <div className="flex gap-6">
-            <a href="#" className="text-xs text-gray-500 hover:text-gray-300">Privacy Policy</a>
-            <a href="#" className="text-xs text-gray-500 hover:text-gray-300">Terms of Service</a>
-            <a href="#" className="text-xs text-gray-500 hover:text-gray-300">Contact</a>
-          </div>
-        </div>
-      </div>
-    </footer>
+        </Box>
+        <Box sx={{ borderTop: '1px solid #1f2937', pt: 4, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
+          <Typography sx={{ fontSize: '0.75rem', color: '#6b7280' }}>© 2026 DevLaunch. All rights reserved.</Typography>
+          <Box sx={{ display: 'flex', gap: 3 }}>
+            <Box component="a" href="#" sx={{ fontSize: '0.75rem', color: '#6b7280', textDecoration: 'none', '&:hover': { color: '#d1d5db' } }}>Privacy Policy</Box>
+            <Box component="a" href="#" sx={{ fontSize: '0.75rem', color: '#6b7280', textDecoration: 'none', '&:hover': { color: '#d1d5db' } }}>Terms of Service</Box>
+            <Box component="a" href="#" sx={{ fontSize: '0.75rem', color: '#6b7280', textDecoration: 'none', '&:hover': { color: '#d1d5db' } }}>Contact</Box>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
   )
 }
 
 // ── Main page ─────────────────────────────────────────
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <Box sx={{ minHeight: '100vh', bgcolor: 'var(--bg-primary)' }}>
       <Navbar />
-      <main>
+      <Box component="main">
         <Hero />
         <TechStrip />
         <Services />
@@ -582,7 +936,7 @@ export default function LandingPage() {
         <Reviews />
         <CTA />
         <Footer />
-      </main>
-    </div>
+      </Box>
+    </Box>
   )
 }

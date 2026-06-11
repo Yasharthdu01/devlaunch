@@ -3,15 +3,17 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import {
   Home, Folder, Star, Rocket, BarChart2, FileText,
-  Users, Cloud, Bot, Zap, Megaphone, LayoutGrid,
+  Users, Cloud, Bot, Zap, Megaphone,
   Settings, User, Ticket
 } from 'lucide-react'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
 
 const navItems = [
   {
     section: 'Discover',
     links: [
-     { label: 'Home', href: '/dashboard', icon: Home },
+      { label: 'Home', href: '/dashboard', icon: Home },
       { label: 'Portfolio',    href: '/portfolio', icon: Folder     },
       { label: 'Reviews',      href: '/reviews',   icon: Star       },
     ]
@@ -43,94 +45,126 @@ export default function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <div className="
-      w-64 flex-shrink-0 flex flex-col overflow-hidden
-      bg-[var(--sidebar-bg)]
-      border-r border-[var(--border)]
-    ">
-
+    <Box
+      sx={{
+        width: 256,
+        flexShrink: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        bgcolor: 'var(--sidebar-bg)',
+        borderRight: '1px solid var(--border)',
+      }}
+    >
       {/* Logo */}
-      <div className="px-6 py-5 border-b border-[var(--border)]">
-        <div className="text-xl font-bold text-[var(--blue)] tracking-tight">
+      <Box sx={{ px: 3, py: 2.5, borderBottom: '1px solid var(--border)' }}>
+        <Typography sx={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--blue)', letterSpacing: '-0.02em' }}>
           DevLaunch
-        </div>
-        <div className="text-xs text-[var(--text-muted)] mt-1 font-medium">
+        </Typography>
+        <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', mt: 0.5, fontWeight: 500 }}>
           AI delivery platform
-        </div>
-      </div>
+        </Typography>
+      </Box>
 
       {/* Nav */}
-      <div className="flex-1 overflow-y-auto py-3 px-3">
+      <Box sx={{ flex: 1, overflowY: 'auto', py: 1.5, px: 1.5 }}>
         {navItems.map((section) => (
-          <div key={section.section} className="mb-6">
-            <div className="
-              text-xs font-bold uppercase tracking-widest px-3 mb-2
-              text-[var(--text-muted)]
-            ">
+          <Box key={section.section} sx={{ mb: 3 }}>
+            <Typography
+              sx={{
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.15em',
+                px: 1.5,
+                mb: 1,
+                color: 'var(--text-muted)',
+              }}
+            >
               {section.section}
-            </div>
-            <div className="space-y-0.5">
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
               {section.links.map((link) => {
                 const isActive = pathname === link.href
                 const Icon = link.icon
                 return (
-                  <Link
+                  <Box
                     key={link.href}
+                    component={Link}
                     href={link.href}
-                    className={`
-                      flex items-center gap-3 px-3 py-2.5 text-sm
-                      rounded-xl transition-all relative group
-                      ${isActive
-                        ? 'bg-[var(--blue-light)] text-[var(--blue)] font-semibold'
-                        : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] font-medium'
-                      }
-                    `}
+                    sx={{
+                      position: 'relative',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1.5,
+                      px: 1.5,
+                      py: 1.25,
+                      fontSize: '0.875rem',
+                      borderRadius: '12px',
+                      textDecoration: 'none',
+                      transition: 'all 0.15s',
+                      fontWeight: isActive ? 600 : 500,
+                      color: isActive ? 'var(--blue)' : 'var(--text-secondary)',
+                      bgcolor: isActive ? 'var(--blue-light)' : 'transparent',
+                      '&:hover': isActive
+                        ? {}
+                        : { bgcolor: 'var(--bg-tertiary)', color: 'var(--text-primary)' },
+                    }}
                   >
                     {isActive && (
-                      <div className="absolute left-0 w-1 h-5 bg-[var(--blue)] rounded-r-full" />
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          left: 0,
+                          width: 4,
+                          height: 20,
+                          bgcolor: 'var(--blue)',
+                          borderRadius: '0 9999px 9999px 0',
+                        }}
+                      />
                     )}
-                    <Icon
-                      size={17}
-                      className={`flex-shrink-0 ${
-                        isActive
-                          ? 'text-[var(--blue)]'
-                          : 'text-[var(--text-muted)] group-hover:text-[var(--text-primary)]'
-                      }`}
-                    />
+                    <Box component="span" sx={{ display: 'flex', flexShrink: 0, color: isActive ? 'var(--blue)' : 'var(--text-muted)' }}>
+                      <Icon size={17} />
+                    </Box>
                     {link.label}
-                  </Link>
+                  </Box>
                 )
               })}
-            </div>
-          </div>
+            </Box>
+          </Box>
         ))}
-      </div>
+      </Box>
 
       {/* User footer */}
-      <div className="p-3 border-t border-[var(--border)]">
-        <div className="
-          bg-[var(--bg-tertiary)]
-          rounded-xl p-3 flex items-center gap-3
-        ">
-          <div className="
-            w-8 h-8 rounded-full flex-shrink-0
-            bg-[var(--blue)]
-            text-white text-xs font-bold
-            flex items-center justify-center
-          ">
+      <Box sx={{ p: 1.5, borderTop: '1px solid var(--border)' }}>
+        <Box sx={{ bgcolor: 'var(--bg-tertiary)', borderRadius: '12px', p: 1.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box
+            sx={{
+              width: 32,
+              height: 32,
+              borderRadius: '50%',
+              flexShrink: 0,
+              bgcolor: 'var(--blue)',
+              color: '#fff',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
             TJ
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-xs font-semibold text-[var(--text-primary)] truncate">
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               Traveler Co.
-            </div>
-            <div className="text-xs text-[var(--text-muted)]">
+            </Typography>
+            <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
               Client
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
   )
 }

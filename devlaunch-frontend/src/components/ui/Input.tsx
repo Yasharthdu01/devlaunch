@@ -1,3 +1,9 @@
+'use client'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import InputBase from '@mui/material/InputBase'
+import type { SxProps, Theme } from '@mui/material/styles'
+
 export default function Input({
   label,
   placeholder,
@@ -5,6 +11,7 @@ export default function Input({
   onChange,
   type = 'text',
   className = '',
+  sx,
 }: {
   label?: string
   placeholder?: string
@@ -12,21 +19,47 @@ export default function Input({
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
   type?: string
   className?: string
+  sx?: SxProps<Theme>
 }) {
   return (
-    <div className={`flex flex-col gap-1.5 ${className}`}>
+    <Box className={className} sx={{ display: 'flex', flexDirection: 'column', gap: 0.75, ...sx } as SxProps<Theme>}>
       {label && (
-        <label className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest px-1">
+        <Typography
+          component="label"
+          sx={{
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            color: 'var(--text-muted)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
+            px: 0.5,
+          }}
+        >
           {label}
-        </label>
+        </Typography>
       )}
-      <input
+      <InputBase
         type={type}
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className="w-full px-4 py-2.5 text-sm border border-[var(--border)] bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-xl outline-none focus:border-[var(--blue)] focus:ring-4 focus:ring-[var(--blue)]/10 transition-all placeholder:text-[var(--text-muted)]"
+        sx={{
+          width: '100%',
+          px: 2,
+          py: 1.25,
+          fontSize: '0.875rem',
+          border: '1px solid var(--border)',
+          bgcolor: 'var(--bg-primary)',
+          color: 'var(--text-primary)',
+          borderRadius: '12px',
+          transition: 'all 0.2s ease',
+          '& input::placeholder': { color: 'var(--text-muted)', opacity: 1 },
+          '&.Mui-focused': {
+            borderColor: 'var(--blue)',
+            boxShadow: '0 0 0 4px color-mix(in srgb, var(--blue) 10%, transparent)',
+          },
+        }}
       />
-    </div>
+    </Box>
   )
 }

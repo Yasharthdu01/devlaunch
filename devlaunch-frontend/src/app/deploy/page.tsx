@@ -1,5 +1,13 @@
 'use client'
 import { useState } from 'react'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Paper from '@mui/material/Paper'
+import Button from '@mui/material/Button'
+import TextField from '@mui/material/TextField'
+import MenuItem from '@mui/material/MenuItem'
+import LinearProgress from '@mui/material/LinearProgress'
+import Link from 'next/link'
 
 interface DeployStep {
   id:      number
@@ -41,6 +49,10 @@ const DEPLOY_LOGS = [
   '🌐 Live at: https://devlaunch.in',
 ]
 
+const FRONTEND_OPTIONS = ['Vercel', 'Netlify', 'AWS Amplify']
+const BACKEND_OPTIONS = ['Railway', 'AWS EC2', 'Render', 'Heroku']
+const DATABASE_OPTIONS = ['Neon.tech (PostgreSQL)', 'AWS RDS', 'PlanetScale (MySQL)', 'MongoDB Atlas']
+
 export default function DeployPage() {
   const [steps,     setSteps]     = useState<DeployStep[]>(INITIAL_STEPS)
   const [logs,      setLogs]      = useState<string[]>([])
@@ -53,7 +65,7 @@ export default function DeployPage() {
     domain:   'devlaunch.in',
   })
 
-  function handleConfigChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
+  function handleConfigChange(e: React.ChangeEvent<HTMLInputElement>) {
     setConfig({ ...config, [e.target.name]: e.target.value })
   }
 
@@ -98,222 +110,224 @@ export default function DeployPage() {
   const doneCount = steps.filter(s => s.status === 'done').length
   const progress  = Math.round((doneCount / steps.length) * 100)
 
+  const labelSx = { fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' } as const
+  const fieldLabelSx = { fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', mb: 0.5 } as const
+
   return (
-    <div className="max-w-4xl mx-auto w-full">
+    <Box sx={{ maxWidth: 896, mx: 'auto', width: '100%' }}>
 
-      <div className="mb-6">
-        <h1 className="text-lg font-bold text-[var(--text-primary)]">Deployment</h1>
-        <p className="text-sm text-[var(--text-muted)] mt-0.5">
+      <Box sx={{ mb: 3 }}>
+        <Typography sx={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--text-primary)' }}>Deployment</Typography>
+        <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-muted)', mt: 0.25 }}>
           Deploy your project to production with one click
-        </p>
-      </div>
+        </Typography>
+      </Box>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2.5, mb: 2.5 }}>
 
         {/* Config */}
-        <div className="bg-[var(--bg-primary)] dark:bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-5">
-          <div className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-4">
-            Deployment config
-          </div>
-          <div className="flex flex-col gap-3">
-            <div>
-              <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
-                Frontend hosting
-              </label>
-              <select
+        <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5 }}>
+          <Typography sx={{ ...labelSx, mb: 2 }}>Deployment config</Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <Box>
+              <Typography sx={fieldLabelSx}>Frontend hosting</Typography>
+              <TextField
+                select
                 name="frontend"
                 value={config.frontend}
                 onChange={handleConfigChange}
                 disabled={deploying}
-                className="mt-1 w-full px-3 py-2 text-sm border border-[var(--border)] bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-lg outline-none focus:border-[var(--blue)] disabled:opacity-50"
+                size="small"
+                fullWidth
               >
-                <option>Vercel</option>
-                <option>Netlify</option>
-                <option>AWS Amplify</option>
-              </select>
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
-                Backend hosting
-              </label>
-              <select
+                {FRONTEND_OPTIONS.map(o => <MenuItem key={o} value={o}>{o}</MenuItem>)}
+              </TextField>
+            </Box>
+            <Box>
+              <Typography sx={fieldLabelSx}>Backend hosting</Typography>
+              <TextField
+                select
                 name="backend"
                 value={config.backend}
                 onChange={handleConfigChange}
                 disabled={deploying}
-                className="mt-1 w-full px-3 py-2 text-sm border border-[var(--border)] bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-lg outline-none focus:border-[var(--blue)] disabled:opacity-50"
+                size="small"
+                fullWidth
               >
-                <option>Railway</option>
-                <option>AWS EC2</option>
-                <option>Render</option>
-                <option>Heroku</option>
-              </select>
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
-                Database
-              </label>
-              <select
+                {BACKEND_OPTIONS.map(o => <MenuItem key={o} value={o}>{o}</MenuItem>)}
+              </TextField>
+            </Box>
+            <Box>
+              <Typography sx={fieldLabelSx}>Database</Typography>
+              <TextField
+                select
                 name="database"
                 value={config.database}
                 onChange={handleConfigChange}
                 disabled={deploying}
-                className="mt-1 w-full px-3 py-2 text-sm border border-[var(--border)] bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-lg outline-none focus:border-[var(--blue)] disabled:opacity-50"
+                size="small"
+                fullWidth
               >
-                <option>Neon.tech (PostgreSQL)</option>
-                <option>AWS RDS</option>
-                <option>PlanetScale (MySQL)</option>
-                <option>MongoDB Atlas</option>
-              </select>
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
-                Custom domain
-              </label>
-              <input
+                {DATABASE_OPTIONS.map(o => <MenuItem key={o} value={o}>{o}</MenuItem>)}
+              </TextField>
+            </Box>
+            <Box>
+              <Typography sx={fieldLabelSx}>Custom domain</Typography>
+              <TextField
                 name="domain"
                 value={config.domain}
                 onChange={handleConfigChange}
                 disabled={deploying}
-                className="mt-1 w-full px-3 py-2 text-sm border border-[var(--border)] bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-lg outline-none focus:border-[var(--blue)] disabled:opacity-50"
+                size="small"
+                fullWidth
               />
-            </div>
-          </div>
+            </Box>
+          </Box>
 
           {!deploying && !done && (
-            <button
+            <Button
               onClick={startDeploy}
-              className="mt-4 w-full py-2.5 bg-[var(--blue)] text-white text-sm font-semibold rounded-xl hover:opacity-90 transition-colors cursor-pointer"
+              fullWidth
+              variant="contained"
+              disableElevation
+              sx={{ mt: 2, py: 1.25, bgcolor: 'var(--blue)', color: '#fff', fontSize: '0.875rem', fontWeight: 600, borderRadius: '12px', textTransform: 'none', '&:hover': { bgcolor: 'var(--blue-dark)' } }}
             >
               🚀 Deploy to production
-            </button>
+            </Button>
           )}
 
           {done && (
-            <div className="mt-4 flex flex-col gap-2">
-              <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/50 rounded-xl px-4 py-3 text-center">
-                <div className="text-green-700 dark:text-green-400 font-bold text-sm mb-1">
+            <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Box sx={{ bgcolor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px', px: 2, py: 1.5, textAlign: 'center' }}>
+                <Typography sx={{ color: '#15803d', fontWeight: 700, fontSize: '0.875rem', mb: 0.5 }}>
                   🎉 Deployment successful!
-                </div>
-                <a
+                </Typography>
+                <Typography
+                  component={Link}
                   href={`https://${config.domain}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-xs text-[var(--blue)] underline"
+                  sx={{ fontSize: '0.75rem', color: 'var(--blue)', textDecoration: 'underline' }}
                 >
                   {config.domain}
-                </a>
-              </div>
-              <button
+                </Typography>
+              </Box>
+              <Button
                 onClick={reset}
-                className="w-full py-2 border border-[var(--border)] text-sm text-[var(--text-secondary)] rounded-xl hover:bg-[var(--bg-tertiary)] transition-colors cursor-pointer"
+                fullWidth
+                variant="outlined"
+                sx={{ py: 1, borderColor: 'var(--border)', color: 'var(--text-secondary)', fontSize: '0.875rem', borderRadius: '12px', textTransform: 'none', '&:hover': { bgcolor: 'var(--bg-tertiary)', borderColor: 'var(--border)' } }}
               >
                 Deploy again
-              </button>
-            </div>
+              </Button>
+            </Box>
           )}
-        </div>
+        </Paper>
 
         {/* Steps */}
-        <div className="bg-[var(--bg-primary)] dark:bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
-              Deploy pipeline
-            </div>
+        <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+            <Typography sx={labelSx}>Deploy pipeline</Typography>
             {deploying && (
-              <span className="text-xs text-[var(--blue)] font-semibold animate-pulse">
+              <Typography sx={{ fontSize: '0.75rem', color: 'var(--blue)', fontWeight: 600, animation: 'pulse 1.5s ease-in-out infinite' }}>
                 {progress}% complete
-              </span>
+              </Typography>
             )}
             {done && (
-              <span className="text-xs text-green-600 dark:text-green-400 font-semibold">
+              <Typography sx={{ fontSize: '0.75rem', color: '#16a34a', fontWeight: 600 }}>
                 100% ✓
-              </span>
+              </Typography>
             )}
-          </div>
+          </Box>
 
           {(deploying || done) && (
-            <div className="h-1.5 bg-[var(--bg-tertiary)] rounded-full overflow-hidden mb-4">
-              <div
-                className="h-full bg-[var(--blue)] rounded-full transition-all duration-500"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
+            <LinearProgress
+              variant="determinate"
+              value={progress}
+              sx={{
+                height: 6,
+                borderRadius: '9999px',
+                bgcolor: 'var(--bg-tertiary)',
+                mb: 2,
+                '& .MuiLinearProgress-bar': { bgcolor: 'var(--blue)', borderRadius: '9999px' },
+              }}
+            />
           )}
 
-          <div className="flex flex-col gap-2">
-            {steps.map(step => (
-              <div key={step.id} className="flex items-start gap-3">
-                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5 transition-all
-                  ${step.status === 'done'    ? 'bg-green-500 text-white' :
-                    step.status === 'running' ? 'bg-[var(--blue)] text-white animate-pulse' :
-                    'bg-[var(--bg-tertiary)] text-[var(--text-muted)]'
-                  }`}>
-                  {step.status === 'done' ? '✓' :
-                   step.status === 'running' ? '⟳' :
-                   step.id}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className={`text-xs font-semibold transition-colors
-                    ${step.status === 'done'    ? 'text-green-700 dark:text-green-400' :
-                      step.status === 'running' ? 'text-[var(--blue)]' :
-                      'text-[var(--text-muted)]'
-                    }`}>
-                    {step.label}
-                  </div>
-                  {(step.status === 'running' || step.status === 'done') && (
-                    <div className="text-xs text-[var(--text-muted)] mt-0.5">{step.detail}</div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            {steps.map(step => {
+              const circleSx =
+                step.status === 'done'    ? { bgcolor: '#22c55e', color: '#fff' } :
+                step.status === 'running' ? { bgcolor: 'var(--blue)', color: '#fff', animation: 'pulse 1.5s ease-in-out infinite' } :
+                { bgcolor: 'var(--bg-tertiary)', color: 'var(--text-muted)' }
+              const labelColor =
+                step.status === 'done'    ? '#16a34a' :
+                step.status === 'running' ? 'var(--blue)' :
+                'var(--text-muted)'
+              return (
+                <Box key={step.id} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                  <Box sx={{ width: 20, height: 20, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700, flexShrink: 0, mt: 0.25, ...circleSx }}>
+                    {step.status === 'done' ? '✓' :
+                     step.status === 'running' ? '⟳' :
+                     step.id}
+                  </Box>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: labelColor }}>
+                      {step.label}
+                    </Typography>
+                    {(step.status === 'running' || step.status === 'done') && (
+                      <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', mt: 0.25 }}>{step.detail}</Typography>
+                    )}
+                  </Box>
+                </Box>
+              )
+            })}
+          </Box>
+        </Paper>
 
-      </div>
+      </Box>
 
       {/* Deploy log */}
       {logs.length > 0 && (
-        <div className="bg-gray-900 dark:bg-black rounded-2xl p-5 mb-5">
-          <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
+        <Paper elevation={0} sx={{ bgcolor: '#111827', borderRadius: '16px', p: 2.5, mb: 2.5 }}>
+          <Typography sx={{ fontSize: '0.7rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.08em', mb: 1.5 }}>
             Deploy log
-          </div>
-          <div className="font-mono text-xs leading-relaxed max-h-48 overflow-y-auto">
+          </Typography>
+          <Box sx={{ fontFamily: 'monospace', fontSize: '0.75rem', lineHeight: 1.6, maxHeight: 192, overflowY: 'auto' }}>
             {logs.map((log, i) => (
-              <div
+              <Box
                 key={i}
-                className={
-                  log.includes('✓') || log.includes('🎉') || log.includes('🌐')
-                    ? 'text-green-400'
-                    : log.startsWith('>')
-                    ? 'text-blue-400'
-                    : 'text-gray-300'
-                }
+                sx={{
+                  color:
+                    log.includes('✓') || log.includes('🎉') || log.includes('🌐')
+                      ? '#4ade80'
+                      : log.startsWith('>')
+                      ? '#60a5fa'
+                      : '#d1d5db',
+                }}
               >
-                {log || '\u00A0'}
-              </div>
+                {log || ' '}
+              </Box>
             ))}
             {deploying && (
-              <div className="text-gray-500 animate-pulse">▋</div>
+              <Box sx={{ color: '#6b7280', animation: 'pulse 1.5s ease-in-out infinite' }}>▋</Box>
             )}
-          </div>
-        </div>
+          </Box>
+        </Paper>
       )}
 
       {/* Env variables */}
-      <div className="bg-[var(--bg-primary)] dark:bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-5">
-        <div className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-4">
-          Environment variables (production)
-        </div>
-        <div className="bg-gray-900 dark:bg-black rounded-xl p-4 font-mono text-xs leading-loose overflow-x-auto">
-          <div><span className="text-blue-400">NEXT_PUBLIC_API_URL</span>=<span className="text-green-400">https://api.{config.domain}</span></div>
-          <div><span className="text-blue-400">DATABASE_URL</span>=<span className="text-green-400">postgresql://***@neon.tech/devlaunch</span></div>
-          <div><span className="text-blue-400">JWT_SECRET</span>=<span className="text-green-400">your_production_secret_here</span></div>
-          <div><span className="text-blue-400">OLLAMA_URL</span>=<span className="text-green-400">https://your-ollama-server.com</span></div>
-          <div><span className="text-blue-400">NODE_ENV</span>=<span className="text-green-400">production</span></div>
-        </div>
-      </div>
+      <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5 }}>
+        <Typography sx={{ ...labelSx, mb: 2 }}>Environment variables (production)</Typography>
+        <Box sx={{ bgcolor: '#111827', borderRadius: '12px', p: 2, fontFamily: 'monospace', fontSize: '0.75rem', lineHeight: 2, overflowX: 'auto' }}>
+          <Box><Box component="span" sx={{ color: '#60a5fa' }}>NEXT_PUBLIC_API_URL</Box>=<Box component="span" sx={{ color: '#4ade80' }}>https://api.{config.domain}</Box></Box>
+          <Box><Box component="span" sx={{ color: '#60a5fa' }}>DATABASE_URL</Box>=<Box component="span" sx={{ color: '#4ade80' }}>postgresql://***@neon.tech/devlaunch</Box></Box>
+          <Box><Box component="span" sx={{ color: '#60a5fa' }}>JWT_SECRET</Box>=<Box component="span" sx={{ color: '#4ade80' }}>your_production_secret_here</Box></Box>
+          <Box><Box component="span" sx={{ color: '#60a5fa' }}>OLLAMA_URL</Box>=<Box component="span" sx={{ color: '#4ade80' }}>https://your-ollama-server.com</Box></Box>
+          <Box><Box component="span" sx={{ color: '#60a5fa' }}>NODE_ENV</Box>=<Box component="span" sx={{ color: '#4ade80' }}>production</Box></Box>
+        </Box>
+      </Paper>
 
-    </div>
+    </Box>
   )
 }

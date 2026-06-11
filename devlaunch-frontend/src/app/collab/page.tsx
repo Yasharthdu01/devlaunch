@@ -1,18 +1,26 @@
 'use client'
 import { useState, useEffect } from 'react'
 import API_URL from '@/lib/config'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Paper from '@mui/material/Paper'
+import Button from '@mui/material/Button'
+import Chip from '@mui/material/Chip'
+import Avatar from '@mui/material/Avatar'
+import TextField from '@mui/material/TextField'
+import MenuItem from '@mui/material/MenuItem'
 
 const COLUMNS = [
-  { id: 'todo',        label: 'To do',       color: 'bg-gray-100' },
-  { id: 'in_progress', label: 'In progress',  color: 'bg-blue-50'  },
-  { id: 'done',        label: 'Done',         color: 'bg-green-50' },
+  { id: 'todo',        label: 'To do',       color: 'var(--bg-tertiary)' },
+  { id: 'in_progress', label: 'In progress', color: '#eff6ff'            },
+  { id: 'done',        label: 'Done',        color: '#f0fdf4'            },
 ]
 
-const TYPE_COLORS = {
-  feature: 'bg-blue-100 text-blue-700',
-  bug:     'bg-red-100 text-red-700',
-  design:  'bg-purple-100 text-purple-700',
-  backend: 'bg-green-100 text-green-700',
+const TYPE_COLORS: Record<string, { bg: string; fg: string }> = {
+  feature: { bg: '#dbeafe', fg: '#1d4ed8' },
+  bug:     { bg: '#fee2e2', fg: '#b91c1c' },
+  design:  { bg: '#f3e8ff', fg: '#7e22ce' },
+  backend: { bg: '#dcfce7', fg: '#15803d' },
 }
 
 export default function CollabPage() {
@@ -144,253 +152,337 @@ export default function CollabPage() {
   const tasksByStatus = (status) =>
     tasks.filter(t => t.status === status)
 
+  const labelSx = { fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' } as const
+
   return (
-    <div className="flex gap-5 h-full min-h-0 w-full">
+    <Box sx={{ display: 'flex', gap: 2.5, height: '100%', minHeight: 0, width: '100%', flexDirection: { xs: 'column', lg: 'row' } }}>
 
       {/* Kanban board */}
-      <div className="flex-1 min-w-0">
+      <Box sx={{ flex: 1, minWidth: 0 }}>
 
         {/* Project selector */}
         {projects.length > 0 && (
-          <div className="flex gap-2 mb-4 flex-wrap">
+          <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
             {projects.map(p => (
-              <button key={p.id}
+              <Button
+                key={p.id}
                 onClick={() => setSelectedId(String(p.id))}
-                className={`px-3 py-1.5 text-xs rounded-lg border transition-colors
-                  ${String(p.id) === selectedId
-                    ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-white text-gray-600 border-gray-300 hover:border-blue-300'
-                  }`}>
+                disableElevation
+                variant={String(p.id) === selectedId ? 'contained' : 'outlined'}
+                sx={{
+                  fontSize: '0.75rem',
+                  borderRadius: '8px',
+                  textTransform: 'none',
+                  py: 0.5,
+                  ...(String(p.id) === selectedId
+                    ? { bgcolor: 'var(--blue)', color: '#fff', '&:hover': { bgcolor: 'var(--blue-dark)' } }
+                    : { borderColor: 'var(--border)', color: 'var(--text-secondary)', '&:hover': { bgcolor: 'var(--bg-tertiary)', borderColor: 'var(--blue-light)' } }),
+                }}
+              >
                 {p.title}
-              </button>
+              </Button>
             ))}
-          </div>
+          </Box>
         )}
 
         {/* Kanban columns */}
-        <div className="grid grid-cols-3 gap-4">
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 2 }}>
           {COLUMNS.map(col => (
-            <div key={col.id} className={`${col.color} rounded-xl p-3`}>
+            <Box key={col.id} sx={{ bgcolor: col.color, borderRadius: '12px', p: 1.5, minWidth: 0 }}>
 
               {/* Column header */}
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-bold text-gray-600 uppercase tracking-wider">
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+                <Typography sx={{ ...labelSx, color: 'var(--text-secondary)' }}>
                   {col.label}
-                </span>
-                <span className="text-xs bg-white text-gray-500 font-semibold px-2 py-0.5 rounded-full">
-                  {tasksByStatus(col.id).length}
-                </span>
-              </div>
+                </Typography>
+                <Chip
+                  label={tasksByStatus(col.id).length}
+                  size="small"
+                  sx={{ height: 20, bgcolor: 'var(--bg-primary)', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600 }}
+                />
+              </Box>
 
               {/* Tasks */}
-              <div className="flex flex-col gap-2 mb-3">
-                {tasksByStatus(col.id).map(task => (
-                  <div key={task.id}
-                    onClick={() => setSelectedTask(task)}
-                    className={`bg-white border rounded-xl p-3 cursor-pointer transition-all
-                      ${selectedTask?.id === task.id
-                        ? 'border-blue-400 shadow-sm'
-                        : 'border-gray-200 hover:border-gray-300'
-                      }`}>
-                    <div className="text-xs font-semibold text-gray-800 mb-2 leading-relaxed">
-                      {task.title}
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium
-                        ${TYPE_COLORS[task.type] || TYPE_COLORS.feature}`}>
-                        {task.type}
-                      </span>
-                      {task.assigned_to && (
-                        <span className="text-xs text-gray-400">{task.assigned_to}</span>
-                      )}
-                    </div>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 1.5 }}>
+                {tasksByStatus(col.id).map(task => {
+                  const tc = TYPE_COLORS[task.type] || TYPE_COLORS.feature
+                  const isSelected = selectedTask?.id === task.id
+                  return (
+                    <Paper
+                      key={task.id}
+                      elevation={0}
+                      onClick={() => setSelectedTask(task)}
+                      sx={{
+                        bgcolor: 'var(--bg-primary)',
+                        border: '1px solid',
+                        borderColor: isSelected ? 'var(--blue-light)' : 'var(--border)',
+                        boxShadow: isSelected ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                        borderRadius: '12px',
+                        p: 1.5,
+                        cursor: 'pointer',
+                        minWidth: 0,
+                        '&:hover': { borderColor: isSelected ? 'var(--blue-light)' : 'var(--text-muted)' },
+                      }}
+                    >
+                      <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)', mb: 1, lineHeight: 1.5, wordBreak: 'break-word' }}>
+                        {task.title}
+                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, minWidth: 0 }}>
+                        <Chip
+                          label={task.type}
+                          size="small"
+                          sx={{ height: 20, bgcolor: tc.bg, color: tc.fg, fontSize: '0.7rem', fontWeight: 500, textTransform: 'capitalize', flexShrink: 0 }}
+                        />
+                        {task.assigned_to && (
+                          <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {task.assigned_to}
+                          </Typography>
+                        )}
+                      </Box>
 
-                    {/* Move buttons */}
-                    <div className="flex gap-1 mt-2">
-                      {col.id !== 'todo' && (
-                        <button
-                          onClick={e => { e.stopPropagation(); moveTask(task.id, col.id === 'in_progress' ? 'todo' : 'in_progress') }}
-                          className="text-xs px-2 py-0.5 bg-gray-100 text-gray-500 rounded-md hover:bg-gray-200">
-                          ← Move back
-                        </button>
-                      )}
-                      {col.id !== 'done' && (
-                        <button
-                          onClick={e => { e.stopPropagation(); moveTask(task.id, col.id === 'todo' ? 'in_progress' : 'done') }}
-                          className="text-xs px-2 py-0.5 bg-blue-100 text-blue-600 rounded-md hover:bg-blue-200">
-                          Move forward →
-                        </button>
-                      )}
-                      <button
-                        onClick={e => { e.stopPropagation(); deleteTask(task.id) }}
-                        className="text-xs px-2 py-0.5 bg-red-50 text-red-400 rounded-md hover:bg-red-100 ml-auto">
-                        ×
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                      {/* Move buttons */}
+                      <Box sx={{ display: 'flex', gap: 0.5, mt: 1, flexWrap: 'wrap' }}>
+                        {col.id !== 'todo' && (
+                          <Button
+                            onClick={e => { e.stopPropagation(); moveTask(task.id, col.id === 'in_progress' ? 'todo' : 'in_progress') }}
+                            disableElevation
+                            sx={{ minWidth: 'auto', fontSize: '0.7rem', px: 1, py: 0.25, bgcolor: 'var(--bg-tertiary)', color: 'var(--text-muted)', borderRadius: '6px', textTransform: 'none', '&:hover': { bgcolor: 'var(--border)' } }}
+                          >
+                            ← Move back
+                          </Button>
+                        )}
+                        {col.id !== 'done' && (
+                          <Button
+                            onClick={e => { e.stopPropagation(); moveTask(task.id, col.id === 'todo' ? 'in_progress' : 'done') }}
+                            disableElevation
+                            sx={{ minWidth: 'auto', fontSize: '0.7rem', px: 1, py: 0.25, bgcolor: '#dbeafe', color: '#1d4ed8', borderRadius: '6px', textTransform: 'none', '&:hover': { bgcolor: '#bfdbfe' } }}
+                          >
+                            Move forward →
+                          </Button>
+                        )}
+                        <Button
+                          onClick={e => { e.stopPropagation(); deleteTask(task.id) }}
+                          disableElevation
+                          sx={{ minWidth: 'auto', fontSize: '0.7rem', px: 1, py: 0.25, bgcolor: '#fef2f2', color: '#f87171', borderRadius: '6px', textTransform: 'none', ml: 'auto', '&:hover': { bgcolor: '#fee2e2' } }}
+                        >
+                          ×
+                        </Button>
+                      </Box>
+                    </Paper>
+                  )
+                })}
+              </Box>
 
               {/* Add task */}
               {showAddTask && addingTo === col.id ? (
-                <div className="bg-white border border-blue-300 rounded-xl p-3 flex flex-col gap-2">
-                  <input
+                <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--blue-light)', borderRadius: '12px', p: 1.5, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <TextField
                     autoFocus
                     value={newTask.title}
-                    onChange={e => setNewTask({ ...newTask, title: e.target.value })}
-                    onKeyDown={e => e.key === 'Enter' && addTask(col.id)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTask({ ...newTask, title: e.target.value })}
+                    onKeyDown={(e: React.KeyboardEvent) => e.key === 'Enter' && addTask(col.id)}
                     placeholder="Task title..."
-                    className="w-full text-xs px-2 py-1.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500"
+                    size="small"
+                    fullWidth
+                    sx={{ '& .MuiInputBase-input': { fontSize: '0.75rem' } }}
                   />
-                  <div className="flex gap-2">
-                    <input
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <TextField
                       value={newTask.assigned_to}
-                      onChange={e => setNewTask({ ...newTask, assigned_to: e.target.value })}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTask({ ...newTask, assigned_to: e.target.value })}
                       placeholder="Assign to..."
-                      className="flex-1 text-xs px-2 py-1.5 border border-gray-200 rounded-lg outline-none"
+                      size="small"
+                      sx={{ flex: 1, minWidth: 0, '& .MuiInputBase-input': { fontSize: '0.75rem' } }}
                     />
-                    <select
+                    <TextField
+                      select
                       value={newTask.type}
-                      onChange={e => setNewTask({ ...newTask, type: e.target.value })}
-                      className="text-xs px-2 py-1.5 border border-gray-200 rounded-lg outline-none bg-white">
-                      <option value="feature">Feature</option>
-                      <option value="bug">Bug</option>
-                      <option value="design">Design</option>
-                      <option value="backend">Backend</option>
-                    </select>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTask({ ...newTask, type: e.target.value })}
+                      size="small"
+                      sx={{ '& .MuiInputBase-input': { fontSize: '0.75rem' } }}
+                    >
+                      <MenuItem value="feature">Feature</MenuItem>
+                      <MenuItem value="bug">Bug</MenuItem>
+                      <MenuItem value="design">Design</MenuItem>
+                      <MenuItem value="backend">Backend</MenuItem>
+                    </TextField>
+                  </Box>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
                       onClick={() => addTask(col.id)}
                       disabled={loading}
-                      className="flex-1 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                      variant="contained"
+                      disableElevation
+                      sx={{ flex: 1, py: 0.75, bgcolor: 'var(--blue)', color: '#fff', fontSize: '0.75rem', fontWeight: 600, borderRadius: '8px', textTransform: 'none', '&:hover': { bgcolor: 'var(--blue-dark)' } }}
+                    >
                       {loading ? '...' : 'Add task'}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() => { setShowAddTask(false); setAddingTo('') }}
-                      className="px-3 py-1.5 border border-gray-200 text-xs rounded-lg text-gray-500 hover:bg-gray-50">
+                      variant="outlined"
+                      sx={{ px: 1.5, py: 0.75, borderColor: 'var(--border)', color: 'var(--text-muted)', fontSize: '0.75rem', borderRadius: '8px', textTransform: 'none', '&:hover': { bgcolor: 'var(--bg-tertiary)', borderColor: 'var(--border)' } }}
+                    >
                       Cancel
-                    </button>
-                  </div>
-                </div>
+                    </Button>
+                  </Box>
+                </Paper>
               ) : (
-                <button
+                <Button
                   onClick={() => { setShowAddTask(true); setAddingTo(col.id) }}
-                  className="w-full py-2 text-xs text-gray-400 hover:text-blue-600 hover:bg-white rounded-lg transition-colors border border-dashed border-gray-200 hover:border-blue-300">
+                  fullWidth
+                  sx={{ py: 1, fontSize: '0.75rem', color: 'var(--text-muted)', borderRadius: '8px', textTransform: 'none', border: '1px dashed var(--border)', '&:hover': { color: 'var(--blue)', bgcolor: 'var(--bg-primary)', borderColor: 'var(--blue-light)' } }}
+                >
                   + Add task
-                </button>
+                </Button>
               )}
 
-            </div>
+            </Box>
           ))}
-        </div>
-      </div>
+        </Box>
+      </Box>
 
       {/* Task detail panel */}
       {selectedTask && (
-        <div className="w-72 flex-shrink-0 bg-white border border-gray-200 rounded-2xl p-4 flex flex-col gap-4 overflow-y-auto">
+        <Paper
+          elevation={0}
+          sx={{
+            width: { xs: '100%', lg: 288 },
+            flexShrink: 0,
+            bgcolor: 'var(--bg-primary)',
+            border: '1px solid var(--border)',
+            borderRadius: '16px',
+            p: 2,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            overflowY: 'auto',
+          }}
+        >
 
-          <div>
-            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-              Task details
-            </div>
-            <div className="text-sm font-semibold text-gray-900 mb-1">
+          <Box>
+            <Typography sx={{ ...labelSx, mb: 1 }}>Task details</Typography>
+            <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', mb: 1, wordBreak: 'break-word' }}>
               {selectedTask.title}
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium
-                ${TYPE_COLORS[selectedTask.type] || TYPE_COLORS.feature}`}>
-                {selectedTask.type}
-              </span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 font-medium capitalize">
-                {selectedTask.status.replace('_', ' ')}
-              </span>
-            </div>
-          </div>
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              <Chip
+                label={selectedTask.type}
+                size="small"
+                sx={{ height: 20, bgcolor: (TYPE_COLORS[selectedTask.type] || TYPE_COLORS.feature).bg, color: (TYPE_COLORS[selectedTask.type] || TYPE_COLORS.feature).fg, fontSize: '0.7rem', fontWeight: 500, textTransform: 'capitalize' }}
+              />
+              <Chip
+                label={selectedTask.status.replace('_', ' ')}
+                size="small"
+                sx={{ height: 20, bgcolor: 'var(--bg-tertiary)', color: 'var(--text-secondary)', fontSize: '0.7rem', fontWeight: 500, textTransform: 'capitalize' }}
+              />
+            </Box>
+          </Box>
 
           {selectedTask.assigned_to && (
-            <div>
-              <div className="text-xs text-gray-400 mb-1">Assigned to</div>
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">
+            <Box>
+              <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', mb: 1 }}>Assigned to</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Avatar sx={{ width: 24, height: 24, bgcolor: '#dbeafe', color: '#1d4ed8', fontSize: '0.75rem', fontWeight: 700 }}>
                   {selectedTask.assigned_to[0].toUpperCase()}
-                </div>
-                <span className="text-sm text-gray-700">{selectedTask.assigned_to}</span>
-              </div>
-            </div>
+                </Avatar>
+                <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {selectedTask.assigned_to}
+                </Typography>
+              </Box>
+            </Box>
           )}
 
           {/* Move task */}
-          <div>
-            <div className="text-xs text-gray-400 mb-2">Move to</div>
-            <div className="flex gap-1">
-              {COLUMNS.map(col => (
-                <button key={col.id}
-                  onClick={() => moveTask(selectedTask.id, col.id)}
-                  disabled={selectedTask.status === col.id}
-                  className={`flex-1 py-1.5 text-xs rounded-lg font-medium transition-colors
-                    ${selectedTask.status === col.id
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}>
-                  {col.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          <Box>
+            <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', mb: 1 }}>Move to</Typography>
+            <Box sx={{ display: 'flex', gap: 0.5 }}>
+              {COLUMNS.map(col => {
+                const active = selectedTask.status === col.id
+                return (
+                  <Button
+                    key={col.id}
+                    onClick={() => moveTask(selectedTask.id, col.id)}
+                    disabled={active}
+                    disableElevation
+                    sx={{
+                      flex: 1,
+                      minWidth: 0,
+                      py: 0.75,
+                      fontSize: '0.7rem',
+                      fontWeight: 500,
+                      borderRadius: '8px',
+                      textTransform: 'none',
+                      ...(active
+                        ? { bgcolor: 'var(--blue)', color: '#fff', '&.Mui-disabled': { bgcolor: 'var(--blue)', color: '#fff' } }
+                        : { bgcolor: 'var(--bg-tertiary)', color: 'var(--text-secondary)', '&:hover': { bgcolor: 'var(--border)' } }),
+                    }}
+                  >
+                    {col.label}
+                  </Button>
+                )
+              })}
+            </Box>
+          </Box>
 
           {/* Comments */}
-          <div className="flex-1">
-            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
+          <Box sx={{ flex: 1 }}>
+            <Typography sx={{ ...labelSx, mb: 1.5 }}>
               Comments ({comments.length})
-            </div>
+            </Typography>
 
-            <div className="flex flex-col gap-3 mb-3">
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 1.5 }}>
               {comments.length === 0 ? (
-                <div className="text-xs text-gray-400 text-center py-2">
+                <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', py: 1 }}>
                   No comments yet
-                </div>
+                </Typography>
               ) : (
                 comments.map(c => (
-                  <div key={c.id} className="flex gap-2 items-start">
-                    <div className="w-6 h-6 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                  <Box key={c.id} sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+                    <Avatar sx={{ width: 24, height: 24, bgcolor: '#f3e8ff', color: '#7e22ce', fontSize: '0.75rem', fontWeight: 700, flexShrink: 0 }}>
                       {(c.name || 'U')[0].toUpperCase()}
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-xs font-semibold text-gray-700">{c.name || 'You'}</div>
-                      <div className="text-xs text-gray-600 mt-0.5 leading-relaxed">{c.content}</div>
-                    </div>
-                  </div>
+                    </Avatar>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{c.name || 'You'}</Typography>
+                      <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', mt: 0.25, lineHeight: 1.5, wordBreak: 'break-word' }}>{c.content}</Typography>
+                    </Box>
+                  </Box>
                 ))
               )}
-            </div>
+            </Box>
 
-            <div className="flex gap-2">
-              <input
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <TextField
                 value={newComment}
-                onChange={e => setNewComment(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && addComment()}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewComment(e.target.value)}
+                onKeyDown={(e: React.KeyboardEvent) => e.key === 'Enter' && addComment()}
                 placeholder="Add comment..."
-                className="flex-1 text-xs px-2 py-1.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500"
+                size="small"
+                sx={{ flex: 1, minWidth: 0, '& .MuiInputBase-input': { fontSize: '0.75rem' } }}
               />
-              <button
+              <Button
                 onClick={addComment}
                 disabled={!newComment.trim()}
-                className="px-3 py-1.5 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                variant="contained"
+                disableElevation
+                sx={{ px: 1.5, bgcolor: 'var(--blue)', color: '#fff', fontSize: '0.75rem', borderRadius: '8px', textTransform: 'none', '&:hover': { bgcolor: 'var(--blue-dark)' } }}
+              >
                 Send
-              </button>
-            </div>
-          </div>
+              </Button>
+            </Box>
+          </Box>
 
-          <button
+          <Button
             onClick={() => setSelectedTask(null)}
-            className="w-full py-2 text-xs text-gray-400 hover:text-gray-600 border border-gray-200 rounded-lg">
+            variant="outlined"
+            fullWidth
+            sx={{ py: 1, fontSize: '0.75rem', color: 'var(--text-muted)', borderColor: 'var(--border)', borderRadius: '8px', textTransform: 'none', '&:hover': { color: 'var(--text-secondary)', bgcolor: 'var(--bg-tertiary)', borderColor: 'var(--border)' } }}
+          >
             Close panel
-          </button>
+          </Button>
 
-        </div>
+        </Paper>
       )}
 
-    </div>
+    </Box>
   )
 }

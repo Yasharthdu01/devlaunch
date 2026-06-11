@@ -1,12 +1,16 @@
 'use client'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Paper from '@mui/material/Paper'
+import Avatar from '@mui/material/Avatar'
 
 const reviews = [
   {
     name: 'Rajesh Kumar',
     company: 'TravelNest Agency',
     initials: 'RK',
-    avatarBg: 'bg-green-100',
-    avatarText: 'text-green-800',
+    avatarBg: '#dcfce7',
+    avatarText: '#166534',
     rating: 5,
     text: '"They built our entire travel portal in 8 weeks. The AI onboarding wizard saved hours of planning. Best tech team I have worked with."',
     meta: 'Travel & Hospitality · Web app · ₹4.2L project',
@@ -15,8 +19,8 @@ const reviews = [
     name: 'Ananya Sharma',
     company: 'EdQuest LMS',
     initials: 'AS',
-    avatarBg: 'bg-amber-100',
-    avatarText: 'text-amber-800',
+    avatarBg: '#fef3c7',
+    avatarText: '#92400e',
     rating: 5,
     text: '"The 6-step wizard was incredible — AI recommended exactly the right tech stack. Deployed in 6 weeks as promised."',
     meta: 'EdTech · Web + Mobile · ₹3.8L project',
@@ -25,8 +29,8 @@ const reviews = [
     name: 'Mohammed Viqar',
     company: 'ShopX Marketplace',
     initials: 'MV',
-    avatarBg: 'bg-purple-100',
-    avatarText: 'text-purple-800',
+    avatarBg: '#f3e8ff',
+    avatarText: '#6b21a8',
     rating: 4,
     text: '"AI chatbot resolved most queries instantly. Delivery was on time and the app handles peak load very well."',
     meta: 'E-commerce · Multi-vendor · ₹6.5L project',
@@ -35,8 +39,8 @@ const reviews = [
     name: 'Priya Mehta',
     company: 'MediBook Health',
     initials: 'PM',
-    avatarBg: 'bg-blue-100',
-    avatarText: 'text-blue-800',
+    avatarBg: '#dbeafe',
+    avatarText: '#1e40af',
     rating: 5,
     text: '"HIPAA-compliant architecture, WebRTC video calls, e-prescriptions — all delivered perfectly. Highly professional team."',
     meta: 'Healthcare · Web app · ₹5.1L project',
@@ -45,8 +49,8 @@ const reviews = [
     name: 'Amit Singh',
     company: 'FinTrack SaaS',
     initials: 'AS',
-    avatarBg: 'bg-teal-100',
-    avatarText: 'text-teal-800',
+    avatarBg: '#ccfbf1',
+    avatarText: '#115e59',
     rating: 5,
     text: '"Multi-tenant SaaS delivered with real-time dashboards, role-based access, and bank API integration. Exceeded expectations."',
     meta: 'SaaS · Dashboard · ₹3.2L project',
@@ -55,93 +59,141 @@ const reviews = [
     name: 'Sneha Reddy',
     company: 'GrowMore Marketing',
     initials: 'SR',
-    avatarBg: 'bg-pink-100',
-    avatarText: 'text-pink-800',
+    avatarBg: '#fce7f3',
+    avatarText: '#9d174d',
     rating: 5,
     text: '"The marketing AI module generated perfect SEO keywords and ad copy for our niche. Website traffic increased 3x in 2 months."',
     meta: 'Marketing · Landing page + SEO · ₹1.8L project',
   },
 ]
 
-function Stars({ count }) {
+const SUMMARY = [
+  { label: 'Overall rating',   value: '4.9 / 5' },
+  { label: 'Would recommend',  value: '97%' },
+  { label: 'On-time delivery', value: '100%' },
+]
+
+function Stars({ count }: { count: number }) {
   return (
-    <div className="flex gap-0.5">
+    <Box sx={{ display: 'flex', gap: 0.25 }}>
       {[1, 2, 3, 4, 5].map((i) => (
-        <span
+        <Box
           key={i}
-          className={`text-sm ${i <= count ? 'text-amber-400' : 'text-gray-200'}`}
+          component="span"
+          sx={{ fontSize: '0.875rem', color: i <= count ? '#fbbf24' : 'var(--border)' }}
         >
           ★
-        </span>
+        </Box>
       ))}
-    </div>
+    </Box>
   )
 }
 
 export default function ReviewsPage() {
   return (
-    <div>
+    <Box sx={{ maxWidth: 720, mx: 'auto', width: '100%' }}>
 
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-xl font-bold text-gray-900">Client reviews</h1>
-        <p className="text-sm text-gray-500 mt-1">Real feedback from our clients</p>
-      </div>
+      <Box sx={{ mb: 3 }}>
+        <Typography sx={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>Client reviews</Typography>
+        <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-muted)', mt: 0.5 }}>Real feedback from our clients</Typography>
+      </Box>
 
       {/* Summary metrics */}
-      <div className="grid grid-cols-3 gap-3 mb-6">
-        {[
-          { label: 'Overall rating',    value: '4.9 / 5' },
-          { label: 'Would recommend',   value: '97%' },
-          { label: 'On-time delivery',  value: '100%' },
-        ].map((s) => (
-          <div key={s.label} className="bg-gray-100 rounded-xl p-3 text-center">
-            <div className="text-2xl font-bold text-gray-900">{s.value}</div>
-            <div className="text-xs text-gray-500 mt-1">{s.label}</div>
-          </div>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', sm: 'repeat(3,1fr)' },
+          gap: 1.5,
+          mb: 3,
+        }}
+      >
+        {SUMMARY.map((s) => (
+          <Paper
+            key={s.label}
+            elevation={0}
+            sx={{ bgcolor: 'var(--bg-tertiary)', borderRadius: '12px', p: 1.5, textAlign: 'center' }}
+          >
+            <Typography sx={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>{s.value}</Typography>
+            <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', mt: 0.5 }}>{s.label}</Typography>
+          </Paper>
         ))}
-      </div>
+      </Box>
 
       {/* Overall stars */}
-      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6 flex items-center gap-4">
-        <div className="text-4xl font-bold text-blue-600">4.9</div>
-        <div>
+      <Paper
+        elevation={0}
+        sx={{
+          bgcolor: 'var(--blue-light)',
+          border: '1px solid var(--blue-light)',
+          borderRadius: '12px',
+          p: 2,
+          mb: 3,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2,
+          flexWrap: 'wrap',
+        }}
+      >
+        <Typography sx={{ fontSize: '2.25rem', fontWeight: 700, color: 'var(--blue)' }}>4.9</Typography>
+        <Box>
           <Stars count={5} />
-          <div className="text-xs text-gray-500 mt-1">Based on 41 client reviews</div>
-        </div>
-      </div>
+          <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', mt: 0.5 }}>Based on 41 client reviews</Typography>
+        </Box>
+      </Paper>
+
+      {/* Section label */}
+      <Typography sx={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', mb: 1.5 }}>
+        What clients say
+      </Typography>
 
       {/* Review cards */}
-      <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
-        What clients say
-      </div>
-      <div className="flex flex-col gap-4">
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {reviews.map((r) => (
-          <div
+          <Paper
             key={r.name}
-            className="bg-white border border-gray-200 rounded-xl p-4"
+            elevation={0}
+            sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '12px', p: 2 }}
           >
             {/* Reviewer info */}
-            <div className="flex items-center gap-3 mb-3">
-              <div className={`w-9 h-9 rounded-full ${r.avatarBg} ${r.avatarText} flex items-center justify-center text-xs font-bold flex-shrink-0`}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+              <Avatar
+                sx={{
+                  width: 36,
+                  height: 36,
+                  bgcolor: r.avatarBg,
+                  color: r.avatarText,
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  flexShrink: 0,
+                }}
+              >
                 {r.initials}
-              </div>
-              <div className="flex-1">
-                <div className="text-sm font-semibold text-gray-900">{r.name}</div>
-                <div className="text-xs text-gray-400">{r.company}</div>
-              </div>
-              <Stars count={r.rating} />
-            </div>
+              </Avatar>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {r.name}
+                </Typography>
+                <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {r.company}
+                </Typography>
+              </Box>
+              <Box sx={{ flexShrink: 0 }}>
+                <Stars count={r.rating} />
+              </Box>
+            </Box>
 
             {/* Review text */}
-            <p className="text-sm text-gray-600 leading-relaxed mb-2 italic">{r.text}</p>
+            <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.6, mb: 1, fontStyle: 'italic' }}>
+              {r.text}
+            </Typography>
 
             {/* Meta */}
-            <div className="text-xs text-gray-400">{r.meta}</div>
-          </div>
+            <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{r.meta}</Typography>
+          </Paper>
         ))}
-      </div>
+      </Box>
 
-    </div>
+    </Box>
   )
 }

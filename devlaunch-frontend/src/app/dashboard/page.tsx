@@ -2,6 +2,30 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Rocket, BarChart2, FileText, Bot, ArrowRight, User, CheckCircle } from 'lucide-react'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Paper from '@mui/material/Paper'
+import LinearProgress from '@mui/material/LinearProgress'
+
+const QUICK_ACTIONS = [
+  { icon: Rocket,    label: 'Start project',  href: '/wizard',   desc: 'AI-guided onboarding', color: '#3b82f6' },
+  { icon: BarChart2, label: 'Live tracker',   href: '/tracker',  desc: 'Track progress',       color: '#22c55e' },
+  { icon: FileText,  label: 'View proposal',  href: '/proposal', desc: 'Scope & cost',         color: '#a855f7' },
+  { icon: Bot,       label: 'AI assistant',   href: '/chatbot',  desc: 'Get help',             color: '#f97316' },
+]
+
+const STAGES = [
+  { label: 'Requirements gathering', value: 100, done: true,  color: '#22c55e' },
+  { label: 'Design & prototype',     value: 0,   done: false, color: 'var(--blue)' },
+  { label: 'Development',            value: 0,   done: false, color: 'var(--blue)' },
+]
+
+const RESOURCES = [
+  { href: '/portfolio', emoji: '📂', label: 'Portfolio',  desc: 'See our past projects', bg: '#dbeafe', fg: '#2563eb' },
+  { href: '/reviews',   emoji: '⭐', label: 'Reviews',    desc: 'What clients say',       bg: '#dcfce7', fg: '#16a34a' },
+  { href: '/profile',   emoji: '👤', label: 'My profile', desc: 'Account settings',       bg: '#f3e8ff', fg: '#9333ea' },
+  { href: '/support',   emoji: '🎫', label: 'Support',    desc: 'Get help & tickets',     bg: '#ffedd5', fg: '#ea580c' },
+]
 
 export default function DashboardPage() {
   const [user, setUser] = useState<{ name?: string; company_name?: string } | null>(null)
@@ -13,135 +37,186 @@ export default function DashboardPage() {
     }
   }, [])
 
-  const quickActions = [
-    { icon: Rocket, label: 'Start project', href: '/wizard', desc: 'AI-guided onboarding', color: 'bg-blue-500' },
-    { icon: BarChart2, label: 'Live tracker', href: '/tracker', desc: 'Track progress', color: 'bg-green-500' },
-    { icon: FileText, label: 'View proposal', href: '/proposal', desc: 'Scope & cost', color: 'bg-purple-500' },
-    { icon: Bot, label: 'AI assistant', href: '/chatbot', desc: 'Get help', color: 'bg-orange-500' },
-  ]
+  const labelSx = { fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' } as const
 
   return (
-    <div className="max-w-5xl mx-auto w-full">
+    <Box sx={{ maxWidth: 880, mx: 'auto', width: '100%' }}>
+
       {/* Greeting */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[var(--text-primary)]">
+      <Box sx={{ mb: 4 }}>
+        <Typography sx={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>
           Welcome back{user?.name ? `, ${user.name.split(' ')[0]}` : ''} 👋
-        </h1>
-        <p className="text-sm text-[var(--text-muted)] mt-1">
+        </Typography>
+        <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-muted)', mt: 0.5 }}>
           {user?.company_name ? `${user.company_name} · ` : ''}Your AI-powered delivery platform
-        </p>
-      </div>
+        </Typography>
+      </Box>
 
       {/* Quick actions */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        {quickActions.map((a) => {
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2,1fr)', md: 'repeat(4,1fr)' },
+          gap: 2,
+          mb: 4,
+        }}
+      >
+        {QUICK_ACTIONS.map((a) => {
           const Icon = a.icon
           return (
-            <Link key={a.href} href={a.href}>
-              <div className="bg-[var(--bg-primary)] border border-[var(--border)] rounded-2xl p-5 hover:border-[var(--blue)] hover:shadow-md transition-all cursor-pointer group h-full">
-                <div className={`w-10 h-10 ${a.color} rounded-xl flex items-center justify-center mb-4`}>
-                  <Icon size={18} className="text-white" />
-                </div>
-                <div className="text-sm font-bold text-[var(--text-primary)] group-hover:text-[var(--blue)] transition-colors">
-                  {a.label}
-                </div>
-                <div className="text-xs text-[var(--text-muted)] mt-1">{a.desc}</div>
-              </div>
-            </Link>
+            <Paper
+              key={a.href}
+              component={Link}
+              href={a.href}
+              elevation={0}
+              sx={{
+                display: 'block',
+                textDecoration: 'none',
+                bgcolor: 'var(--bg-primary)',
+                border: '1px solid var(--border)',
+                borderRadius: '16px',
+                p: 2.5,
+                height: '100%',
+                transition: 'all 0.15s',
+                '&:hover': { borderColor: 'var(--blue)', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' },
+                '&:hover .qa-label': { color: 'var(--blue)' },
+              }}
+            >
+              <Box
+                sx={{
+                  width: 40,
+                  height: 40,
+                  bgcolor: a.color,
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mb: 2,
+                }}
+              >
+                <Icon size={18} color="#fff" />
+              </Box>
+              <Typography className="qa-label" sx={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)', transition: 'color 0.15s' }}>
+                {a.label}
+              </Typography>
+              <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', mt: 0.5 }}>{a.desc}</Typography>
+            </Paper>
           )
         })}
-      </div>
+      </Box>
 
       {/* Project status summary */}
-      <div className="bg-[var(--bg-primary)] border border-[var(--border)] rounded-2xl p-6 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-bold text-[var(--text-primary)]">Project status</h2>
-          <Link href="/tracker" className="text-xs text-[var(--blue)] font-semibold hover:underline flex items-center gap-1">
+      <Paper
+        elevation={0}
+        sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 3, mb: 2.5 }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, mb: 2, flexWrap: 'wrap' }}>
+          <Typography sx={labelSx}>Project status</Typography>
+          <Typography
+            component={Link}
+            href="/tracker"
+            sx={{
+              fontSize: '0.75rem',
+              color: 'var(--blue)',
+              fontWeight: 600,
+              textDecoration: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.5,
+              '&:hover': { textDecoration: 'underline' },
+            }}
+          >
             View details <ArrowRight size={12} />
-          </Link>
-        </div>
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <CheckCircle size={16} className="text-green-500 flex-shrink-0" />
-            <div className="flex-1">
-              <div className="flex justify-between text-xs">
-                <span className="text-[var(--text-primary)] font-medium">Requirements gathering</span>
-                <span className="text-[var(--text-muted)]">100%</span>
-              </div>
-              <div className="mt-1 h-1.5 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
-                <div className="h-full bg-green-500 rounded-full" style={{ width: '100%' }} />
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-4 h-4 rounded-full border-2 border-[var(--border)] flex-shrink-0" />
-            <div className="flex-1">
-              <div className="flex justify-between text-xs">
-                <span className="text-[var(--text-primary)] font-medium">Design & prototype</span>
-                <span className="text-[var(--text-muted)]">0%</span>
-              </div>
-              <div className="mt-1 h-1.5 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
-                <div className="h-full bg-[var(--blue)] rounded-full" style={{ width: '0%' }} />
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-4 h-4 rounded-full border-2 border-[var(--border)] flex-shrink-0" />
-            <div className="flex-1">
-              <div className="flex justify-between text-xs">
-                <span className="text-[var(--text-primary)] font-medium">Development</span>
-                <span className="text-[var(--text-muted)]">0%</span>
-              </div>
-              <div className="mt-1 h-1.5 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
-                <div className="h-full bg-[var(--blue)] rounded-full" style={{ width: '0%' }} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {STAGES.map((s) => (
+            <Box key={s.label} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              {s.done ? (
+                <CheckCircle size={16} color="#22c55e" style={{ flexShrink: 0 }} />
+              ) : (
+                <Box sx={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid var(--border)', flexShrink: 0 }} />
+              )}
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, fontSize: '0.75rem' }}>
+                  <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-primary)', fontWeight: 500 }}>{s.label}</Typography>
+                  <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{s.value}%</Typography>
+                </Box>
+                <LinearProgress
+                  variant="determinate"
+                  value={s.value}
+                  sx={{
+                    mt: 0.5,
+                    height: 6,
+                    borderRadius: '9999px',
+                    bgcolor: 'var(--bg-tertiary)',
+                    '& .MuiLinearProgress-bar': { bgcolor: s.color, borderRadius: '9999px' },
+                  }}
+                />
+              </Box>
+            </Box>
+          ))}
+        </Box>
+      </Paper>
 
       {/* Resources */}
-      <div className="bg-[var(--bg-primary)] border border-[var(--border)] rounded-2xl p-6">
-        <h2 className="text-sm font-bold text-[var(--text-primary)] mb-4">Quick resources</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Link href="/portfolio" className="flex items-center gap-3 p-3 rounded-xl hover:bg-[var(--bg-tertiary)] transition-colors">
-            <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-400 text-xs font-bold">
-              📂
-            </div>
-            <div>
-              <div className="text-xs font-semibold text-[var(--text-primary)]">Portfolio</div>
-              <div className="text-xs text-[var(--text-muted)]">See our past projects</div>
-            </div>
-          </Link>
-          <Link href="/reviews" className="flex items-center gap-3 p-3 rounded-xl hover:bg-[var(--bg-tertiary)] transition-colors">
-            <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-600 dark:text-green-400 text-xs font-bold">
-              ⭐
-            </div>
-            <div>
-              <div className="text-xs font-semibold text-[var(--text-primary)]">Reviews</div>
-              <div className="text-xs text-[var(--text-muted)]">What clients say</div>
-            </div>
-          </Link>
-          <Link href="/profile" className="flex items-center gap-3 p-3 rounded-xl hover:bg-[var(--bg-tertiary)] transition-colors">
-            <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900 flex items-center justify-center text-purple-600 dark:text-purple-400 text-xs font-bold">
-              👤
-            </div>
-            <div>
-              <div className="text-xs font-semibold text-[var(--text-primary)]">My profile</div>
-              <div className="text-xs text-[var(--text-muted)]">Account settings</div>
-            </div>
-          </Link>
-          <Link href="/support" className="flex items-center gap-3 p-3 rounded-xl hover:bg-[var(--bg-tertiary)] transition-colors">
-            <div className="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-900 flex items-center justify-center text-orange-600 dark:text-orange-400 text-xs font-bold">
-              🎫
-            </div>
-            <div>
-              <div className="text-xs font-semibold text-[var(--text-primary)]">Support</div>
-              <div className="text-xs text-[var(--text-muted)]">Get help & tickets</div>
-            </div>
-          </Link>
-        </div>
-      </div>
-    </div>
+      <Paper
+        elevation={0}
+        sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 3 }}
+      >
+        <Typography sx={{ ...labelSx, mb: 2 }}>Quick resources</Typography>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', md: 'repeat(2,1fr)' },
+            gap: 1.5,
+          }}
+        >
+          {RESOURCES.map((r) => (
+            <Box
+              key={r.href}
+              component={Link}
+              href={r.href}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1.5,
+                p: 1.5,
+                borderRadius: '12px',
+                textDecoration: 'none',
+                transition: 'background-color 0.15s',
+                '&:hover': { bgcolor: 'var(--bg-tertiary)' },
+              }}
+            >
+              <Box
+                sx={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: '8px',
+                  bgcolor: r.bg,
+                  color: r.fg,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  flexShrink: 0,
+                }}
+              >
+                {r.emoji}
+              </Box>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {r.label}
+                </Typography>
+                <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {r.desc}
+                </Typography>
+              </Box>
+            </Box>
+          ))}
+        </Box>
+      </Paper>
+    </Box>
   )
 }
