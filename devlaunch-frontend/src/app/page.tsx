@@ -642,19 +642,19 @@ function Portfolio() {
 function Pricing() {
   const plans = [
     {
-      name: 'Starter', price: '₹2,999', period: '/month',
+      name: 'Starter', price: '₹19,999', period: '/month',
       desc: 'Perfect for small businesses getting started',
       features: ['Web application (5 pages)', 'Mobile responsive', 'Basic admin panel', 'Contact form + WhatsApp', 'SSL + hosting', 'Email support'],
       cta: 'Get started', featured: false,
     },
     {
-      name: 'Professional', price: '₹5,999', period: '/month',
+      name: 'Professional', price: '₹29,999', period: '/month',
       desc: 'For growing businesses needing full features',
       features: ['Full web application', 'Mobile app (iOS + Android)', 'Advanced admin panel', 'Razorpay payment gateway', 'AI chatbot integration', 'SEO optimization', 'Priority support'],
       cta: 'Get started', featured: true,
     },
     {
-      name: 'Enterprise', price: '₹9,999', period: '/month',
+      name: 'Enterprise', price: '₹49,999', period: '/month',
       desc: 'For established businesses needing custom solutions',
       features: ['Custom web + mobile app', 'AI automation workflows', 'Multi-location support', 'ERP / CRM integration', 'Dedicated developer', '40 hours/month', '24/7 support'],
       cta: 'Contact us', featured: false,
