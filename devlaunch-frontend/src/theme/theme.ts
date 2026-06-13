@@ -9,7 +9,7 @@ const theme = createTheme({
     fontFamily: "var(--font-geist-sans), system-ui, -apple-system, sans-serif",
   },
   palette: {
-    primary: { main: "#185FA5" },
+    primary: { main: "#3b82f6" },
     error: { main: "#ef4444" },
     success: { main: "#16a34a" },
     warning: { main: "#d97706" },

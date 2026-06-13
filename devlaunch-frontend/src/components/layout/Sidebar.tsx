@@ -1,13 +1,20 @@
 'use client'
+import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import {
   Home, Folder, Star, Rocket, BarChart2, FileText,
-  Users, Cloud, Bot, Zap, Megaphone,
+  Users, Bot, Zap, Megaphone,
   Settings, User, Ticket
 } from 'lucide-react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
+
+interface StoredUser {
+  name?: string
+  company_name?: string
+  role?: string
+}
 
 const navItems = [
   {
@@ -25,7 +32,6 @@ const navItems = [
       { label: 'Live tracker',  href: '/tracker',  icon: BarChart2 },
       { label: 'Proposal',      href: '/proposal', icon: FileText  },
       { label: 'Collaboration', href: '/collab',   icon: Users     },
-      { label: 'Deployment',    href: '/deploy',   icon: Cloud     },
     ]
   },
   {
@@ -35,7 +41,7 @@ const navItems = [
       { label: 'Build my MVP',  href: '/mvp',       icon: Zap        },
       { label: 'Marketing AI',  href: '/marketing', icon: Megaphone  },
       { label: 'Support',       href: '/support',   icon: Ticket     },
-      { label: 'Admin panel',   href: '/admin',     icon: Settings   },
+      { label: 'Admin panel',   href: '/admin',     icon: Settings, adminOnly: true },
       { label: 'My profile',    href: '/profile',   icon: User       },
     ]
   },
@@ -43,6 +49,22 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const [user, setUser] = useState<StoredUser | null>(null)
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('user')
+      if (raw) setUser(JSON.parse(raw))
+    } catch {}
+  }, [])
+
+  const isAdmin = user?.role === 'admin'
+  const initials = (user?.name || 'U')
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
 
   return (
     <Box
@@ -84,7 +106,9 @@ export default function Sidebar() {
               {section.section}
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
-              {section.links.map((link) => {
+              {section.links
+                .filter((link) => !('adminOnly' in link && link.adminOnly) || isAdmin)
+                .map((link) => {
                 const isActive = pathname === link.href
                 const Icon = link.icon
                 return (
@@ -153,14 +177,14 @@ export default function Sidebar() {
               justifyContent: 'center',
             }}
           >
-            TJ
+            {initials}
           </Box>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              Traveler Co.
+              {user?.company_name || user?.name || 'Guest'}
             </Typography>
-            <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-              Client
+            <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'capitalize' }}>
+              {user?.role || 'Client'}
             </Typography>
           </Box>
         </Box>

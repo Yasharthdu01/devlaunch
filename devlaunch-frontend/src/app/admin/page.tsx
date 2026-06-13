@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import API_URL from '@/lib/config'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
@@ -101,19 +102,32 @@ function RevenueBar({ data }: { data: RevenuePoint[] }) {
 }
 
 export default function AdminPage() {
+  const router = useRouter()
   const [stats,    setStats]    = useState<Stats | null>(null)
   const [clients,  setClients]  = useState<Client[]>([])
   const [projects, setProjects] = useState<Project[]>([])
   const [revenue,  setRevenue]  = useState<RevenuePoint[]>([])
   const [tab,      setTab]      = useState('overview')
   const [loading,  setLoading]  = useState(true)
+  const [authorized, setAuthorized] = useState(false)
 
   const token = typeof window !== 'undefined'
     ? localStorage.getItem('token') : ''
 
   useEffect(() => {
+    // Client-side guard — the backend adminOnly middleware is the real enforcement.
+    let role = ''
+    try {
+      const raw = localStorage.getItem('user')
+      if (raw) role = (JSON.parse(raw).role || '')
+    } catch {}
+    if (role !== 'admin') {
+      router.replace('/dashboard')
+      return
+    }
+    setAuthorized(true)
     fetchAll()
-  }, [])
+  }, [router])
 
   async function fetchAll() {
     setLoading(true)
@@ -149,6 +163,8 @@ export default function AdminPage() {
       setProjects(prev => prev.map(p => p.id === id ? { ...p, ...data } : p))
     } catch {}
   }
+
+  if (!authorized) return null
 
   if (loading) {
     return (

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useTheme } from 'next-themes'
 import { Sun, Moon, Menu, X, ArrowRight, CheckCircle, Star, ChevronDown } from 'lucide-react'
+import { waLink } from '@/lib/config'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Paper from '@mui/material/Paper'
@@ -830,7 +831,7 @@ function CTA() {
           </Button>
           <Button
             component="a"
-            href="https://wa.me/91XXXXXXXXXX"
+            href={waLink('Hi DevLaunch, I want to start a project')}
             target="_blank"
             rel="noreferrer"
             disableElevation

@@ -181,7 +181,19 @@ export default function WizardPage() {
 
   async function handleSubmit() {
     setLoading(true)
-    await new Promise(r => setTimeout(r, 800))
+    try {
+      const token = localStorage.getItem('token')
+      await fetch(API_URL + '/api/wizard/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ ...form, projectId }),
+      })
+    } catch {
+      // Best-effort — still route the user onward even if notify fails
+    }
     setLoading(false)
     router.push('/tracker')
   }
@@ -317,6 +329,7 @@ export default function WizardPage() {
                 <MenuItem value="EdTech">EdTech</MenuItem>
                 <MenuItem value="SaaS">SaaS</MenuItem>
                 <MenuItem value="Marketing">Marketing</MenuItem>
+                <MenuItem value="Other">Other</MenuItem>
               </TextField>
             </Box>
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 1.5 }}>

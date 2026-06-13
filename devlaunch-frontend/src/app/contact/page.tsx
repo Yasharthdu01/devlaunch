@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Mail, MapPin, Clock, MessageCircle } from 'lucide-react'
+import { waLink, WHATSAPP_DISPLAY } from '@/lib/config'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Paper from '@mui/material/Paper'
@@ -77,9 +78,9 @@ export default function ContactPage() {
     {
       icon: <MessageCircle size={20} />,
       label: 'WhatsApp',
-      value: '+91 XXXXX XXXXX',
+      value: WHATSAPP_DISPLAY,
       sub: 'Fastest response — usually within 30 mins',
-      href: 'https://wa.me/91XXXXXXXXXX',
+      href: waLink('Hi DevLaunch, I have a project enquiry'),
       bg: '#f0fdf4',
       fg: '#16a34a',
     },
@@ -223,7 +224,7 @@ export default function ContactPage() {
               </Typography>
               <Button
                 component="a"
-                href="https://wa.me/917905661636"
+                href={waLink('Hi DevLaunch, I have a project enquiry')}
                 target="_blank"
                 rel="noreferrer"
                 fullWidth

@@ -15,7 +15,6 @@ const PAGE_META: Record<string, { title: string; sub: string }> = {
   '/tracker':    { title: 'Live tracker',        sub: 'Track your project progress'          },
   '/proposal':   { title: 'Project proposal',    sub: 'AI-generated scope and cost'          },
   '/collab':     { title: 'Collaboration',       sub: 'Tasks, comments and files'            },
-  '/deploy':     { title: 'Deployment',          sub: 'Deploy to production'                 },
   '/chatbot':    { title: 'AI assistant',        sub: 'Powered by Ollama LLM'                },
   '/mvp':        { title: 'Build my MVP',        sub: 'Idea to full spec in seconds'         },
   '/marketing':  { title: 'Marketing AI',        sub: 'SEO, social posts and ad copy'        },

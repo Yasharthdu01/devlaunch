@@ -12,7 +12,7 @@ function adminOnly(req, res, next) {
 }
 
 // GET /api/admin/stats
-router.get('/stats', authMiddleware, async (req, res) => {
+router.get('/stats', authMiddleware, adminOnly, async (req, res) => {
   try {
     const clients  = await pool.query(`SELECT COUNT(*) FROM users WHERE role = 'client'`)
     const projects = await pool.query(`SELECT COUNT(*) FROM projects`)
@@ -31,7 +31,7 @@ router.get('/stats', authMiddleware, async (req, res) => {
 })
 
 // GET /api/admin/clients
-router.get('/clients', authMiddleware, async (req, res) => {
+router.get('/clients', authMiddleware, adminOnly, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT 
@@ -51,7 +51,7 @@ router.get('/clients', authMiddleware, async (req, res) => {
 })
 
 // GET /api/admin/projects
-router.get('/projects', authMiddleware, async (req, res) => {
+router.get('/projects', authMiddleware, adminOnly, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT 
@@ -70,7 +70,7 @@ router.get('/projects', authMiddleware, async (req, res) => {
 })
 
 // GET /api/admin/revenue
-router.get('/revenue', authMiddleware, async (req, res) => {
+router.get('/revenue', authMiddleware, adminOnly, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT 
@@ -89,7 +89,7 @@ router.get('/revenue', authMiddleware, async (req, res) => {
 })
 
 // PATCH /api/admin/projects/:id
-router.patch('/projects/:id', authMiddleware, async (req, res) => {
+router.patch('/projects/:id', authMiddleware, adminOnly, async (req, res) => {
   const { status, developer } = req.body
   try {
     const result = await pool.query(

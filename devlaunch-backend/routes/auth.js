@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const pool = require('../db')
 const authMiddleware = require('../middleware/auth')
+const { sendMail, ADMIN_EMAIL } = require('../utils/mailer')
 require('dotenv').config()
 
 // POST /api/auth/register
@@ -38,6 +39,26 @@ router.post('/register', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     )
+
+    // Notify the business of the new signup (best-effort, never blocks)
+    sendMail({
+      to: ADMIN_EMAIL,
+      subject: `New account created — ${name} (${company_name || 'no company'})`,
+      text:
+        `A new user just created an account on DevLaunch.\n\n` +
+        `Name: ${name}\nEmail: ${email}\nCompany: ${company_name || '—'}\nIndustry: ${industry || '—'}\n`,
+      html: `
+        <div style="font-family:Arial,sans-serif;color:#111">
+          <h2 style="color:#2563eb">New account created</h2>
+          <p>A new user just signed up on DevLaunch.</p>
+          <ul style="font-size:14px;line-height:1.8">
+            <li><b>Name:</b> ${name}</li>
+            <li><b>Email:</b> ${email}</li>
+            <li><b>Company:</b> ${company_name || '—'}</li>
+            <li><b>Industry:</b> ${industry || '—'}</li>
+          </ul>
+        </div>`,
+    }).catch(() => {})
 
     res.status(201).json({ token, user })
 
