@@ -88,6 +88,67 @@ router.get('/revenue', authMiddleware, adminOnly, async (req, res) => {
   }
 })
 
+// GET /api/admin/submissions  — AI wizard onboarding submissions
+router.get('/submissions', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT id, user_id, project_id, name, email, company, payload, created_at
+      FROM onboarding_submissions
+      ORDER BY created_at DESC
+      LIMIT 200
+    `)
+    res.json(result.rows)
+  } catch (err) {
+    // Table may not exist yet if no one has submitted — return empty list
+    res.json([])
+  }
+})
+
+// GET /api/admin/enquiries  — contact form enquiries
+router.get('/enquiries', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT id, name, email, phone, company, industry, budget, message, status, created_at
+      FROM enquiries
+      ORDER BY created_at DESC
+      LIMIT 200
+    `)
+    res.json(result.rows)
+  } catch (err) {
+    res.json([])
+  }
+})
+
+// GET /api/admin/audits  — leads from the free website audit tool
+router.get('/audits', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT id, url, name, email, phone, score, created_at
+      FROM audits
+      ORDER BY created_at DESC
+      LIMIT 200
+    `)
+    res.json(result.rows)
+  } catch (err) {
+    res.json([])
+  }
+})
+
+// GET /api/admin/whatsapp-leads  — leads for the WhatsApp AI agent product
+router.get('/whatsapp-leads', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT id, business, name, phone, industry, plan, created_at
+      FROM whatsapp_leads
+      ORDER BY created_at DESC
+      LIMIT 200
+    `)
+    res.json(result.rows)
+  } catch (err) {
+    res.json([])
+  }
+})
+
 // PATCH /api/admin/projects/:id
 router.patch('/projects/:id', authMiddleware, adminOnly, async (req, res) => {
   const { status, developer } = req.body

@@ -43,6 +43,45 @@ interface Stats {
   active_projects?: number
   total_revenue?: number
 }
+interface Submission {
+  id: number
+  name?: string
+  email?: string
+  company?: string
+  project_id?: number
+  payload?: Record<string, unknown>
+  created_at?: string
+}
+interface Enquiry {
+  id: number
+  name?: string
+  email?: string
+  phone?: string
+  company?: string
+  industry?: string
+  budget?: string
+  message?: string
+  status?: string
+  created_at?: string
+}
+interface AuditLead {
+  id: number
+  url?: string
+  name?: string
+  email?: string
+  phone?: string
+  score?: number
+  created_at?: string
+}
+interface WhatsAppLead {
+  id: number
+  business?: string
+  name?: string
+  phone?: string
+  industry?: string
+  plan?: string
+  created_at?: string
+}
 
 const STATUS_COLORS: Record<string, { bg: string; fg: string }> = {
   discovery:   { bg: '#f3f4f6', fg: '#4b5563' },
@@ -107,6 +146,10 @@ export default function AdminPage() {
   const [clients,  setClients]  = useState<Client[]>([])
   const [projects, setProjects] = useState<Project[]>([])
   const [revenue,  setRevenue]  = useState<RevenuePoint[]>([])
+  const [submissions, setSubmissions] = useState<Submission[]>([])
+  const [enquiries,   setEnquiries]   = useState<Enquiry[]>([])
+  const [audits,      setAudits]      = useState<AuditLead[]>([])
+  const [waLeads,     setWaLeads]     = useState<WhatsAppLead[]>([])
   const [tab,      setTab]      = useState('overview')
   const [loading,  setLoading]  = useState(true)
   const [authorized, setAuthorized] = useState(false)
@@ -132,16 +175,24 @@ export default function AdminPage() {
   async function fetchAll() {
     setLoading(true)
     try {
-      const [s, c, p, r] = await Promise.all([
-        fetch(API_URL +'/api/admin/stats',    { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
-        fetch(API_URL +'/api/admin/clients',  { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
-        fetch(API_URL +'/api/admin/projects', { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
-        fetch(API_URL +'/api/admin/revenue',  { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+      const [s, c, p, r, sub, enq, aud, wa] = await Promise.all([
+        fetch(API_URL +'/api/admin/stats',         { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+        fetch(API_URL +'/api/admin/clients',       { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+        fetch(API_URL +'/api/admin/projects',      { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+        fetch(API_URL +'/api/admin/revenue',       { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+        fetch(API_URL +'/api/admin/submissions',   { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+        fetch(API_URL +'/api/admin/enquiries',     { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+        fetch(API_URL +'/api/admin/audits',        { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+        fetch(API_URL +'/api/admin/whatsapp-leads',{ headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
       ])
       setStats(s)
       setClients(Array.isArray(c) ? c : [])
       setProjects(Array.isArray(p) ? p : [])
       setRevenue(Array.isArray(r) ? r : [])
+      setSubmissions(Array.isArray(sub) ? sub : [])
+      setEnquiries(Array.isArray(enq) ? enq : [])
+      setAudits(Array.isArray(aud) ? aud : [])
+      setWaLeads(Array.isArray(wa) ? wa : [])
     } catch {}
     setLoading(false)
   }
@@ -221,9 +272,13 @@ export default function AdminPage() {
             },
           }}
         >
-          <Tab value="overview" label="Overview" />
-          <Tab value="projects" label="Projects" />
-          <Tab value="clients"  label="Clients" />
+          <Tab value="overview"    label="Overview" />
+          <Tab value="projects"    label="Projects" />
+          <Tab value="clients"     label="Clients" />
+          <Tab value="onboarding"  label={`Onboarding${submissions.length ? ` (${submissions.length})` : ''}`} />
+          <Tab value="enquiries"   label={`Enquiries${enquiries.length ? ` (${enquiries.length})` : ''}`} />
+          <Tab value="audits"      label={`Audit leads${audits.length ? ` (${audits.length})` : ''}`} />
+          <Tab value="whatsapp"    label={`WhatsApp${waLeads.length ? ` (${waLeads.length})` : ''}`} />
         </Tabs>
       </Box>
 
@@ -417,6 +472,224 @@ export default function AdminPage() {
                   <TableRow>
                     <TableCell colSpan={6} sx={{ ...tdSx, textAlign: 'center', py: 4, color: 'var(--text-muted)' }}>
                       No clients yet
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </Box>
+        </Paper>
+      )}
+
+      {/* ONBOARDING TAB */}
+      {tab === 'onboarding' && (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {submissions.length === 0 && (
+            <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 4, textAlign: 'center' }}>
+              <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>No wizard submissions yet</Typography>
+            </Paper>
+          )}
+          {submissions.map(s => {
+            const d = (s.payload || {}) as Record<string, unknown>
+            const val = (k: string) => {
+              const v = d[k]
+              if (Array.isArray(v)) return v.length ? v.join(', ') : '—'
+              return v != null && v !== '' ? String(v) : '—'
+            }
+            const fields: [string, string][] = [
+              ['Industry',     val('industry')],
+              ['Budget',       val('budget')],
+              ['Platforms',    val('platforms')],
+              ['Framework',    val('framework')],
+              ['Design style', val('design_style')],
+              ['Screens',      val('screens')],
+              ['Backend',      val('backend')],
+              ['Database',     val('database')],
+              ['Integrations', val('integrations')],
+              ['Marketing',    val('marketing')],
+              ['Cloud',        val('cloud')],
+              ['Timeline',     val('timeline')],
+              ['Support',      val('support')],
+            ]
+            return (
+              <Paper key={s.id} elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, mb: 1.5, flexWrap: 'wrap' }}>
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography sx={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                      {val('title')}
+                    </Typography>
+                    <Typography sx={{ fontSize: '0.8rem', color: 'var(--text-muted)', mt: 0.25 }}>
+                      {s.name || '—'} · {s.company || '—'} · {s.email || '—'}
+                    </Typography>
+                  </Box>
+                  <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                    {s.created_at ? new Date(s.created_at).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''}
+                  </Typography>
+                </Box>
+
+                {val('description') !== '—' && (
+                  <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.6, mb: 2, whiteSpace: 'pre-line' }}>
+                    {val('description')}
+                  </Typography>
+                )}
+
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', md: 'repeat(4, 1fr)' }, gap: 1.5 }}>
+                  {fields.map(([k, v]) => (
+                    <Box key={k} sx={{ minWidth: 0 }}>
+                      <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{k}</Typography>
+                      <Typography sx={{ fontSize: '0.8rem', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis' }} title={v}>{v}</Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Paper>
+            )
+          })}
+        </Box>
+      )}
+
+      {/* ENQUIRIES TAB */}
+      {tab === 'enquiries' && (
+        <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden' }}>
+          <Box sx={{ overflowX: 'auto', width: '100%' }}>
+            <Table sx={{ minWidth: 720 }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={thSx}>Name</TableCell>
+                  <TableCell sx={thSx}>Contact</TableCell>
+                  <TableCell sx={thSx}>Industry</TableCell>
+                  <TableCell sx={thSx}>Budget</TableCell>
+                  <TableCell sx={thSx}>Message</TableCell>
+                  <TableCell sx={thSx}>Received</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {enquiries.map(e => (
+                  <TableRow key={e.id} sx={{ '&:hover': { bgcolor: 'var(--bg-tertiary)' }, verticalAlign: 'top' }}>
+                    <TableCell sx={tdSx}>
+                      <Typography sx={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.875rem' }}>{e.name || '—'}</Typography>
+                      <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{e.company || ''}</Typography>
+                    </TableCell>
+                    <TableCell sx={{ ...tdSx, fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      <Box>{e.email || '—'}</Box>
+                      <Box>{e.phone || ''}</Box>
+                    </TableCell>
+                    <TableCell sx={tdSx}>
+                      <Chip label={e.industry || 'Not set'} size="small" sx={{ fontSize: '0.7rem', bgcolor: '#f3f4f6', color: '#4b5563' }} />
+                    </TableCell>
+                    <TableCell sx={{ ...tdSx, fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{e.budget || '—'}</TableCell>
+                    <TableCell sx={{ ...tdSx, maxWidth: 320 }}>
+                      <Typography sx={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>{e.message || '—'}</Typography>
+                    </TableCell>
+                    <TableCell sx={{ ...tdSx, fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                      {e.created_at ? new Date(e.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {enquiries.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} sx={{ ...tdSx, textAlign: 'center', py: 4, color: 'var(--text-muted)' }}>
+                      No enquiries yet
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </Box>
+        </Paper>
+      )}
+
+      {/* AUDIT LEADS TAB */}
+      {tab === 'audits' && (
+        <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden' }}>
+          <Box sx={{ overflowX: 'auto', width: '100%' }}>
+            <Table sx={{ minWidth: 720 }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={thSx}>Website</TableCell>
+                  <TableCell sx={thSx}>Name</TableCell>
+                  <TableCell sx={thSx}>Contact</TableCell>
+                  <TableCell sx={thSx}>Score</TableCell>
+                  <TableCell sx={thSx}>Received</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {audits.map(a => {
+                  const score = a.score ?? 0
+                  const col = score >= 85 ? { bg: '#f0fdf4', fg: '#15803d' }
+                            : score >= 60 ? { bg: '#fffbeb', fg: '#b45309' }
+                            : { bg: '#fef2f2', fg: '#b91c1c' }
+                  return (
+                    <TableRow key={a.id} sx={{ '&:hover': { bgcolor: 'var(--bg-tertiary)' } }}>
+                      <TableCell sx={{ ...tdSx, maxWidth: 280 }}>
+                        <Typography sx={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={a.url}>{a.url || '—'}</Typography>
+                      </TableCell>
+                      <TableCell sx={tdSx}>
+                        <Typography sx={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>{a.name || '—'}</Typography>
+                      </TableCell>
+                      <TableCell sx={{ ...tdSx, fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                        <Box>{a.email || '—'}</Box>
+                        <Box>{a.phone || ''}</Box>
+                      </TableCell>
+                      <TableCell sx={tdSx}>
+                        <Chip label={`${score}/100`} size="small" sx={{ fontSize: '0.7rem', fontWeight: 700, bgcolor: col.bg, color: col.fg }} />
+                      </TableCell>
+                      <TableCell sx={{ ...tdSx, fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                        {a.created_at ? new Date(a.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+                {audits.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={5} sx={{ ...tdSx, textAlign: 'center', py: 4, color: 'var(--text-muted)' }}>
+                      No audit leads yet
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </Box>
+        </Paper>
+      )}
+
+      {/* WHATSAPP LEADS TAB */}
+      {tab === 'whatsapp' && (
+        <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden' }}>
+          <Box sx={{ overflowX: 'auto', width: '100%' }}>
+            <Table sx={{ minWidth: 720 }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={thSx}>Business</TableCell>
+                  <TableCell sx={thSx}>Name</TableCell>
+                  <TableCell sx={thSx}>Phone</TableCell>
+                  <TableCell sx={thSx}>Industry</TableCell>
+                  <TableCell sx={thSx}>Plan</TableCell>
+                  <TableCell sx={thSx}>Received</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {waLeads.map(w => (
+                  <TableRow key={w.id} sx={{ '&:hover': { bgcolor: 'var(--bg-tertiary)' } }}>
+                    <TableCell sx={tdSx}>
+                      <Typography sx={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.85rem' }}>{w.business || '—'}</Typography>
+                    </TableCell>
+                    <TableCell sx={{ ...tdSx, fontSize: '0.85rem' }}>{w.name || '—'}</TableCell>
+                    <TableCell sx={{ ...tdSx, fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{w.phone || '—'}</TableCell>
+                    <TableCell sx={tdSx}>
+                      <Chip label={w.industry || 'Not set'} size="small" sx={{ fontSize: '0.7rem', textTransform: 'capitalize', bgcolor: '#f3f4f6', color: '#4b5563' }} />
+                    </TableCell>
+                    <TableCell sx={tdSx}>
+                      <Chip label={w.plan || '—'} size="small" sx={{ fontSize: '0.7rem', fontWeight: 600, bgcolor: 'rgba(37,211,102,0.12)', color: '#128C7E' }} />
+                    </TableCell>
+                    <TableCell sx={{ ...tdSx, fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                      {w.created_at ? new Date(w.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {waLeads.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} sx={{ ...tdSx, textAlign: 'center', py: 4, color: 'var(--text-muted)' }}>
+                      No WhatsApp leads yet
                     </TableCell>
                   </TableRow>
                 )}

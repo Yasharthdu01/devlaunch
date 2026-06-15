@@ -16,6 +16,8 @@ const marketingRoutes = require('./routes/marketing')
 const supportRoutes   = require('./routes/support')
 const mvpRoutes       = require('./routes/mvp')
 const enquiryRoutes = require('./routes/enquiry')
+const auditRoutes   = require('./routes/audit')
+const whatsappRoutes = require('./routes/whatsapp')
 
 const app = express();
 
@@ -75,6 +77,8 @@ app.use('/api/marketing',  marketingRoutes)
 app.use('/api/support',    supportRoutes)
 app.use('/api/mvp',        mvpRoutes)
 app.use('/api/enquiry', enquiryRoutes)
+app.use('/api/audit',   auditRoutes)
+app.use('/api/whatsapp', whatsappRoutes)
 
 // 404 handler
 app.use((req, res) => {

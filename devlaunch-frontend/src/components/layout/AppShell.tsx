@@ -3,9 +3,14 @@ import { usePathname } from 'next/navigation'
 import Box from '@mui/material/Box'
 import Sidebar from './Sidebar'
 import Topbar from './Topbar'
+import FloatingWhatsApp from '../FloatingWhatsApp'
 
-const PUBLIC_PAGES = ['/', '/about', '/services', '/portfolio-public', '/pricing-public', '/contact', '/blog']
+const PUBLIC_PAGES = ['/', '/about', '/services', '/portfolio-public', '/pricing-public', '/contact', '/blog', '/audit', '/whatsapp']
 const AUTH_PAGES   = ['/login', '/register', '/forgot-password']
+
+// The /whatsapp product page is already WhatsApp-themed, so skip the floating
+// button there to avoid redundancy.
+const NO_FLOATING = ['/whatsapp']
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -14,7 +19,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const isAuthPage   = AUTH_PAGES.includes(pathname)
 
   if (isAuthPage || isPublicPage) {
-    return <>{children}</>
+    return (
+      <>
+        {children}
+        {isPublicPage && !NO_FLOATING.includes(pathname) && <FloatingWhatsApp />}
+      </>
+    )
   }
 
   return (

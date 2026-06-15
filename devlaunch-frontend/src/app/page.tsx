@@ -26,14 +26,15 @@ function Navbar() {
   }, [])
 
   const navLinks = [
-    { label: 'Services',   href: '#services'   },
-    { label: 'Industries', href: '#industries' },
-    { label: 'Process',    href: '#process'    },
-    { label: 'Portfolio',  href: '#portfolio'  },
-    { label: 'Pricing',    href: '#pricing'    },
-    { label: 'Reviews',    href: '#reviews'    },
-    { label: 'About',      href: '/about'      },
-    { label: 'Contact',    href: '/contact'    },
+    { label: 'WhatsApp AI', href: '/whatsapp'   },
+    { label: 'Free Audit',  href: '/audit'      },
+    { label: 'Services',    href: '#services'   },
+    { label: 'Industries',  href: '#industries' },
+    { label: 'Process',     href: '#process'    },
+    { label: 'Portfolio',   href: '#portfolio'  },
+    { label: 'Pricing',     href: '#pricing'    },
+    { label: 'About',       href: '/about'      },
+    { label: 'Contact',     href: '/contact'    },
   ]
 
   return (
@@ -338,6 +339,28 @@ function Hero() {
           >
             View our work
           </Button>
+        </Box>
+
+        {/* New product strip */}
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, justifyContent: 'center', mb: 8 }}>
+          <Box component={Link} href="/whatsapp"
+            sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, px: 2.5, py: 1.25, borderRadius: '9999px', textDecoration: 'none',
+              bgcolor: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.3)', transition: 'all 0.2s',
+              '&:hover': { bgcolor: 'rgba(37,211,102,0.18)' } }}>
+            <Box component="span" sx={{ fontSize: '0.875rem', fontWeight: 700, color: '#128C7E' }}>
+              💬 New: WhatsApp AI receptionist from ₹999/mo
+            </Box>
+            <ArrowRight size={15} color="#128C7E" />
+          </Box>
+          <Box component={Link} href="/audit"
+            sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, px: 2.5, py: 1.25, borderRadius: '9999px', textDecoration: 'none',
+              bgcolor: 'var(--bg-tertiary)', border: '1px solid var(--border)', transition: 'all 0.2s',
+              '&:hover': { borderColor: 'var(--blue)' } }}>
+            <Box component="span" sx={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--blue)' }}>
+              ⚡ Free instant website audit
+            </Box>
+            <ArrowRight size={15} color="var(--blue)" />
+          </Box>
         </Box>
 
         {/* Stats */}
