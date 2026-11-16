@@ -2,6 +2,11 @@ const express = require('express')
 const router = express.Router()
 const pool = require('../db')
 const authMiddleware = require('../middleware/auth')
+const { requireProjectAccess, requireChildAccess } = require('../lib/access')
+
+const byProjectParam = requireProjectAccess(req => req.params.project_id)
+const byProjectBody = requireProjectAccess(req => req.body?.project_id)
+const byTask = requireChildAccess('tasks', req => req.params.id)
 
 async function ensureTasksTable() {
   await pool.query(`
@@ -26,10 +31,10 @@ async function ensureTasksTable() {
     )
   `)
 }
-ensureTasksTable()
+ensureTasksTable().catch(err => console.error(`[db] ensureTasksTable failed: ${err.message}`))
 
 // GET /api/tasks/:project_id
-router.get('/:project_id', authMiddleware, async (req, res) => {
+router.get('/:project_id', authMiddleware, byProjectParam, async (req, res) => {
   try {
     const result = await pool.query(
       'SELECT * FROM tasks WHERE project_id = $1 ORDER BY created_at ASC',
@@ -42,7 +47,7 @@ router.get('/:project_id', authMiddleware, async (req, res) => {
 })
 
 // POST /api/tasks
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', authMiddleware, byProjectBody, async (req, res) => {
   const { project_id, title, description, assigned_to, type } = req.body
   try {
     const result = await pool.query(
@@ -57,7 +62,7 @@ router.post('/', authMiddleware, async (req, res) => {
 })
 
 // PATCH /api/tasks/:id
-router.patch('/:id', authMiddleware, async (req, res) => {
+router.patch('/:id', authMiddleware, byTask, async (req, res) => {
   const { status, title, assigned_to } = req.body
   try {
     const result = await pool.query(
@@ -75,7 +80,7 @@ router.patch('/:id', authMiddleware, async (req, res) => {
 })
 
 // DELETE /api/tasks/:id
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', authMiddleware, byTask, async (req, res) => {
   try {
     await pool.query('DELETE FROM tasks WHERE id = $1', [req.params.id])
     res.json({ message: 'Deleted' })
@@ -85,7 +90,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
 })
 
 // GET /api/tasks/:id/comments
-router.get('/:id/comments', authMiddleware, async (req, res) => {
+router.get('/:id/comments', authMiddleware, byTask, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT c.*, u.name FROM comments c
@@ -100,7 +105,7 @@ router.get('/:id/comments', authMiddleware, async (req, res) => {
 })
 
 // POST /api/tasks/:id/comments
-router.post('/:id/comments', authMiddleware, async (req, res) => {
+router.post('/:id/comments', authMiddleware, byTask, async (req, res) => {
   const { content } = req.body
   try {
     const result = await pool.query(

@@ -25,7 +25,7 @@ async function ensureWaTables() {
     )
   `)
 }
-ensureWaTables()
+ensureWaTables().catch(err => console.error(`[db] ensureWaTables failed: ${err.message}`))
 
 // Industry-specific receptionist personas — the sellable templates.
 const TEMPLATES = {

@@ -19,7 +19,7 @@ async function ensureEnquiryTable() {
     )
   `)
 }
-ensureEnquiryTable()
+ensureEnquiryTable().catch(err => console.error(`[db] ensureEnquiryTable failed: ${err.message}`))
 
 router.post('/', async (req, res) => {
   const { name, email, phone, company, industry, budget, message } = req.body
