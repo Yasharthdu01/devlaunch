@@ -57,13 +57,13 @@ DevLaunch is a full-stack SaaS platform that helps businesses and clients collab
 
 * Node.js
 * Express.js
-* PostgreSQL (Neon)
-* Sequelize ORM
+* PostgreSQL (Neon), queried with `pg` (parameterized SQL)
+* zod (request + LLM-output validation), express-rate-limit
 
 ### AI Integration
 
-* OpenAI API
-* Anthropic Claude API
+* Any OpenAI-compatible LLM API (OpenAI, Groq, OpenRouter, ...) in production
+* Ollama locally, through the same client (`lib/llm.js`)
 
 ### Deployment
 
@@ -115,10 +115,12 @@ npm install
 npm run dev
 ```
 
-Backend runs on:
+Backend runs on `http://localhost:5000`. Copy `devlaunch-backend/.env.example` to `.env` first.
 
-```
-${API_URL}
+Run the backend tests (no database or API key needed; both are faked):
+
+```bash
+npm test
 ```
 
 ---
@@ -127,19 +129,37 @@ ${API_URL}
 
 ### Backend (`.env`)
 
+See [`devlaunch-backend/.env.example`](devlaunch-backend/.env.example). The important ones:
+
 ```
-PORT=5000
-JWT_SECRET=your_secret_key
-DATABASE_URL=your_neon_database_url
-OPENAI_API_KEY=your_openai_key
-CLAUDE_API_KEY=your_claude_key
+DATABASE_URL=...
+JWT_SECRET=...
+CORS_ORIGINS=http://localhost:3000,https://your-frontend.vercel.app
+LLM_BASE_URL=https://api.groq.com/openai/v1   # or http://localhost:11434/v1 for Ollama
+LLM_MODEL=llama-3.1-8b-instant
+LLM_API_KEY=...
 ```
 
 ### Frontend (`.env.local`)
 
 ```
-NEXT_PUBLIC_API_URL=${API_URL}
+NEXT_PUBLIC_API_URL=http://localhost:5000
+NEXT_PUBLIC_DEMO_MODE=true   # shows the "sample data" banner; set false once testimonials/portfolio are real
 ```
+
+---
+
+## 🛠️ Engineering Notes
+
+**LLM reliability.** All AI features go through one client (`lib/llm.js`). JSON-producing features (MVP planner, proposals, marketing) validate the model's output against a zod schema; on failure the validation errors are sent back to the model and it retries (up to 3 attempts). If the AI is unavailable the API returns `503` with a clear message instead of silently returning canned data. Proposal totals are recomputed server-side from line items rather than trusting model arithmetic.
+
+**Prompt-injection hygiene.** User text is wrapped in `<user_input>` tags and the system prompt tells the model to treat it as data. Chat history only accepts `user`/`assistant` roles, so clients can't inject system messages.
+
+**Authorization.** Tasks, milestones and proposals are checked against project ownership (`lib/access.js`); other users get `404`, not someone else's data.
+
+**SSRF protection.** The website audit fetches user-supplied URLs server-side. `lib/safeFetch.js` blocks private, loopback, link-local (cloud metadata) and reserved addresses, checked at DNS-lookup time so redirects and DNS rebinding are covered too.
+
+**Cost control.** AI routes are rate-limited per IP and chat history is capped at the last 10 turns.
 
 ---
 
