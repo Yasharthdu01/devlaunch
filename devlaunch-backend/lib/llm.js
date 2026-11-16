@@ -48,6 +48,24 @@ function model() {
   return process.env.LLM_MODEL || 'gpt-4o-mini'
 }
 
+// Startup diagnostic: ask the provider which models this key can use and warn
+// if LLM_MODEL isn't one of them. Logs model ids only, never the key.
+async function checkConfiguredModel(log = console) {
+  try {
+    const page = await getClient().models.list()
+    const ids = (page.data || []).map(m => m.id).sort()
+    if (ids.includes(model())) {
+      log.log(`[ai] LLM ready: model "${model()}" is available`)
+    } else {
+      log.error(`[ai] LLM_MODEL "${model()}" is NOT available to this API key. Available models: ${ids.join(', ') || '(none)'}`)
+    }
+    return ids
+  } catch (err) {
+    log.error(`[ai] could not list provider models: ${err.message}`)
+    return null
+  }
+}
+
 // Plain text completion. `messages` uses the standard {role, content} shape.
 async function chat({ system, messages, temperature = 0.4, maxTokens = 500 }) {
   const all = system ? [{ role: 'system', content: system }, ...messages] : messages
@@ -125,4 +143,4 @@ function quoteUserInput(text) {
   return `<user_input>\n${String(text).replace(/<\/?user_input>/gi, '')}\n</user_input>`
 }
 
-module.exports = { chat, generateJSON, extractJSON, quoteUserInput, setClient, LLMError }
+module.exports = { chat, generateJSON, extractJSON, quoteUserInput, setClient, checkConfiguredModel, LLMError }
