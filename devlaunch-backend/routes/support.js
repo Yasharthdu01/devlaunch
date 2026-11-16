@@ -19,7 +19,7 @@ async function ensureTicketsTable() {
     )
   `)
 }
-ensureTicketsTable()
+ensureTicketsTable().catch(err => console.error(`[db] ensureTicketsTable failed: ${err.message}`))
 
 // GET /api/support
 router.get('/', authMiddleware, async (req, res) => {

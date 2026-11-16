@@ -2,6 +2,11 @@ const express = require('express')
 const router = express.Router()
 const pool = require('../db')
 const authMiddleware = require('../middleware/auth')
+const { requireProjectAccess, requireChildAccess } = require('../lib/access')
+
+const byProjectParam = requireProjectAccess(req => req.params.project_id)
+const byProjectBody = requireProjectAccess(req => req.body?.project_id)
+const byMilestone = requireChildAccess('milestones', req => req.params.id)
 
 // Create milestones table first
 async function ensureMilestonesTable() {
@@ -16,10 +21,10 @@ async function ensureMilestonesTable() {
     )
   `)
 }
-ensureMilestonesTable()
+ensureMilestonesTable().catch(err => console.error(`[db] ensureMilestonesTable failed: ${err.message}`))
 
 // GET /api/milestones/:project_id
-router.get('/:project_id', authMiddleware, async (req, res) => {
+router.get('/:project_id', authMiddleware, byProjectParam, async (req, res) => {
   try {
     const result = await pool.query(
       'SELECT * FROM milestones WHERE project_id = $1 ORDER BY due_date ASC',
@@ -32,7 +37,7 @@ router.get('/:project_id', authMiddleware, async (req, res) => {
 })
 
 // POST /api/milestones — create milestone
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', authMiddleware, byProjectBody, async (req, res) => {
   const { project_id, title, due_date } = req.body
   try {
     const result = await pool.query(
@@ -46,7 +51,7 @@ router.post('/', authMiddleware, async (req, res) => {
 })
 
 // PATCH /api/milestones/:id — update milestone status
-router.patch('/:id', authMiddleware, async (req, res) => {
+router.patch('/:id', authMiddleware, byMilestone, async (req, res) => {
   const { status } = req.body
   try {
     const result = await pool.query(
@@ -60,7 +65,7 @@ router.patch('/:id', authMiddleware, async (req, res) => {
 })
 
 // DELETE /api/milestones/:id
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', authMiddleware, byMilestone, async (req, res) => {
   try {
     await pool.query('DELETE FROM milestones WHERE id = $1', [req.params.id])
     res.json({ message: 'Deleted' })

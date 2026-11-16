@@ -3,6 +3,8 @@ const router = express.Router()
 const axios = require('axios')
 const pool = require('../db')
 const { sendMail, ADMIN_EMAIL } = require('../utils/mailer')
+const { httpAgent, httpsAgent, isAllowedUrl } = require('../lib/safeFetch')
+const { aiLimiter } = require('../lib/http')
 
 // Lead-gen "instant website audit" tool.
 // It performs a REAL fetch of the visitor's URL, measures genuine signals
@@ -24,7 +26,7 @@ async function ensureAuditTable() {
     )
   `)
 }
-ensureAuditTable()
+ensureAuditTable().catch(err => console.error(`[db] ensureAuditTable failed: ${err.message}`))
 
 // Normalise whatever the user typed into a fetchable https URL.
 function normaliseUrl(raw) {
@@ -147,11 +149,11 @@ function analyse({ html, finalUrl, status, loadMs, bytes, usedHttps }) {
   return { score, summary, fails, warns, findings, finalUrl, status, loadMs }
 }
 
-router.post('/', async (req, res) => {
-  const { url, name, email, phone } = req.body
+router.post('/', aiLimiter, async (req, res) => {
+  const { url, name, email, phone } = req.body || {}
   const target = normaliseUrl(url)
 
-  if (!target) {
+  if (!target || !isAllowedUrl(target)) {
     return res.status(400).json({ message: 'Please enter a valid website or Instagram URL.' })
   }
 
@@ -162,6 +164,14 @@ router.post('/', async (req, res) => {
     const response = await axios.get(target, {
       timeout: 12000,
       maxRedirects: 5,
+      // Every connection (including redirects) goes through a DNS lookup that
+      // refuses private/internal addresses, so the audit can't be used for SSRF.
+      httpAgent,
+      httpsAgent,
+      proxy: false,
+      beforeRedirect: (options) => {
+        if (!isAllowedUrl(options.href)) throw new Error('Redirect to a disallowed URL')
+      },
       // Pretend to be a real browser so sites don't serve us a bot page.
       headers: {
         'User-Agent':
@@ -187,6 +197,9 @@ router.post('/', async (req, res) => {
       usedHttps: finalUrl.startsWith('https://'),
     })
   } catch (err) {
+    if (err.code === 'EBLOCKEDADDRESS' || err.cause?.code === 'EBLOCKEDADDRESS') {
+      return res.status(400).json({ message: 'That address cannot be audited. Please enter a public website URL.' })
+    }
     // Site unreachable / timed out — still a useful (negative) signal.
     const loadMs = Number((process.hrtime.bigint() - startedAt) / 1000000n)
     report = {
