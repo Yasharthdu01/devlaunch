@@ -67,6 +67,26 @@ async function checkConfiguredModel(log = console) {
 }
 
 // Plain text completion. `messages` uses the standard {role, content} shape.
+// Reasoning models (gpt-oss, qwen3, ...) spend output tokens "thinking" before
+// they answer. Set LLM_REASONING_EFFORT=low|medium|high for those models: it is
+// sent to the provider, and the token budget gets headroom for the reasoning so
+// the visible answer isn't cut off.
+function reasoningOptions(maxTokens) {
+  const effort = (process.env.LLM_REASONING_EFFORT || '').trim().toLowerCase()
+  if (!['low', 'medium', 'high'].includes(effort)) return { max_tokens: maxTokens }
+  const headroom = Number(process.env.LLM_REASONING_TOKENS) || 1500
+  return { max_tokens: maxTokens + headroom, reasoning_effort: effort }
+}
+
+// Some models put their reasoning inline as <think>...</think>; never show it.
+function stripReasoning(text) {
+  return String(text || '')
+    .replace(/<think>[\s\S]*?<\/think>/gi, '')
+    .replace(/^[\s\S]*?<\/think>/i, '') // unterminated opening tag cut off upstream
+    .trim()
+}
+
+// Plain text completion. `messages` uses the standard {role, content} shape.
 async function chat({ system, messages, temperature = 0.4, maxTokens = 500 }) {
   const all = system ? [{ role: 'system', content: system }, ...messages] : messages
   let res
@@ -75,15 +95,19 @@ async function chat({ system, messages, temperature = 0.4, maxTokens = 500 }) {
       model: model(),
       messages: all,
       temperature,
-      max_tokens: maxTokens,
+      ...reasoningOptions(maxTokens),
     })
   } catch (err) {
     if (err instanceof LLMError) throw err
     throw new LLMError(`LLM request failed: ${err.message}`, { cause: err })
   }
-  const text = res?.choices?.[0]?.message?.content
-  if (!text || !text.trim()) throw new LLMError('LLM returned an empty response')
-  return text.trim()
+  const choice = res?.choices?.[0]
+  const text = stripReasoning(choice?.message?.content)
+  if (!text) {
+    const why = choice?.finish_reason === 'length' ? ' (token limit reached while reasoning)' : ''
+    throw new LLMError(`LLM returned an empty response${why}`)
+  }
+  return text
 }
 
 // Pull the first {...} block out of model text (models often wrap JSON in prose
@@ -143,4 +167,13 @@ function quoteUserInput(text) {
   return `<user_input>\n${String(text).replace(/<\/?user_input>/gi, '')}\n</user_input>`
 }
 
-module.exports = { chat, generateJSON, extractJSON, quoteUserInput, setClient, checkConfiguredModel, LLMError }
+module.exports = {
+  chat,
+  generateJSON,
+  extractJSON,
+  quoteUserInput,
+  setClient,
+  checkConfiguredModel,
+  stripReasoning,
+  LLMError,
+}
