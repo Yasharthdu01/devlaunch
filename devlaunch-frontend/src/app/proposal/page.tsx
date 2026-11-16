@@ -13,6 +13,7 @@ export default function ProposalPage() {
   const [proposal,  setProposal]    = useState<any>(null)
   const [loading,   setLoading]     = useState(false)
   const [error,     setError]       = useState('')
+  const [source,    setSource]      = useState<'ai' | 'template' | ''>('')
 
   async function generateProposal() {
     if (!projectId) {
@@ -39,6 +40,7 @@ export default function ProposalPage() {
         setError(data.message || 'Failed to generate proposal')
       } else {
         setProposal(data.proposal)
+        setSource(data.source || 'ai')
       }
     } catch {
       setError('Server error. Make sure backend is running.')
@@ -98,6 +100,12 @@ export default function ProposalPage() {
       {/* Proposal output */}
       {proposal && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pb: 5 }}>
+
+          {source === 'template' && (
+            <Alert severity="info" sx={{ borderRadius: '8px' }}>
+              The AI service was unavailable, so this is our standard proposal template, not a tailored estimate. Try again later for an AI-generated proposal.
+            </Alert>
+          )}
 
           {/* Tech stack */}
           <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '16px', p: 2.5 }}>

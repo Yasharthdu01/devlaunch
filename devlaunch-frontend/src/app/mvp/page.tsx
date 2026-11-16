@@ -71,7 +71,11 @@ export default function MVPPage() {
         body: JSON.stringify({ idea }),
       })
       const result = await res.json()
-      setData(result)
+      if (!res.ok) {
+        setError(result.message || 'Could not generate the MVP plan. Please try again.')
+      } else {
+        setData(result)
+      }
     } catch {
       setError('Server error. Make sure backend is running.')
     }

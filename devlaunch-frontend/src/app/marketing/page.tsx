@@ -71,7 +71,11 @@ export default function MarketingPage() {
         body: JSON.stringify(form),
       })
       const result = await res.json()
-      setData(result)
+      if (!res.ok) {
+        setError(result.message || 'Could not generate the marketing content. Please try again.')
+      } else {
+        setData(result)
+      }
     } catch {
       setError('Server error. Make sure backend is running.')
     }
