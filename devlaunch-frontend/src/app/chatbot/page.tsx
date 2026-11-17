@@ -58,7 +58,10 @@ export default function ChatbotPage() {
       })
 
       const data = await res.json()
-      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }])
+      const reply = data.reply || (res.status === 429
+        ? 'You are sending messages too quickly. Please wait a minute and try again.'
+        : data.message || 'Sorry, I could not answer that right now. Please try again.')
+      setMessages(prev => [...prev, { role: 'assistant', content: reply }])
 
     } catch {
       setMessages(prev => [...prev, {

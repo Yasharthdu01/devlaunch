@@ -222,3 +222,33 @@ describe('audit SSRF protection', () => {
     }
   })
 })
+
+describe('AI request validation matches what the UI sends', () => {
+  test('wizard suggest with the full multi-line context works', async () => {
+    fakeLLM.reply('- Use Next.js')
+    const data = 'Project: Grocery app\nIndustry: E-commerce\nDescription: Ordering and delivery'
+    const res = await request(app).post('/api/ai/suggest').send({ step: 1, data })
+    assert.equal(res.status, 200)
+    assert.match(fakeLLM.requests[0].messages.at(-1).content, /Grocery app/)
+  })
+
+  test('wizard suggest with empty data is a 400 with a readable message', async () => {
+    const res = await request(app).post('/api/ai/suggest').send({ step: 1, data: '' })
+    assert.equal(res.status, 400)
+    assert.ok(res.body.message)
+    assert.equal(fakeLLM.requests.length, 0)
+  })
+
+  test('marketing works without a location (the form does not require it)', async () => {
+    fakeLLM.reply(JSON.stringify({
+      seo_keywords: ['a', 'b', 'c'],
+      instagram_posts: [{ day: 'Monday', caption: 'Hi', hashtags: '#x' }],
+      google_ads: { headline1: 'H1', headline2: 'H2', description: 'D', cta: 'Go' },
+      email_subject: 'S',
+      email_preview: 'P',
+    }))
+    const res = await request(app).post('/api/marketing/generate').set(auth(alice)).send({ business_type: 'Cafe', industry: 'Food', location: '' })
+    assert.equal(res.status, 200, JSON.stringify(res.body))
+    assert.match(fakeLLM.requests[0].messages.at(-1).content, /Location: India/)
+  })
+})
