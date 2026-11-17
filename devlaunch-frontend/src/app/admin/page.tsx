@@ -36,6 +36,8 @@ interface Project {
   company_name?: string
   platform?: string
   budget_min?: string | number
+  lead_id?: number | null
+  lead_name?: string | null
 }
 interface Stats {
   total_clients?: number
@@ -95,13 +97,7 @@ const STATUS_COLORS: Record<string, { bg: string; fg: string }> = {
 
 const STATUSES = ['discovery', 'design', 'development', 'testing', 'deploy', 'live', 'delivered']
 
-const DEVELOPERS = [
-  'Ravi Kumar',
-  'Priya Mehta',
-  'Amit Singh',
-  'Sneha Reddy',
-  'Unassigned',
-]
+interface StaffMember { id: number; name: string; role: string }
 
 const labelSx = { fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', mb: 2 } as const
 const thSx = { fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid var(--border)', bgcolor: 'var(--bg-tertiary)', whiteSpace: 'nowrap' } as const
@@ -150,6 +146,7 @@ export default function AdminPage() {
   const [enquiries,   setEnquiries]   = useState<Enquiry[]>([])
   const [audits,      setAudits]      = useState<AuditLead[]>([])
   const [waLeads,     setWaLeads]     = useState<WhatsAppLead[]>([])
+  const [staff,       setStaff]       = useState<StaffMember[]>([])
   const [tab,      setTab]      = useState('overview')
   const [loading,  setLoading]  = useState(true)
   const [authorized, setAuthorized] = useState(false)
@@ -193,11 +190,13 @@ export default function AdminPage() {
       setEnquiries(Array.isArray(enq) ? enq : [])
       setAudits(Array.isArray(aud) ? aud : [])
       setWaLeads(Array.isArray(wa) ? wa : [])
+      const members = await fetch(API_URL + '/api/orgs/current/members', { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json())
+      setStaff(Array.isArray(members) ? members.filter((m: StaffMember) => m.role !== 'client') : [])
     } catch {}
     setLoading(false)
   }
 
-  async function updateProject(id: number, field: string, value: string) {
+  async function updateProject(id: number, field: 'status' | 'lead_id', value: string | number | null) {
     try {
       const res = await fetch(
         API_URL + `/api/admin/projects/${id}`,
@@ -211,7 +210,7 @@ export default function AdminPage() {
         }
       )
       const data = await res.json()
-      setProjects(prev => prev.map(p => p.id === id ? { ...p, ...data } : p))
+      if (res.ok) setProjects(prev => prev.map(p => p.id === id ? { ...p, ...data } : p))
     } catch {}
   }
 
@@ -394,15 +393,17 @@ export default function AdminPage() {
                       <TableCell sx={tdSx}>
                         <TextField
                           select
-                          value={p.platform || 'Unassigned'}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateProject(p.id, 'developer', e.target.value)}
+                          value={p.lead_id ?? ''}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateProject(p.id, 'lead_id', e.target.value === '' ? null : Number(e.target.value))}
+                          slotProps={{ select: { displayEmpty: true } }}
                           size="small"
                           sx={{
                             '& .MuiOutlinedInput-root': { borderRadius: '8px', bgcolor: 'var(--bg-primary)', color: 'var(--text-secondary)', fontSize: '0.75rem' },
                             '& .MuiSelect-select': { py: 0.5, pl: 1.5 },
                           }}
                         >
-                          {DEVELOPERS.map(d => <MenuItem key={d} value={d}>{d}</MenuItem>)}
+                          <MenuItem value="">Unassigned</MenuItem>
+                          {staff.map(d => <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>)}
                         </TextField>
                       </TableCell>
                       <TableCell sx={{ ...tdSx, fontWeight: 600, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>

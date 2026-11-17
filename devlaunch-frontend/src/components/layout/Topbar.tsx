@@ -1,10 +1,12 @@
 'use client'
+import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
 import ThemeToggle from '@/components/ui/ThemeToggle'
+import { getStoredUser, can, type SessionUser } from '@/lib/session'
 
 const PAGE_META: Record<string, { title: string; sub: string }> = {
   '/dashboard':  { title: 'Dashboard',           sub: 'Your AI-powered delivery platform'    },
@@ -15,16 +17,26 @@ const PAGE_META: Record<string, { title: string; sub: string }> = {
   '/tracker':    { title: 'Live tracker',        sub: 'Track your project progress'          },
   '/proposal':   { title: 'Project proposal',    sub: 'AI-generated scope and cost'          },
   '/collab':     { title: 'Collaboration',       sub: 'Tasks, comments and files'            },
-  '/chatbot':    { title: 'AI assistant',        sub: 'Powered by Ollama LLM'                },
+  '/chatbot':    { title: 'AI assistant',        sub: 'Ask about stacks, timelines and costs' },
   '/mvp':        { title: 'Build my MVP',        sub: 'Idea to full spec in seconds'         },
   '/marketing':  { title: 'Marketing AI',        sub: 'SEO, social posts and ad copy'        },
   '/support':    { title: 'Support & tickets',   sub: 'Bug reports and maintenance'          },
   '/admin':      { title: 'Admin panel',         sub: 'Manage clients, projects and revenue' },
   '/profile':    { title: 'My profile',          sub: 'Account details and settings'         },
+  '/team':       { title: 'Team',                sub: 'Members, roles, invitations and activity' },
+  '/platform':   { title: 'Platform',            sub: 'All agencies on DevLaunch'            },
 }
 
 export default function Topbar() {
   const pathname = usePathname()
+  const [user, setUser] = useState<SessionUser | null>(null)
+  useEffect(() => {
+    setUser(getStoredUser())
+    const onChange = () => setUser(getStoredUser())
+    window.addEventListener('session-changed', onChange)
+    return () => window.removeEventListener('session-changed', onChange)
+  }, [])
+  const initials = (user?.name || '?').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
   const meta = PAGE_META[pathname] || {
     title: 'DevLaunch',
     sub: 'AI delivery platform',
@@ -86,7 +98,7 @@ export default function Topbar() {
           Ask AI
         </Box>
 
-        <Box
+        {can(user, 'projects:create') && <Box
           component={Link}
           href="/wizard"
           sx={{
@@ -103,7 +115,7 @@ export default function Topbar() {
           }}
         >
           Start project
-        </Box>
+        </Box>}
 
         <Box
           component={Link}
@@ -125,7 +137,7 @@ export default function Topbar() {
             '&:hover': { opacity: 0.8 },
           }}
         >
-          TJ
+          {initials}
         </Box>
       </Box>
     </Box>

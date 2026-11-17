@@ -117,7 +117,7 @@ describe('AI routes', () => {
 })
 
 describe('proposals', () => {
-  const project = { id: 7, client_id: 1, title: 'Clinic booking', description: 'Appointments', budget_min: 300000 }
+  const project = { id: 7, org_id: 1, client_id: 1, title: 'Clinic booking', description: 'Appointments', budget_min: 300000 }
   const aiProposal = {
     scope: ['Booking', 'Payments', 'Admin'],
     timeline: [
@@ -154,39 +154,46 @@ describe('proposals', () => {
 })
 
 describe('authorization on project data', () => {
-  // Alice owns project 7 only. Task 5 belongs to project 7, task 6 to project 8.
+  // Org 1 has project 7 (Alice's) and project 8 (Bob's). Task 5 is on 7, task 6 on 8.
   beforeEach(() => {
-    db.on(/SELECT 1 FROM projects WHERE id = \$1 AND client_id = \$2/, ([id, uid]) => (id === 7 && uid === 1 ? [{}] : []))
+    db.on(/SELECT org_id, client_id FROM projects WHERE id/, ([id]) =>
+      id === 7 ? [{ org_id: 1, client_id: 1 }] : id === 8 ? [{ org_id: 1, client_id: 2 }] : []
+    )
     db.on(/SELECT project_id FROM tasks WHERE id/, ([id]) => (id === 5 ? [{ project_id: 7 }] : id === 6 ? [{ project_id: 8 }] : []))
-    db.on(/SELECT \* FROM tasks WHERE project_id/, [{ id: 5, title: 'mine' }])
-    db.on(/DELETE FROM tasks/, [])
+    db.on(/FROM tasks t LEFT JOIN users a/, [{ id: 5, title: 'mine' }])
+    db.on(/DELETE FROM tasks/, [{ title: 'x' }])
   })
 
-  test("owner can list their project's tasks", async () => {
+  test("a client can read their own project's tasks", async () => {
     const res = await request(app).get('/api/tasks/7').set(auth(alice))
     assert.equal(res.status, 200)
   })
 
-  test("other users get 404 on someone else's project tasks", async () => {
+  test("a client gets 404 on another client's project in the same org", async () => {
     const res = await request(app).get('/api/tasks/8').set(auth(alice))
     assert.equal(res.status, 404)
   })
 
-  test("cannot delete a task from someone else's project", async () => {
-    const res = await request(app).delete('/api/tasks/6').set(auth(alice))
-    assert.equal(res.status, 404)
+  test('clients cannot delete tasks, even on their own project', async () => {
+    const res = await request(app).delete('/api/tasks/5').set(auth(alice))
+    assert.equal(res.status, 403)
     assert.ok(!db.calls.some(c => /DELETE FROM tasks/.test(c.sql)))
   })
 
-  test('admin can access any project', async () => {
+  test("an org admin can access every project in the org", async () => {
     const res = await request(app).get('/api/tasks/8').set(auth(admin))
     assert.equal(res.status, 200)
+  })
+
+  test('a token for a deleted user is rejected', async () => {
+    const res = await request(app).get('/api/tasks/7').set(auth({ id: 12345, email: 'gone@example.com' }))
+    assert.equal(res.status, 401)
   })
 })
 
 describe('routing', () => {
   test('GET /api/projects returns the user\'s projects, not hardcoded demo data', async () => {
-    db.on(/SELECT \* FROM projects WHERE client_id/, ([uid]) => [{ id: 7, client_id: uid, title: 'Clinic booking' }])
+    db.on(/FROM projects p\s+LEFT JOIN users u/, ([orgId, uid]) => [{ id: 7, org_id: orgId, client_id: uid, title: 'Clinic booking' }])
     const res = await request(app).get('/api/projects').set(auth(alice))
     assert.equal(res.status, 200)
     assert.deepEqual(res.body.map(p => p.title), ['Clinic booking'])

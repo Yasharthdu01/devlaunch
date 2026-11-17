@@ -5,6 +5,9 @@ const authMiddleware = require('../middleware/auth')
 const llm = require('../lib/llm')
 const { requests, outputs } = require('../lib/schemas')
 const { validateBody, aiLimiter } = require('../lib/http')
+const { requirePermission } = require('../lib/rbac')
+const { userCanAccessProject } = require('../lib/access')
+const { recordAudit } = require('../lib/auditLog')
 
 const SYSTEM = `You write software project proposals for an Indian development agency.
 Respond with ONLY a JSON object (no prose, no markdown) with exactly these keys:
@@ -59,14 +62,15 @@ function templateProposal() {
 const sumCost = cost => Math.round(cost.reduce((sum, c) => sum + (Number(c.amount) || 0), 0))
 
 // POST /api/proposals/generate
-router.post('/generate', authMiddleware, aiLimiter, validateBody(requests.proposal), async (req, res) => {
+router.post('/generate', authMiddleware, requirePermission('proposals:generate'), aiLimiter, validateBody(requests.proposal), async (req, res) => {
   const { project_id } = req.body
 
   try {
-    const result = await pool.query('SELECT * FROM projects WHERE id = $1 AND client_id = $2', [
-      project_id,
-      req.user.id,
-    ])
+    // Clients: their own projects. Org admins: any project in their org.
+    if (!(await userCanAccessProject(req.ctx, project_id))) {
+      return res.status(404).json({ message: 'Project not found' })
+    }
+    const result = await pool.query('SELECT * FROM projects WHERE id = $1', [project_id])
     if (result.rows.length === 0) {
       return res.status(404).json({ message: 'Project not found' })
     }
@@ -110,6 +114,11 @@ router.post('/generate', authMiddleware, aiLimiter, validateBody(requests.propos
       ]
     )
 
+    await recordAudit(req, 'proposal.generated', {
+      entityType: 'proposal',
+      entityId: saved.rows[0].id,
+      metadata: { project_id, source, total: proposalData.total },
+    })
     res.json({ proposal: proposalData, id: saved.rows[0].id, source })
   } catch (err) {
     console.error('[proposals] generation error:', err)
@@ -117,15 +126,15 @@ router.post('/generate', authMiddleware, aiLimiter, validateBody(requests.propos
   }
 })
 
-// GET /api/proposals/:project_id — only the project's owner can read its proposal
-router.get('/:project_id', authMiddleware, async (req, res) => {
+// GET /api/proposals/:project_id — latest proposal for a project the caller can access
+router.get('/:project_id', authMiddleware, requirePermission('proposals:read'), async (req, res) => {
   try {
+    if (!(await userCanAccessProject(req.ctx, req.params.project_id))) {
+      return res.status(404).json({ message: 'No proposal found' })
+    }
     const result = await pool.query(
-      `SELECT pr.* FROM proposals pr
-       JOIN projects p ON p.id = pr.project_id
-       WHERE pr.project_id = $1 AND (p.client_id = $2 OR $3 = 'admin')
-       ORDER BY pr.created_at DESC LIMIT 1`,
-      [req.params.project_id, req.user.id, req.user.role]
+      'SELECT * FROM proposals WHERE project_id = $1 ORDER BY created_at DESC LIMIT 1',
+      [req.params.project_id]
     )
     if (result.rows.length === 0) {
       return res.status(404).json({ message: 'No proposal found' })

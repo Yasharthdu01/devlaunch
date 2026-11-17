@@ -1,6 +1,6 @@
 'use client'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import API_URL from '@/lib/config'
 import Box from '@mui/material/Box'
@@ -10,11 +10,20 @@ import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import MenuItem from '@mui/material/MenuItem'
 import Alert from '@mui/material/Alert'
+import ToggleButton from '@mui/material/ToggleButton'
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
+import { saveSession, homePathFor, ROLE_LABELS } from '@/lib/session'
+
+interface InvitePreview { org_name: string; email: string; role: string; has_account: boolean }
 
 const INDUSTRIES = ['Travel & Hospitality', 'E-commerce', 'Healthcare', 'EdTech', 'SaaS', 'Marketing', 'Other']
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter()
+  const params = useSearchParams()
+  const inviteToken = params.get('invite') || ''
+  const [accountType, setAccountType] = useState<'client' | 'agency'>(params.get('type') === 'agency' ? 'agency' : 'client')
+  const [invite, setInvite] = useState<InvitePreview | null>(null)
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -24,6 +33,19 @@ export default function RegisterPage() {
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // Invited people sign up into the inviting org with a fixed email.
+  useEffect(() => {
+    if (!inviteToken) return
+    fetch(API_URL + `/api/invitations/${encodeURIComponent(inviteToken)}`)
+      .then(async r => {
+        const data = await r.json()
+        if (!r.ok) { setError(data.message || 'This invitation link is invalid or has expired'); return }
+        setInvite(data)
+        setForm(f => ({ ...f, email: data.email }))
+      })
+      .catch(() => setError('Could not load the invitation'))
+  }, [inviteToken])
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -38,7 +60,12 @@ export default function RegisterPage() {
       const res = await fetch(API_URL + '/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          account_type: invite ? 'client' : accountType,
+          agency_name: accountType === 'agency' && !invite ? form.company_name : undefined,
+          invite_token: invite ? inviteToken : undefined,
+        }),
       })
 
       const data = await res.json()
@@ -49,9 +76,8 @@ export default function RegisterPage() {
         return
       }
 
-      localStorage.setItem('token', data.token)
-      localStorage.setItem('user', JSON.stringify(data.user))
-      router.push('/dashboard')
+      saveSession(data.token, data.user)
+      router.push(homePathFor(data.user))
 
     } catch (err) {
       setError('Server error. Make sure backend is running.')
@@ -74,8 +100,35 @@ export default function RegisterPage() {
           <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-muted)', mt: 0.5 }}>AI delivery platform</Typography>
         </Box>
 
-        <Typography sx={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)', mb: 0.5 }}>Create account</Typography>
-        <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-muted)', mb: 3 }}>Start your project today</Typography>
+        <Typography sx={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)', mb: 0.5 }}>
+          {invite ? `Join ${invite.org_name}` : 'Create account'}
+        </Typography>
+        <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-muted)', mb: 3 }}>
+          {invite
+            ? `You've been invited as ${ROLE_LABELS[invite.role]?.toLowerCase() || invite.role}.`
+            : accountType === 'agency' ? 'Run your agency’s clients, proposals and delivery in one place' : 'Start your project today'}
+        </Typography>
+
+        {invite?.has_account && (
+          <Alert severity="info" sx={{ borderRadius: '12px', mb: 2.5 }}>
+            You already have an account.{' '}
+            <Link href={`/login?next=${encodeURIComponent(`/invite?token=${inviteToken}`)}`}>Log in to accept</Link>
+          </Alert>
+        )}
+
+        {!inviteToken && (
+          <ToggleButtonGroup
+            exclusive
+            fullWidth
+            size="small"
+            value={accountType}
+            onChange={(_, v) => v && setAccountType(v)}
+            sx={{ mb: 2.5, '& .MuiToggleButton-root': { textTransform: 'none', fontWeight: 600, borderRadius: '8px' } }}
+          >
+            <ToggleButton value="client">I need a project built</ToggleButton>
+            <ToggleButton value="agency">I run an agency</ToggleButton>
+          </ToggleButtonGroup>
+        )}
 
         {/* Error */}
         {error && (
@@ -111,6 +164,7 @@ export default function RegisterPage() {
               required
               size="small"
               fullWidth
+              disabled={Boolean(invite)}
             />
           </Box>
 
@@ -125,19 +179,21 @@ export default function RegisterPage() {
               required
               size="small"
               fullWidth
-              slotProps={{ htmlInput: { minLength: 6 } }}
+              slotProps={{ htmlInput: { minLength: 8 } }}
+              helperText="At least 8 characters"
             />
           </Box>
 
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2.5 }}>
             <Box sx={{ minWidth: 0 }}>
-              <Typography sx={labelSx}>Company name</Typography>
+              <Typography sx={labelSx}>{accountType === 'agency' && !invite ? 'Agency name' : 'Company name'}</Typography>
               <TextField
                 type="text"
                 name="company_name"
                 value={form.company_name}
                 onChange={handleChange}
-                placeholder="Traveler Co."
+                required={accountType === 'agency' && !invite}
+                placeholder={accountType === 'agency' && !invite ? 'Acme Studio' : 'Traveler Co.'}
                 size="small"
                 fullWidth
               />
@@ -166,7 +222,7 @@ export default function RegisterPage() {
             fullWidth
             sx={{ bgcolor: 'var(--blue)', color: '#fff', borderRadius: '8px', textTransform: 'none', fontWeight: 600, py: 1, mt: 0.5, '&:hover': { bgcolor: 'var(--blue-dark)' } }}
           >
-            {loading ? 'Creating account...' : 'Create account'}
+            {loading ? 'Creating account...' : invite ? `Join ${invite.org_name}` : accountType === 'agency' ? 'Create agency workspace' : 'Create account'}
           </Button>
 
         </Box>
@@ -184,5 +240,13 @@ export default function RegisterPage() {
 
       </Paper>
     </Box>
+  )
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterForm />
+    </Suspense>
   )
 }

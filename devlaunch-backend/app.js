@@ -17,6 +17,9 @@ const mvpRoutes = require('./routes/mvp')
 const enquiryRoutes = require('./routes/enquiry')
 const auditRoutes = require('./routes/audit')
 const whatsappRoutes = require('./routes/whatsapp')
+const orgRoutes = require('./routes/orgs')
+const invitationRoutes = require('./routes/invitations')
+const platformRoutes = require('./routes/platform')
 
 // Allowed frontend origins come from env so a new Vercel domain doesn't need a code change.
 // CORS_ORIGINS is comma-separated; FRONTEND_URL is kept for backwards compatibility.
@@ -44,7 +47,7 @@ function createApp() {
       origin: allowedOrigins(),
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Org-Id'],
     })
   )
   app.use(express.json({ limit: '100kb' }))
@@ -53,7 +56,7 @@ function createApp() {
     res.json({
       message: 'DevLaunch API running',
       environment: process.env.NODE_ENV || 'development',
-      version: '1.1.0',
+      version: '1.2.0',
     })
   })
 
@@ -72,6 +75,9 @@ function createApp() {
   app.use('/api/enquiry', enquiryRoutes)
   app.use('/api/audit', auditRoutes)
   app.use('/api/whatsapp', whatsappRoutes)
+  app.use('/api/orgs', orgRoutes)
+  app.use('/api/invitations', invitationRoutes)
+  app.use('/api/platform', platformRoutes)
 
   app.use((req, res) => {
     res.status(404).json({ message: 'Route not found' })

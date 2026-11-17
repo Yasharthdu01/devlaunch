@@ -3,7 +3,8 @@ require('dotenv').config()
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
+  // Hosted Postgres (Neon) needs SSL; a local dev/test database usually doesn't.
+  ssl: process.env.DATABASE_SSL === 'false' ? false : { rejectUnauthorized: false },
   // Neon closes idle connections; recycle ours first and fail fast on connect.
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,

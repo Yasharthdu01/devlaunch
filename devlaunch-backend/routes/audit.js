@@ -12,21 +12,6 @@ const { aiLimiter } = require('../lib/http')
 // those signals into a scored, human-readable report. The narrative is
 // templated for now — swap in an LLM later without changing the front end.
 
-async function ensureAuditTable() {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS audits (
-      id SERIAL PRIMARY KEY,
-      url VARCHAR(500),
-      name VARCHAR(100),
-      email VARCHAR(100),
-      phone VARCHAR(20),
-      score INT,
-      report JSONB,
-      created_at TIMESTAMP DEFAULT NOW()
-    )
-  `)
-}
-ensureAuditTable().catch(err => console.error(`[db] ensureAuditTable failed: ${err.message}`))
 
 // Normalise whatever the user typed into a fetchable https URL.
 function normaliseUrl(raw) {
