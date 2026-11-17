@@ -83,27 +83,42 @@ export default function WizardPage() {
     }
   }
 
+  // Everything the client has told us so far, so each step's suggestion
+  // builds on earlier answers instead of seeing a single field.
+  function aiContext() {
+    const parts = [
+      form.title && `Project: ${form.title}`,
+      form.industry && `Industry: ${form.industry}`,
+      form.company && `Company: ${form.company}`,
+      form.budget && `Budget: ${form.budget}`,
+      form.description && `Description: ${form.description}`,
+      form.platforms.length > 0 && `Platforms: ${form.platforms.join(', ')}`,
+      currentStep > 2 && form.framework && `Frontend: ${form.framework}`,
+      currentStep > 3 && form.backend && `Backend: ${form.backend} with ${form.database}`,
+    ].filter(Boolean)
+    return parts.join('\n').slice(0, 500)
+  }
+
   async function getAISuggestion() {
+    const data = aiContext()
+    if (!form.title.trim() && !form.description.trim() && !form.industry) {
+      setSuggestion('Add a project name, industry or description first, and the AI will tailor its suggestion to it.')
+      return
+    }
     setAiLoading(true)
     setSuggestion('')
-    const contextMap = {
-      1: form.description || form.title,
-      2: form.industry || 'web app',
-      3: form.industry || 'web app',
-      4: form.industry || 'web app',
-      5: form.company  || form.industry,
-      6: form.industry || 'web app',
-    }
     try {
       const res = await fetch(API_URL + '/api/ai/suggest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ step: currentStep, data: contextMap[currentStep] }),
+        body: JSON.stringify({ step: currentStep, data }),
       })
-      const data = await res.json()
-      setSuggestion(data.suggestion)
+      const body = await res.json()
+      if (res.ok) setSuggestion(body.suggestion)
+      else if (res.status === 429) setSuggestion('Too many AI requests. Please wait a minute and try again.')
+      else setSuggestion(body.suggestion || body.message || 'AI suggestion unavailable right now. You can continue without it.')
     } catch {
-      setSuggestion('Could not load AI suggestion. Check backend is running.')
+      setSuggestion('Could not reach the AI service. Please try again.')
     }
     setAiLoading(false)
   }

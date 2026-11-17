@@ -31,7 +31,8 @@ const requests = {
   }),
   marketing: z.object({
     business_type: shortText(120),
-    location: shortText(120),
+    // The marketing form only requires name + industry; location is optional.
+    location: z.string().trim().max(120).optional().default('India').transform(v => v || 'India'),
     industry: shortText(120),
   }),
   proposal: z.object({
