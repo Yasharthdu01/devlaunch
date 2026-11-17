@@ -10,6 +10,7 @@ export const tabsSx = {
   borderRadius: '12px',
   p: 0.5,
   display: 'inline-flex',
+  maxWidth: '100%',
   '& .MuiTabs-indicator': { display: 'none' },
   '& .MuiTab-root': { minHeight: 0, py: 0.75, px: 2, textTransform: 'none', fontWeight: 600, fontSize: '0.875rem', borderRadius: '8px', color: 'var(--text-muted)' },
   '& .Mui-selected': { bgcolor: 'var(--bg-primary)', color: 'var(--text-primary) !important' },

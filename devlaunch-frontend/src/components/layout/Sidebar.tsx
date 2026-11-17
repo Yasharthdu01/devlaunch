@@ -5,8 +5,9 @@ import Link from 'next/link'
 import {
   Home, Folder, Star, Rocket, BarChart2, FileText,
   Users, Bot, Zap, Megaphone,
-  Settings, User, Ticket, UserPlus, Globe, ListChecks
+  Settings, User, Ticket, UserPlus, Globe, ListChecks, X
 } from 'lucide-react'
+import IconButton from '@mui/material/IconButton'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { getStoredUser, refreshUser, can, ROLE_LABELS, type SessionUser } from '@/lib/session'
@@ -75,7 +76,9 @@ function visible(link: NavLink, user: SessionUser | null) {
   return true
 }
 
-export default function Sidebar() {
+// onClose: shown as a close button when the sidebar is a mobile drawer.
+// onNavigate: called after a link is tapped (closes the drawer).
+export default function Sidebar({ onClose, onNavigate }: { onClose?: () => void; onNavigate?: () => void } = {}) {
   const pathname = usePathname()
   const [user, setUser] = useState<SessionUser | null>(null)
 
@@ -99,6 +102,8 @@ export default function Sidebar() {
     <Box
       sx={{
         width: 256,
+        maxWidth: '85vw',
+        height: '100%',
         flexShrink: 0,
         display: 'flex',
         flexDirection: 'column',
@@ -108,7 +113,17 @@ export default function Sidebar() {
       }}
     >
       {/* Logo */}
-      <Box sx={{ px: 3, py: 2.5, borderBottom: '1px solid var(--border)' }}>
+      <Box sx={{ px: 3, py: 2.5, borderBottom: '1px solid var(--border)', position: 'relative' }}>
+        {onClose && (
+          <IconButton
+            onClick={onClose}
+            aria-label="Close menu"
+            size="small"
+            sx={{ position: 'absolute', top: 16, right: 12, color: 'var(--text-muted)' }}
+          >
+            <X size={20} />
+          </IconButton>
+        )}
         <Typography sx={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--blue)', letterSpacing: '-0.02em' }}>
           DevLaunch
         </Typography>
@@ -145,6 +160,7 @@ export default function Sidebar() {
                     key={link.label}
                     component={Link}
                     href={link.href}
+                    onClick={onNavigate}
                     sx={{
                       position: 'relative',
                       display: 'flex',

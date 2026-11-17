@@ -7,6 +7,8 @@ import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
 import ThemeToggle from '@/components/ui/ThemeToggle'
 import { getStoredUser, can, type SessionUser } from '@/lib/session'
+import IconButton from '@mui/material/IconButton'
+import { Menu } from 'lucide-react'
 
 const PAGE_META: Record<string, { title: string; sub: string }> = {
   '/dashboard':  { title: 'Dashboard',           sub: 'Your AI-powered delivery platform'    },
@@ -27,7 +29,7 @@ const PAGE_META: Record<string, { title: string; sub: string }> = {
   '/platform':   { title: 'Platform',            sub: 'All agencies on DevLaunch'            },
 }
 
-export default function Topbar() {
+export default function Topbar({ onMenuClick }: { onMenuClick?: () => void } = {}) {
   const pathname = usePathname()
   const [user, setUser] = useState<SessionUser | null>(null)
   useEffect(() => {
@@ -47,28 +49,37 @@ export default function Topbar() {
       sx={{
         bgcolor: 'var(--bg-primary)',
         borderBottom: '1px solid var(--border)',
-        px: 2.5,
+        px: { xs: 1.5, md: 2.5 },
         py: 1.5,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
+        gap: 1,
         flexShrink: 0,
       }}
     >
-      <Box>
-        <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+      <IconButton
+        onClick={onMenuClick}
+        aria-label="Open menu"
+        sx={{ display: { xs: 'inline-flex', md: 'none' }, color: 'var(--text-primary)', ml: -0.5 }}
+      >
+        <Menu size={22} />
+      </IconButton>
+      <Box sx={{ minWidth: 0, flex: 1 }}>
+        <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {meta.title}
         </Typography>
-        <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', mt: 0.25 }}>
+        <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', mt: 0.25, display: { xs: 'none', sm: 'block' }, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {meta.sub}
         </Typography>
       </Box>
 
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
         <Chip
           label="● Live"
           size="small"
           sx={{
+            display: { xs: 'none', sm: 'inline-flex' },
             fontSize: '0.75rem',
             fontWeight: 600,
             bgcolor: 'var(--blue-light)',
@@ -83,6 +94,7 @@ export default function Topbar() {
           component={Link}
           href="/chatbot"
           sx={{
+            display: { xs: 'none', sm: 'block' },
             fontSize: '0.75rem',
             px: 1.5,
             py: 0.75,
@@ -102,6 +114,8 @@ export default function Topbar() {
           component={Link}
           href="/wizard"
           sx={{
+            display: { xs: 'none', sm: 'block' },
+            whiteSpace: 'nowrap',
             fontSize: '0.75rem',
             px: 1.5,
             py: 0.75,

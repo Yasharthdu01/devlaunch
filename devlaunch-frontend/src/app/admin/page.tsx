@@ -248,7 +248,10 @@ export default function AdminPage() {
         <Tabs
           value={tab}
           onChange={(_e, v: string) => setTab(v)}
+          variant="scrollable"
+          scrollButtons={false}
           sx={{
+            maxWidth: '100%',
             minHeight: 0,
             bgcolor: 'var(--bg-tertiary)',
             borderRadius: '12px',
