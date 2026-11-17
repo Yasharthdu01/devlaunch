@@ -3,23 +3,6 @@ const router = express.Router()
 const pool = require('../db')
 const { sendMail, ADMIN_EMAIL } = require('../utils/mailer')
 
-async function ensureEnquiryTable() {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS enquiries (
-      id SERIAL PRIMARY KEY,
-      name VARCHAR(100),
-      email VARCHAR(100),
-      phone VARCHAR(20),
-      company VARCHAR(100),
-      industry VARCHAR(100),
-      budget VARCHAR(50),
-      message TEXT,
-      status VARCHAR(20) DEFAULT 'new',
-      created_at TIMESTAMP DEFAULT NOW()
-    )
-  `)
-}
-ensureEnquiryTable().catch(err => console.error(`[db] ensureEnquiryTable failed: ${err.message}`))
 
 router.post('/', async (req, res) => {
   const { name, email, phone, company, industry, budget, message } = req.body

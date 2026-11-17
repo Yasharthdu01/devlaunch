@@ -12,20 +12,6 @@ const { sendMail, ADMIN_EMAIL } = require('../utils/mailer')
 // and forward the same { reply, quickReplies, booking } shape — the front end
 // and webhook contract stay identical.
 
-async function ensureWaTables() {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS whatsapp_leads (
-      id SERIAL PRIMARY KEY,
-      business VARCHAR(120),
-      name VARCHAR(100),
-      phone VARCHAR(20),
-      industry VARCHAR(60),
-      plan VARCHAR(40),
-      created_at TIMESTAMP DEFAULT NOW()
-    )
-  `)
-}
-ensureWaTables().catch(err => console.error(`[db] ensureWaTables failed: ${err.message}`))
 
 // Industry-specific receptionist personas — the sellable templates.
 const TEMPLATES = {
