@@ -221,7 +221,7 @@ export default function TeamPage() {
       )}
 
       <Box sx={{ mb: 2.5 }}>
-        <Tabs value={tab} onChange={(_e, v: string) => setTab(v)} sx={tabsSx}>
+        <Tabs value={tab} onChange={(_e, v: string) => setTab(v)} sx={tabsSx} variant="scrollable" scrollButtons={false}>
           <Tab value="members" label={`Members (${members.length})`} />
           {manage && <Tab value="invites" label={`Pending invites${invites.length ? ` (${invites.length})` : ''}`} />}
           {can(user, 'audit:read') && <Tab value="audit" label="Activity log" />}
@@ -236,7 +236,7 @@ export default function TeamPage() {
                 <TableRow>
                   <TableCell sx={thSx}>Name</TableCell>
                   <TableCell sx={thSx}>Role</TableCell>
-                  <TableCell sx={thSx}>Joined</TableCell>
+                  <TableCell sx={{ ...thSx, display: { xs: 'none', sm: 'table-cell' } }}>Joined</TableCell>
                   {manage && <TableCell sx={thSx} align="right" />}
                 </TableRow>
               </TableHead>
@@ -257,7 +257,7 @@ export default function TeamPage() {
                         </TextField>
                       ) : ROLE_LABELS[m.role]}
                     </TableCell>
-                    <TableCell sx={tdSx}>{formatDate(m.joined_at)}</TableCell>
+                    <TableCell sx={{ ...tdSx, display: { xs: 'none', sm: 'table-cell' } }}>{formatDate(m.joined_at)}</TableCell>
                     {manage && (
                       <TableCell sx={tdSx} align="right">
                         <Tooltip title="Remove from team">
