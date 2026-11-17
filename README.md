@@ -163,6 +163,38 @@ NEXT_PUBLIC_DEMO_MODE=true   # shows the "sample data" banner; set false once te
 
 ---
 
+## 👥 Roles & Multi-tenancy
+
+DevLaunch is multi-tenant: each agency is an **organization** with its own clients, projects and team.
+
+| Role | Who | Can |
+|---|---|---|
+| **Super admin** | Platform operator (`users.is_super_admin`) | List / suspend agencies, see platform stats, enter any org for support (`X-Org-Id` header) |
+| **Org admin** | Agency owner / manager | Everything in their org: team & roles, invitations, all projects, proposals, milestones, activity log |
+| **Developer** | Agency team member | All org projects and tasks, assigned work (`/api/tasks/mine`); no team or billing access |
+| **Client** | The agency's customer | Only their own projects: wizard, proposals, read tasks & comment, support tickets |
+
+How it's enforced:
+- The JWT carries **identity only**. Roles and org membership are loaded from the database on every request, so removing someone or suspending an org takes effect immediately.
+- Routes check **permissions**, not roles (`lib/rbac.js`), and every query is scoped to the caller's org (`lib/access.js`). Cross-tenant ids return `404`.
+- Security-relevant actions are written to `audit_log` (Team → Activity log).
+- `test/tenancy.integration.test.js` proves isolation against a real Postgres (run with `TEST_DATABASE_URL`).
+
+Signup paths: public signup → client of the DevLaunch org · "I run an agency" → new org, you're its admin · invitation link → the inviting org with the invited role.
+
+## 🗄️ Database migrations
+
+Schema lives in `devlaunch-backend/migrations/*.sql` and is applied by `npm run migrate` (transactional, checksummed, advisory-locked). In production this runs as Railway's **pre-deploy command**, so a failed migration aborts the deploy and the previous release keeps serving. Migrations are additive (expand/contract): never edit an applied migration, add a new one.
+
+```bash
+cd devlaunch-backend
+npm run migrate                      # apply pending migrations
+ADMIN_EMAIL=you@x.com ADMIN_PASSWORD='12+ chars' npm run seed:admin   # create/reset the super admin
+TEST_DATABASE_URL=postgres://localhost/devlaunch_test npm test        # unit + integration tests
+```
+
+---
+
 ## 🚀 Roadmap
 
 ### Phase 1 (Completed)

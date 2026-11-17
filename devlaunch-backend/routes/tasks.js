@@ -13,7 +13,7 @@ const byProjectBody = requireProjectAccess(req => req.body?.project_id)
 const byTask = requireChildAccess('tasks', req => req.params.id)
 
 const TASK_STATUSES = ['todo', 'in_progress', 'review', 'done']
-const TASK_TYPES = ['feature', 'bug', 'design', 'devops', 'research', 'other']
+const TASK_TYPES = ['feature', 'bug', 'design', 'backend', 'devops', 'research', 'other']
 
 const createSchema = z.object({
   project_id: z.coerce.number().int().positive(),
@@ -22,6 +22,7 @@ const createSchema = z.object({
   assigned_to: z.string().trim().max(100).nullable().optional(),
   assignee_id: z.coerce.number().int().positive().nullable().optional(),
   type: z.enum(TASK_TYPES).optional().default('feature'),
+  status: z.enum(TASK_STATUSES).optional().default('todo'),
 })
 
 const updateSchema = z
@@ -82,14 +83,14 @@ router.get('/:project_id', authMiddleware, requirePermission('tasks:read'), byPr
 
 // POST /api/tasks — agency staff only; clients see tasks and comment
 router.post('/', authMiddleware, requirePermission('tasks:manage'), validateBody(createSchema), byProjectBody, async (req, res) => {
-  const { project_id, title, description, type } = req.body
+  const { project_id, title, description, type, status } = req.body
   try {
     const assignee = await resolveAssignee(req.ctx.orgId, req.body.assignee_id)
     if (!assignee.ok) return res.status(400).json({ message: 'Tasks can only be assigned to your team members' })
     const result = await pool.query(
-      `INSERT INTO tasks (project_id, title, description, assigned_to, assignee_id, type)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [project_id, title, description ?? null, assignee.name ?? req.body.assigned_to ?? null, assignee.value ?? null, type]
+      `INSERT INTO tasks (project_id, title, description, assigned_to, assignee_id, type, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [project_id, title, description ?? null, assignee.name ?? req.body.assigned_to ?? null, assignee.value ?? null, type, status]
     )
     res.status(201).json(result.rows[0])
   } catch (err) {

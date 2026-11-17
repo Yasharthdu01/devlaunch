@@ -5,60 +5,89 @@ import Link from 'next/link'
 import {
   Home, Folder, Star, Rocket, BarChart2, FileText,
   Users, Bot, Zap, Megaphone,
-  Settings, User, Ticket
+  Settings, User, Ticket, UserPlus, Globe, ListChecks
 } from 'lucide-react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
+import { getStoredUser, refreshUser, can, ROLE_LABELS, type SessionUser } from '@/lib/session'
 
-interface StoredUser {
-  name?: string
-  company_name?: string
-  role?: string
+// Older marketing tools, hidden from the app nav unless explicitly enabled.
+const SHOW_LEGACY_TOOLS = process.env.NEXT_PUBLIC_SHOW_LEGACY_TOOLS === 'true'
+
+type NavLink = {
+  label: string
+  href: string
+  icon: React.ComponentType<{ size?: number }>
+  // Show only if the user has this permission (or, for 'platform', is a super admin).
+  needs?: string
+  // Hide for agency staff (client-only pages).
+  clientOnly?: boolean
+  // Hide for clients (staff-only pages).
+  staffOnly?: boolean
+  legacy?: boolean
 }
 
-const navItems = [
+const navItems: { section: string; links: NavLink[] }[] = [
   {
-    section: 'Discover',
+    section: 'Overview',
     links: [
-      { label: 'Home', href: '/dashboard', icon: Home },
-      { label: 'Portfolio',    href: '/portfolio', icon: Folder     },
-      { label: 'Reviews',      href: '/reviews',   icon: Star       },
+      { label: 'Home',      href: '/dashboard', icon: Home },
+      { label: 'Portfolio', href: '/portfolio', icon: Folder, legacy: true },
+      { label: 'Reviews',   href: '/reviews',   icon: Star,   legacy: true },
     ]
   },
   {
-    section: 'My Project',
+    section: 'Projects',
     links: [
-      { label: 'Start project', href: '/wizard',   icon: Rocket    },
+      { label: 'Start project', href: '/wizard',   icon: Rocket,     needs: 'projects:create' },
       { label: 'Live tracker',  href: '/tracker',  icon: BarChart2 },
-      { label: 'Proposal',      href: '/proposal', icon: FileText  },
-      { label: 'Collaboration', href: '/collab',   icon: Users     },
+      { label: 'Proposal',      href: '/proposal', icon: FileText,   needs: 'proposals:generate' },
+      { label: 'Tasks',         href: '/collab',   icon: ListChecks, staffOnly: true },
+      { label: 'Collaboration', href: '/collab',   icon: Users,      clientOnly: true },
+      { label: 'Support',       href: '/support',  icon: Ticket },
     ]
   },
   {
     section: 'Tools',
     links: [
-      { label: 'AI assistant',  href: '/chatbot',   icon: Bot        },
-      { label: 'Build my MVP',  href: '/mvp',       icon: Zap        },
-      { label: 'Marketing AI',  href: '/marketing', icon: Megaphone  },
-      { label: 'Support',       href: '/support',   icon: Ticket     },
-      { label: 'Admin panel',   href: '/admin',     icon: Settings, adminOnly: true },
-      { label: 'My profile',    href: '/profile',   icon: User       },
+      { label: 'AI assistant', href: '/chatbot',   icon: Bot },
+      { label: 'Build my MVP', href: '/mvp',       icon: Zap,       clientOnly: true },
+      { label: 'Marketing AI', href: '/marketing', icon: Megaphone, legacy: true },
+    ]
+  },
+  {
+    section: 'Manage',
+    links: [
+      { label: 'Admin panel', href: '/admin',    icon: Settings, needs: 'stats:read' },
+      { label: 'Team',        href: '/team',     icon: UserPlus, needs: 'members:read' },
+      { label: 'Platform',    href: '/platform', icon: Globe,    needs: 'platform:orgs' },
+      { label: 'My profile',  href: '/profile',  icon: User },
     ]
   },
 ]
 
+function visible(link: NavLink, user: SessionUser | null) {
+  if (link.legacy && !SHOW_LEGACY_TOOLS) return false
+  const staff = can(user, 'projects:read_all')
+  if (link.clientOnly && staff) return false
+  if (link.staffOnly && !staff) return false
+  if (link.needs && !can(user, link.needs)) return false
+  return true
+}
+
 export default function Sidebar() {
   const pathname = usePathname()
-  const [user, setUser] = useState<StoredUser | null>(null)
+  const [user, setUser] = useState<SessionUser | null>(null)
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('user')
-      if (raw) setUser(JSON.parse(raw))
-    } catch {}
+    setUser(getStoredUser())
+    // Pick up role changes made by an admin since this user logged in.
+    refreshUser().then(u => u && setUser(u))
+    const onChange = () => setUser(getStoredUser())
+    window.addEventListener('session-changed', onChange)
+    return () => window.removeEventListener('session-changed', onChange)
   }, [])
 
-  const isAdmin = user?.role === 'admin'
   const initials = (user?.name || 'U')
     .split(' ')
     .map(n => n[0])
@@ -83,14 +112,16 @@ export default function Sidebar() {
         <Typography sx={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--blue)', letterSpacing: '-0.02em' }}>
           DevLaunch
         </Typography>
-        <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', mt: 0.5, fontWeight: 500 }}>
-          AI delivery platform
+        <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', mt: 0.5, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {user?.org?.name || 'AI delivery platform'}
         </Typography>
       </Box>
 
       {/* Nav */}
       <Box sx={{ flex: 1, overflowY: 'auto', py: 1.5, px: 1.5 }}>
-        {navItems.map((section) => (
+        {navItems.map((section) => ({ ...section, links: section.links.filter(l => visible(l, user)) }))
+          .filter(section => section.links.length > 0)
+          .map((section) => (
           <Box key={section.section} sx={{ mb: 3 }}>
             <Typography
               sx={{
@@ -106,14 +137,12 @@ export default function Sidebar() {
               {section.section}
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
-              {section.links
-                .filter((link) => !('adminOnly' in link && link.adminOnly) || isAdmin)
-                .map((link) => {
+              {section.links.map((link) => {
                 const isActive = pathname === link.href
                 const Icon = link.icon
                 return (
                   <Box
-                    key={link.href}
+                    key={link.label}
                     component={Link}
                     href={link.href}
                     sx={{
@@ -183,8 +212,8 @@ export default function Sidebar() {
             <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {user?.company_name || user?.name || 'Guest'}
             </Typography>
-            <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'capitalize' }}>
-              {user?.role || 'Client'}
+            <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              {user?.is_super_admin ? 'Platform admin' : ROLE_LABELS[user?.org_role || ''] || 'Client'}
             </Typography>
           </Box>
         </Box>

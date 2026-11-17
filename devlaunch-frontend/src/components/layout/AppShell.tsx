@@ -6,7 +6,7 @@ import Topbar from './Topbar'
 import FloatingWhatsApp from '../FloatingWhatsApp'
 
 const PUBLIC_PAGES = ['/', '/about', '/services', '/portfolio-public', '/pricing-public', '/contact', '/blog', '/audit', '/whatsapp']
-const AUTH_PAGES   = ['/login', '/register', '/forgot-password']
+const AUTH_PAGES   = ['/login', '/register', '/forgot-password', '/invite']
 
 // The /whatsapp product page is already WhatsApp-themed, so skip the floating
 // button there to avoid redundancy.
@@ -28,7 +28,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden', bgcolor: 'var(--bg-primary)' }}>
+    <Box sx={{ display: 'flex', height: 'calc(100dvh - var(--banner-h, 0px))', overflow: 'hidden', bgcolor: 'var(--bg-primary)' }}>
       <Sidebar />
       <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, bgcolor: 'var(--bg-secondary)' }}>
         <Topbar />

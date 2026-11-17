@@ -1,6 +1,6 @@
 'use client'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import API_URL from '@/lib/config'
 import Box from '@mui/material/Box'
@@ -9,9 +9,16 @@ import Paper from '@mui/material/Paper'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import Alert from '@mui/material/Alert'
+import { saveSession, homePathFor } from '@/lib/session'
 
-export default function LoginPage() {
+// Only follow same-site relative paths after login (no open redirects).
+function safeNext(next: string | null) {
+  return next && next.startsWith('/') && !next.startsWith('//') ? next : null
+}
+
+function LoginForm() {
   const router = useRouter()
+  const next = safeNext(useSearchParams().get('next'))
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -40,9 +47,8 @@ export default function LoginPage() {
         return
       }
 
-      localStorage.setItem('token', data.token)
-      localStorage.setItem('user', JSON.stringify(data.user))
-      router.push(data.user?.role === 'admin' ? '/admin' : '/dashboard')
+      saveSession(data.token, data.user)
+      router.push(next || homePathFor(data.user))
 
     } catch (err) {
       setError('Server error. Make sure backend is running.')
@@ -129,5 +135,13 @@ export default function LoginPage() {
 
       </Paper>
     </Box>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   )
 }

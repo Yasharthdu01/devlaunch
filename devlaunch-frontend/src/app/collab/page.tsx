@@ -9,6 +9,7 @@ import Chip from '@mui/material/Chip'
 import Avatar from '@mui/material/Avatar'
 import TextField from '@mui/material/TextField'
 import MenuItem from '@mui/material/MenuItem'
+import { getStoredUser, can, type SessionUser } from '@/lib/session'
 
 const COLUMNS = [
   { id: 'todo',        label: 'To do',       color: 'var(--bg-tertiary)' },
@@ -32,13 +33,27 @@ export default function CollabPage() {
   const [newComment,    setNewComment]    = useState('')
   const [showAddTask,   setShowAddTask]   = useState(false)
   const [addingTo,      setAddingTo]      = useState('')
-  const [newTask,       setNewTask]       = useState({ title: '', assigned_to: '', type: 'feature' })
+  const [newTask,       setNewTask]       = useState({ title: '', assignee_id: '', type: 'feature' })
   const [loading,       setLoading]       = useState(false)
+  const [user,          setUser]          = useState<SessionUser | null>(null)
+  const [staff,         setStaff]         = useState<{ id: number; name: string; role: string }[]>([])
+  // Clients follow progress and comment; only agency staff change tasks.
+  const manage = can(user, 'tasks:manage')
 
   const token = typeof window !== 'undefined'
     ? localStorage.getItem('token') : ''
 
-  useEffect(() => { fetchProjects() }, [])
+  useEffect(() => {
+    const u = getStoredUser()
+    setUser(u)
+    fetchProjects()
+    if (can(u, 'tasks:manage')) {
+      fetch(API_URL + '/api/orgs/current/members', { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json())
+        .then(m => setStaff(Array.isArray(m) ? m.filter(x => x.role !== 'client') : []))
+        .catch(() => {})
+    }
+  }, [])
   useEffect(() => { if (selectedId) fetchTasks() }, [selectedId])
   useEffect(() => { if (selectedTask) fetchComments(selectedTask.id) }, [selectedTask])
 
@@ -88,14 +103,16 @@ export default function CollabPage() {
         body: JSON.stringify({
           project_id:  parseInt(selectedId),
           title:       newTask.title,
-          assigned_to: newTask.assigned_to,
+          assignee_id: newTask.assignee_id ? Number(newTask.assignee_id) : null,
           type:        newTask.type,
           status,
         }),
       })
       const data = await res.json()
-      setTasks(prev => [...prev, data])
-      setNewTask({ title: '', assigned_to: '', type: 'feature' })
+      if (!res.ok) { setLoading(false); return }
+      const assignee = staff.find(m => m.id === data.assignee_id)
+      setTasks(prev => [...prev, { ...data, assignee_name: assignee?.name ?? null }])
+      setNewTask({ title: '', assignee_id: '', type: 'feature' })
       setShowAddTask(false)
       setAddingTo('')
     } catch {}
@@ -241,7 +258,7 @@ export default function CollabPage() {
                       </Box>
 
                       {/* Move buttons */}
-                      <Box sx={{ display: 'flex', gap: 0.5, mt: 1, flexWrap: 'wrap' }}>
+                      {manage && <Box sx={{ display: 'flex', gap: 0.5, mt: 1, flexWrap: 'wrap' }}>
                         {col.id !== 'todo' && (
                           <Button
                             onClick={e => { e.stopPropagation(); moveTask(task.id, col.id === 'in_progress' ? 'todo' : 'in_progress') }}
@@ -267,14 +284,14 @@ export default function CollabPage() {
                         >
                           ×
                         </Button>
-                      </Box>
+                      </Box>}
                     </Paper>
                   )
                 })}
               </Box>
 
               {/* Add task */}
-              {showAddTask && addingTo === col.id ? (
+              {!manage ? null : showAddTask && addingTo === col.id ? (
                 <Paper elevation={0} sx={{ bgcolor: 'var(--bg-primary)', border: '1px solid var(--blue-light)', borderRadius: '12px', p: 1.5, display: 'flex', flexDirection: 'column', gap: 1 }}>
                   <TextField
                     autoFocus
@@ -288,12 +305,16 @@ export default function CollabPage() {
                   />
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <TextField
-                      value={newTask.assigned_to}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTask({ ...newTask, assigned_to: e.target.value })}
-                      placeholder="Assign to..."
+                      select
+                      value={newTask.assignee_id}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTask({ ...newTask, assignee_id: e.target.value })}
                       size="small"
+                      slotProps={{ select: { displayEmpty: true } }}
                       sx={{ flex: 1, minWidth: 0, '& .MuiInputBase-input': { fontSize: '0.75rem' } }}
-                    />
+                    >
+                      <MenuItem value="">Unassigned</MenuItem>
+                      {staff.map(m => <MenuItem key={m.id} value={String(m.id)}>{m.name}</MenuItem>)}
+                    </TextField>
                     <TextField
                       select
                       value={newTask.type}
@@ -393,7 +414,7 @@ export default function CollabPage() {
           )}
 
           {/* Move task */}
-          <Box>
+          {manage && <Box>
             <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)', mb: 1 }}>Move to</Typography>
             <Box sx={{ display: 'flex', gap: 0.5 }}>
               {COLUMNS.map(col => {
@@ -422,7 +443,7 @@ export default function CollabPage() {
                 )
               })}
             </Box>
-          </Box>
+          </Box>}
 
           {/* Comments */}
           <Box sx={{ flex: 1 }}>

@@ -3,9 +3,17 @@
 export default function DemoBanner() {
   if (process.env.NEXT_PUBLIC_DEMO_MODE === 'false') return null
   return (
+    <>
+    <style>{`:root { --banner-h: 32px; }`}</style>
     <div
       role="note"
       style={{
+        height: 32,
+        boxSizing: 'border-box',
+        lineHeight: '20px',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
         background: '#fef3c7',
         color: '#78350f',
         borderBottom: '1px solid #fcd34d',
@@ -15,7 +23,8 @@ export default function DemoBanner() {
         padding: '6px 16px',
       }}
     >
-      Portfolio project · Testimonials, portfolio items and stats shown here are sample data.
+      Testimonials, portfolio items and stats shown here are sample data.
     </div>
+    </>
   )
 }

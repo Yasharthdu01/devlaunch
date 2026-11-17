@@ -6,7 +6,7 @@ const { requirePermission } = require('../lib/rbac')
 const { requireProjectAccess, projectScope } = require('../lib/access')
 const { recordAudit } = require('../lib/auditLog')
 
-const PROJECT_STATUSES = ['discovery', 'design', 'development', 'testing', 'deploy', 'live']
+const PROJECT_STATUSES = ['discovery', 'design', 'development', 'testing', 'deploy', 'live', 'delivered']
 
 // GET /api/projects — staff see every project in the org, clients see their own
 router.get('/', authMiddleware, async (req, res) => {

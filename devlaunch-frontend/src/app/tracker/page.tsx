@@ -10,6 +10,7 @@ import TextField from '@mui/material/TextField'
 import MenuItem from '@mui/material/MenuItem'
 import LinearProgress from '@mui/material/LinearProgress'
 import Link from 'next/link'
+import { getStoredUser, can, type SessionUser } from '@/lib/session'
 
 const STAGES = ['discovery', 'design', 'development', 'testing', 'deploy', 'live']
 
@@ -42,11 +43,16 @@ export default function TrackerPage() {
   const [newTitle,   setNewTitle]   = useState('')
   const [newDate,    setNewDate]    = useState('')
   const [adding,     setAdding]     = useState(false)
+  const [user,       setUser]       = useState<SessionUser | null>(null)
+  // Clients watch progress; agency staff move stages and manage milestones.
+  const canMoveStage = can(user, 'projects:update')
+  const canManageMilestones = can(user, 'milestones:manage')
 
   const token = typeof window !== 'undefined'
     ? localStorage.getItem('token') : ''
 
   useEffect(() => {
+    setUser(getStoredUser())
     fetchProjects()
   }, [])
 
@@ -230,7 +236,8 @@ export default function TrackerPage() {
                 return (
                   <Box key={stage} sx={{ flex: 1, minWidth: 80 }}>
                     <Button
-                      onClick={() => updateStatus(stage)}
+                      onClick={() => canMoveStage && updateStatus(stage)}
+                      disabled={!canMoveStage && !isCurrent && !isDone}
                       fullWidth
                       disableElevation
                       sx={{
@@ -317,6 +324,7 @@ export default function TrackerPage() {
                         </Box>
                         <TextField
                           select
+                          disabled={!canManageMilestones}
                           value={m.status}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateMilestone(m.id, e.target.value)}
                           size="small"
@@ -337,12 +345,12 @@ export default function TrackerPage() {
                           <MenuItem value="in_progress">In progress</MenuItem>
                           <MenuItem value="done">Done</MenuItem>
                         </TextField>
-                        <Button
+                        {canManageMilestones && <Button
                           onClick={() => deleteMilestone(m.id)}
                           sx={{ minWidth: 'auto', p: 0.5, color: 'var(--text-muted)', fontSize: '1.125rem', lineHeight: 1, flexShrink: 0, '&:hover': { color: '#f87171', bgcolor: 'transparent' } }}
                         >
                           ×
-                        </Button>
+                        </Button>}
                       </Box>
                     )
                   })}
@@ -350,7 +358,7 @@ export default function TrackerPage() {
               )}
 
               {/* Add milestone */}
-              <Box sx={{ borderTop: '1px solid var(--border)', pt: 1.5, display: 'flex', flexDirection: 'column', gap: 1 }}>
+              {canManageMilestones && <Box sx={{ borderTop: '1px solid var(--border)', pt: 1.5, display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <TextField
                   value={newTitle}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTitle(e.target.value)}
@@ -377,7 +385,7 @@ export default function TrackerPage() {
                     {adding ? '...' : '+ Add'}
                   </Button>
                 </Box>
-              </Box>
+              </Box>}
             </Paper>
 
             {/* Contract & details */}
